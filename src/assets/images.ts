@@ -1,0 +1,13 @@
+export { default as link150 } from './link-150w.webp'
+export { default as link300 } from './link-300w.webp'
+export { default as tubert150 } from './tubert-150w.webp'
+export { default as tubert300 } from './tubert-300w.webp'
+export { default as reactLogo } from './react.svg'
+
+export { default as bluerupee } from './minigame/bluerupee.png'
+export { default as goldrupee } from './minigame/goldrupee.png'
+export { default as greenrupee } from './minigame/greenrupee.png'
+export { default as redrupee } from './minigame/redrupee.png'
+export { default as silverrupee } from './minigame/silverrupee.png'
+export { default as rupoor } from './minigame/rupoor.png'
+export { default as undug } from './minigame/undug.png'

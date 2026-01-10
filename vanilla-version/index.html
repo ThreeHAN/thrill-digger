@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)https://www.joshscotland.com/thrill-digger-assistant/ -->
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Thrill Digger Assistant | Josh Scotland</title>
+        <meta name="description" content="A solver and simulator for the Thrill Digger minigame from Zelda: Skyward Sword!">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; base-uri 'self'; form-action 'self'; manifest-src 'self';">
+        <meta name="theme-color" content="#fafafa">
+        <link rel="canonical" href="https://www.joshscotland.com/thrill-digger-assistant/">
+        <link rel="stylesheet" type="text/css" href="./css/main.css">
+        <link rel="manifest" href="https://www.joshscotland.com/manifest.json">
+        <link rel="apple-touch-icon" href="https://www.joshscotland.com./img/icons/icon_256x256.png">
+    </head>
+    <body class="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white">
+        <main class="flex-grow">
+            <div class="flex justify-center m-3">
+                <div class="flex flex-col items-center space-y-3 max-w-prose text-center">
+                    <h1 class="text-4xl">Thrill Digger Assistant</h1>
+                    <h2 class="text-2xl">Overview</h2>
+                    <div class="flex flex-col sm:flex-row items-center">
+                        <div class="flex-none">
+                            <picture>
+                                <source type="image/webp" srcset="./img/tubert-150w.webp 150w, ./img/tubert-300w.webp 300w" sizes="(max-width: 300px) 100vw, 300px">
+                                <source type="image/png" srcset="./img/tubert-150w.png 150w, ./img/tubert-300w.png 300w" sizes="(max-width: 300px) 100vw, 300px">
+                                <img src="./img/tubert-150w.webp" width="150" height="119" alt="Tubert from Skyward Sword" loading="lazy" decoding="async">
+                            </picture>
+                        </div>
+                        <p class="sm:text-left mt-3 sm:mt-0">Thrill Digger is a minigame in The Legend of Zelda: The Skyward Sword where you dig up as many rupees as possible! If you dig up a bomb, it's game over. The minigame is similar to Minesweeper. You can play by heading to the Eldin Volcano area and speaking to Tubert.</p>
+                    </div>
+                    <h2 class="text-2xl">Play & Solve</h2>
+                    <p>You can play Thrill Digger! You can also run a solver to try to give you the best possible chance to win the minigame.</p>
+                    <div class="flex flex-col sm:flex-row justify-between sm:w-full">
+                        <p id="rupees" class="text-lg font-bold">431 Rupees</p>
+                        <p id="rupeetotal" class="text-lg italic">0 Rupees All Time</p>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto flex">
+                <div id="gamearea" class="m-auto">
+                    <div id="diggerarea" class="diggerarea" style="width: 1000px; height: 500px;">
+                        <div class="undug" id="hole_0_0" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(119, 255, 102);">
+                            <img class="solverimg" height="22" style="display: inline; margin: 15px;" alt="Green rupee" src="./img/greenrupee.png">
+                            <p style="display: none;"></p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_1_0" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: green;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">0% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_2_0" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: red;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">100% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_3_0" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: red;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">100% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_4_0" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: red;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">100% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_5_0" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: green;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">-1% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_6_0" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(177, 255, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">33% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_7_0" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(133, 255, 102);">
+                            <img class="solverimg" height="22" style="display: inline; margin: 15px;" alt="Blue rupee" src="./img/bluerupee.png">
+                            <p style="display: none;"></p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_0_1" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: green;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">0% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_1_1" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: green;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">0% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_2_1" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: red;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">100% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_3_1" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(204, 255, 102);">
+                            <img class="solverimg" height="22" style="display: inline; margin: 15px;" alt="Gold rupee" src="./img/goldrupee.png">
+                            <p style="display: none;"></p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_4_1" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: red;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">100% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_5_1" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: green;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">-1% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_6_1" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(177, 255, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">33% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_7_1" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(177, 255, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">33% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_0_2" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(129, 255, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">?% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_1_2" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(129, 255, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">?% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_2_2" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(255, 164, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">?% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_3_2" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: red;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">100% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_4_2" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: red;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">100% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_5_2" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(255, 164, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">71% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_6_2" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(255, 164, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">71% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_7_2" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(255, 164, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">71% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_0_3" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(129, 255, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">?% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_1_3" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(131, 255, 102);">
+                            <img class="solverimg" height="22" style="display: inline; margin: 15px;" alt="Blue rupee" src="./img/bluerupee.png">
+                            <p style="display: none;"></p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_2_3" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: red;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">100% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_3_3" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: red;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">100% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_4_3" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(133, 255, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">?% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_5_3" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(255, 164, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">71% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_6_3" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(162, 255, 102);">
+                            <img class="solverimg" height="22" style="display: inline; margin: 15px;" alt="Silver rupee" src="./img/silverrupee.png">
+                            <p style="display: none;"></p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_7_3" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(255, 164, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">71% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_0_4" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(129, 255, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">?% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_1_4" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(129, 255, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">?% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_2_4" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: red;">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">100% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_3_4" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(133, 255, 102);">
+                            <img class="solverimg" height="22" style="display: inline; margin: 15px;" alt="Red rupee" src="./img/redrupee.png">
+                            <p style="display: none;"></p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_4_4" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(133, 255, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">?% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_5_4" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(255, 164, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">71% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_6_4" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(255, 164, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">71% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                        <div class="undug" id="hole_7_4" style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: black; float: left; width: 125px; height: 100px; background-color: rgb(255, 181, 102);">
+                            <img class="solverimg" height="22" style="display: none;">
+                            <p style="display: block;">?% Bad</p>
+                            <select class="solverselect">
+                                <option value="0">Undug</option>
+                                <option value="1">Green rupee</option>
+                                <option value="5">Blue rupee</option>
+                                <option value="20">Red rupee</option>
+                                <option value="100">Silver rupee</option>
+                                <option value="300">Gold rupee</option>
+                                <option value="-10">Rupoor</option>
+                                <option value="0">Bomb</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center m-3">
+                <div class="flex flex-col items-center space-y-3 max-w-prose text-center">
+                    <div class="flex flex-col space-y-3 sm:flex-row sm:w-full sm:justify-between sm:space-y-0">
+                        <fieldset>
+                            <button type="button" id="resetbutton" class="bg-transparent py-1 px-2 border text-blue-700 dark:text-blue-300 hover:bg-blue-700 dark:hover:bg-blue-300 hover:text-white dark:hover:text-black border-blue-700 dark:border-blue-300 hover:border-transparent rounded">New Game</button>
+                        </fieldset>
+                        <fieldset class="bg-transparent py-1 px-2 border text-blue-700 dark:text-blue-300 border-blue-700 dark:border-blue-300 rounded">
+                            <input type="radio" name="gametype" id="play" value="play" checked="true">
+                            <label for="play" class="cursor-pointer">Play</label>
+                            <input type="radio" name="gametype" id="solve" value="solve">
+                            <label for="solve" class="cursor-pointer">Solve</label>
+                        </fieldset>
+                        <fieldset class="bg-transparent py-1 px-2 border text-blue-700 dark:text-blue-300 border-blue-700 dark:border-blue-300 rounded">
+                            <input type="radio" name="diggerlevel" id="beginner" value="Beginner" checked="true">
+                            <label for="beginner" class="cursor-pointer">Beginner</label>
+                            <input type="radio" name="diggerlevel" id="intermediate" value="Intermediate">
+                            <label for="intermediate" class="cursor-pointer">Intermediate</label>
+                            <input type="radio" name="diggerlevel" id="expert" value="Expert">
+                            <label for="expert" class="cursor-pointer">Expert</label>
+                        </fieldset>
+                    </div>
+                    <h2 class="text-2xl">Hints</h2>
+                    <div class="flex flex-col sm:flex-row items-center">
+                        <p class="mb-3 sm:mb-0">
+                            <strong>The board you choose has different risks!</strong>
+                            <br>
+                            · Beginner (-30): 4 bombs / 0 rupoors<br>
+                            · Intermediate (-50): 4 bombs / 4 rupoors<br>· Expert (-70): 8 bombs / 8 rupoors
+                        </p>
+                        <div class="flex-none">
+                            <picture>
+                                <source type="image/webp" srcset="./img/link-150w.webp 150w, ./img/link-300w.webp 300w" sizes="(max-width: 300px) 100vw, 300px">
+                                <source type="image/png" srcset="./img/link-150w.png 150w, ./img/link-300w.png 300w" sizes="(max-width: 300px) 100vw, 300px">
+                                <img src="./img/link-150w.webp" width="150" height="134" alt="Link from Skyward Sword" loading="lazy" decoding="async">
+                            </picture>
+                        </div>
+                    </div>
+                    <p>
+                        <strong>What you dig up tells you about the surrounding area!</strong>
+                        <br>
+                        · Green Rupee (+1): 0 nearby bombs / rupoors<br>
+                        · Blue Rupee (+5): 1 or 2 nearby bombs / rupoors<br>
+                        · Red Rupee (+20): 3 or 4 nearby bombs / rupoors<br>
+                        · Silver Rupee (+100): 5 or 6 nearby bombs / rupoors<br>· Gold Rupee (+300): 7 or 8 nearby bombs / rupoors
+                    </p>
+                    <h2 class="text-2xl">Notes</h2>
+                    <p>
+                        <strong>Update 7/16/21:</strong>
+                        Skyward Sword HD released! A ton of new features were added to the site including way better support for mobile devices, dark mode, higher quality images, and a friendlier UI, enjoy 😀
+                    </p>
+                    <p>
+                        <strong>Update 2/8/20:</strong>
+                        Rupoors do not set current rupees below 0. This allows All Game rupees to be more accurate!
+                    </p>
+                    <p>
+                        The solver may have bugs and can be slow if moves are spaced out. The algorithm solves a constraint satisfaction problem like in <a href="http://www.cs.utoronto.ca/~cvs/minesweeper/" target="_blank" rel="noopener noreferrer" class="underline text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100">Minesweeper solvers </a>
+                        and eliminates possible bomb positions when constraints aren't met.
+                    </p>
+                    <p>Feel free to send me any comments using the contact button below.</p>
+                    <p>
+                        <strong>
+                            Play Pokémon <span class="text-blue-500">Sword</span>
+                            or <span class="text-pink-500">Shield</span>
+                            ?
+                        </strong>
+                        Check out <a href="https://apps.apple.com/us/app/id1496095727" target="_blank" rel="noopener noreferrer" class="underline text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100">Guideys: Sword and Shield</a>
+                        !
+                    </p>
+                    <div>
+                        <a href="https://www.joshscotland.com/">
+                            <button class="bg-transparent py-1 px-2 border text-blue-700 dark:text-blue-300 hover:bg-blue-700 dark:hover:bg-blue-300 hover:text-white dark:hover:text-black border-blue-700 dark:border-blue-300 hover:border-transparent rounded">Home</button>
+                        </a>
+                        <a href="https://www.joshscotland.com/contact/" class="ml-2">
+                            <button class="bg-transparent py-1 px-2 border text-blue-700 dark:text-blue-300 hover:bg-blue-700 dark:hover:bg-blue-300 hover:text-white dark:hover:text-black border-blue-700 dark:border-blue-300 hover:border-transparent rounded">Contact</button>
+                        </a>
+                    </div>
+                    <small>Zelda, Skyward Sword © Nintendo</small>
+                </div>
+            </div>
+            <script src="./js/minigame.js"></script>
+        </main>
+        <script src="./js/main.js"></script>
+        <footer class="text-center mb-3">
+            <small>© 2021 Josh Scotland</small>
+        </footer>
+    </body>
+</html>
