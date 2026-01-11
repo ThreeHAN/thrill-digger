@@ -19,11 +19,11 @@ function App() {
   const [level, setLevel] = useState<Level>('beginner')
   const [gameMode, setGameMode] = useState<GameMode>(2)
   const [showSettings, setShowSettings] = useState(false)
-  const { gameState, newGame, revealCell, updateCell, setCurrentRupees, setGameOver, setRupoorCount, addTotalRupees, resetGame, showComputationWarning, setShowComputationWarning, computationWarning, boardTotal, showInvalidBoardError, setShowInvalidBoardError } = useGameBoard(levelToDifficulty[level])
+  const { gameState, newGame, revealCell, updateCell, setCurrentRupees, setGameOver, setRupoorCount, addTotalRupees, setGameConfig, resetGame, showComputationWarning, setShowComputationWarning, boardTotal, showInvalidBoardError, setShowInvalidBoardError } = useGameBoard(levelToDifficulty[level])
 
   useEffect(() => {
-    newGame(levelToDifficulty[level], 2)
-  }, [newGame, level])
+    newGame(levelToDifficulty[level], gameMode)
+  }, [newGame, level, gameMode])
 
   const handleDifficultyChange = (newLevel: Level) => {
     setLevel(newLevel)
@@ -46,6 +46,7 @@ function App() {
     setGameOver,
     setRupoorCount,
     addTotalRupees,
+    setGameConfig,
     showInvalidBoardError,
     setShowInvalidBoardError,
   }
@@ -62,7 +63,7 @@ function App() {
         </header>
         
         <main>
-            <HazardStats boardTotal={boardTotal} />
+            <HazardStats boardTotal={gameMode === 1 ? gameState.currentRupees : boardTotal} />
           <div className="board-area">
             <GameBoard />
           </div>
@@ -73,6 +74,8 @@ function App() {
           onClose={() => setShowSettings(false)}
           level={level}
           setLevel={handleDifficultyChange}
+          gameMode={gameMode}
+          setGameMode={handleGameModeChange}
         />
 
         <ComputationWarningModal

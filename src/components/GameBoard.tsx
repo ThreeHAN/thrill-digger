@@ -36,27 +36,58 @@ export default function GameBoard() {
     return () => window.removeEventListener('resize', computeSize)
   }, [config.width, config.height])
 
-  // Find safest holes (undug cells with minimum bomb probability)
-  let safestHoles = new Set<number>()
+  // Find lowest probability hole for highlighting
+  let lowestProbabilityIndex = -1
   if (gameState.mode === 2 && gameState.solvedBoard) {
     const flatBoard = board.flat()
     let minProbability = Infinity
+    let maxProbability = -Infinity
     
-    // First pass: find minimum probability
+    // First pass: find minimum and maximum probability
     for (let i = 0; i < gameState.solvedBoard.length; i++) {
       const boardCell = flatBoard[i]
       const prob = gameState.solvedBoard[i]
       if (boardCell === 0 && typeof prob === 'number' && prob >= 0 && prob < Infinity) {
         minProbability = Math.min(minProbability, prob)
+        maxProbability = Math.max(maxProbability, prob)
       }
     }
     
-    // Second pass: mark all cells with minimum probability
-    for (let i = 0; i < gameState.solvedBoard.length; i++) {
-      const boardCell = flatBoard[i]
-      const prob = gameState.solvedBoard[i]
-      if (boardCell === 0 && typeof prob === 'number' && Math.abs(prob - minProbability) < 0.0001) {
-        safestHoles.add(i)
+    // Only show highlight if there's a difference in probabilities
+    if (minProbability < maxProbability) {
+      // Collect all candidate indices with the minimum probability
+      const candidates: number[] = []
+      for (let i = 0; i < gameState.solvedBoard.length; i++) {
+        const boardCell = flatBoard[i]
+        const prob = gameState.solvedBoard[i]
+        if (boardCell === 0 && typeof prob === 'number' && Math.abs(prob - minProbability) < 0.0001) {
+          candidates.push(i)
+        }
+      }
+
+      if (candidates.length > 0) {
+        // If we know the last changed index, pick the nearest candidate
+        const lastIdx = gameState.lastChangedIndex
+        if (typeof lastIdx === 'number') {
+          const w = config.width
+          const lastRow = Math.floor(lastIdx / w)
+          const lastCol = lastIdx % w
+          let bestIdx = candidates[0]
+          let bestDist = Infinity
+          for (const i of candidates) {
+            const r = Math.floor(i / w)
+            const c = i % w
+            const dist = Math.abs(r - lastRow) + Math.abs(c - lastCol)
+            if (dist < bestDist) {
+              bestDist = dist
+              bestIdx = i
+            }
+          }
+          lowestProbabilityIndex = bestIdx
+        } else {
+          // Fallback: first candidate
+          lowestProbabilityIndex = candidates[0]
+        }
       }
     }
   }
@@ -75,13 +106,12 @@ export default function GameBoard() {
           isRevealed={gameState.revealed[row][col]}
           gameMode={gameState.mode}
           gameActions={gameActions}
-          isSafest={safestHoles.has(index)}
+          isLowestProbability={index === lowestProbabilityIndex}
+          showProbabilitiesInPlay={gameState.config.showProbabilitiesInPlay}
         />
       )
     }
   }
-
-  const gridColsClass = `grid-cols-${config.width}`
 
   return (
     <div id="gamearea" className="m-auto">

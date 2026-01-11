@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import type { BoardCell, GameConfig } from '../utils/gameLogic'
 import { getGameConfig, createEmptyBoard, generatePlayBoard } from '../utils/gameLogic'
 import { solveBoardProbabilities, calculateUnknownIndicesCount } from '../utils/solver'
+import type { SolvedBoard } from '../utils/solver'
 
 export type GameMode = 1 | 2 // 1=Play, 2=Solve
 export type Difficulty = 1 | 2 | 3 // 1=Beginner, 2=Intermediate, 3=Expert
@@ -13,6 +14,9 @@ export type GameBoardActions = {
   setGameOver: (isGameOver: boolean) => void
   setRupoorCount: (count: number) => void
   addTotalRupees: (amount: number) => void
+  setGameConfig: (config: GameConfig) => void
+  showInvalidBoardError: boolean
+  setShowInvalidBoardError: (show: boolean) => void
 }
 
 export interface GameState {
@@ -25,7 +29,8 @@ export interface GameState {
   totalRupeesAllTime: number
   isGameOver: boolean
   rupoorCount: number
-  solvedBoard?: number[] // Probabilities for solve mode
+  solvedBoard: SolvedBoard | null // Probabilities for solve mode
+  lastChangedIndex?: number
 }
 
 const createEmptyRevealedBoard = (width: number, height: number): boolean[][] => {
@@ -52,6 +57,8 @@ const initialGameState = (difficulty: Difficulty): GameState => {
     totalRupeesAllTime: 0,
     isGameOver: false,
     rupoorCount: config.rupoorCount,
+    solvedBoard: null,
+    lastChangedIndex: undefined,
   }
 }
 
@@ -59,19 +66,10 @@ export function useGameBoard(initialDifficulty: Difficulty = 1) {
   const [gameState, setGameState] = useState<GameState>(() => initialGameState(initialDifficulty))
   const [showComputationWarning, setShowComputationWarning] = useState(false)
   const [computationWarning, setComputationWarning] = useState({ time: 0, combinations: 0 })
-  const [solvedBoard, setSolvedBoard] = useState<ReturnType<typeof solveBoardProbabilities>>(undefined)
+  const [solvedBoard, setSolvedBoard] = useState<SolvedBoard | null>(null)
   const [isComputing, setIsComputing] = useState(false)
   const [boardTotal, setBoardTotal] = useState(0)
   const [showInvalidBoardError, setShowInvalidBoardError] = useState(false)
-
-  // Calculate board total whenever board changes
-  useEffect(() => {
-    const total = gameState.board.flat().reduce((sum, cell) => {
-      return sum + (cell != -3 ? cell : 0)
-    }, 0)
-    console.log('Calculated board total:', total);
-    setBoardTotal(total)
-  }, [gameState.board])
 
   // Detect heavy computation and show warning first
   useEffect(() => {
@@ -122,7 +120,7 @@ export function useGameBoard(initialDifficulty: Difficulty = 1) {
         setIsComputing(false)
       }
     } else if (gameState.mode !== 2) {
-      setSolvedBoard(undefined)
+      setSolvedBoard(null)
       setIsComputing(false)
     }
   }, [gameState.board, gameState.config, gameState.mode])
@@ -132,6 +130,10 @@ export function useGameBoard(initialDifficulty: Difficulty = 1) {
     const board = mode === 1 
       ? generatePlayBoard(config.width, config.height, config.bombCount, config.rupoorCount)
       : createEmptyBoard(config.width, config.height)
+
+    // Calculate total rupees on the board (sum of all positive values)
+    const totalRupees = board.flat().reduce((sum, cell) => sum + (cell > 0 ? cell : 0), 0)
+    setBoardTotal(totalRupees)
     
     setGameState({
       mode,
@@ -143,24 +145,37 @@ export function useGameBoard(initialDifficulty: Difficulty = 1) {
       totalRupeesAllTime: gameState.totalRupeesAllTime,
       isGameOver: false,
       rupoorCount: config.rupoorCount,
+      solvedBoard: null,
+      lastChangedIndex: undefined,
     })
-  }, [gameState.totalRupeesAllTime])
+  }, [])
 
   const revealCell = useCallback((row: number, col: number) => {
     setGameState(prev => {
       const newRevealed = prev.revealed.map(r => [...r])
       newRevealed[row][col] = true
-      return { ...prev, revealed: newRevealed }
+      const idx = row * prev.config.width + col
+      return { ...prev, revealed: newRevealed, lastChangedIndex: idx }
     })
   }, [])
 
   const updateCell = useCallback((row: number, col: number, value: BoardCell) => {
+    // Read prevValue outside the state setter to avoid nested setters (Strict Mode double-invoke)
+    const prevValue = gameState.board[row][col]
+    if (prevValue === value) {
+      return
+    }
+
     setGameState(prev => {
       const newBoard = prev.board.map(r => [...r])
       newBoard[row][col] = value
-      return { ...prev, board: newBoard }
+      const idx = row * prev.config.width + col
+      return { ...prev, board: newBoard, lastChangedIndex: idx }
     })
-  }, [])
+
+    // Update boardTotal using a single setter outside the other setter
+    setBoardTotal(total => Math.max(0, total - prevValue + value))
+  }, [gameState.board])
 
   const setCurrentRupees = useCallback((rupees: number) => {
     setGameState(prev => ({ ...prev, currentRupees: rupees }))
@@ -182,6 +197,10 @@ export function useGameBoard(initialDifficulty: Difficulty = 1) {
     })
   }, [])
 
+  const setGameConfig = useCallback((config: GameConfig) => {
+    setGameState(prev => ({ ...prev, config }))
+  }, [])
+
   const resetGame = useCallback((difficulty: Difficulty, mode: GameMode) => {
     newGame(difficulty, mode)
   }, [newGame])
@@ -195,6 +214,7 @@ export function useGameBoard(initialDifficulty: Difficulty = 1) {
     setGameOver,
     setRupoorCount,
     addTotalRupees,
+    setGameConfig,
     resetGame,
     showComputationWarning,
     setShowComputationWarning,

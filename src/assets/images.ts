@@ -5,6 +5,7 @@ export { default as tubert300 } from './tubert-300w.webp'
 export { default as reactLogo } from './react.svg'
 
 export { default as bluerupee } from './minigame/bluerupee.png'
+export { default as bomb } from './minigame/bomb.png'
 export { default as goldrupee } from './minigame/goldrupee.png'
 export { default as greenrupee } from './minigame/greenrupee.png'
 export { default as redrupee } from './minigame/redrupee.png'

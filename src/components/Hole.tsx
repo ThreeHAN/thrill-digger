@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { getItemName } from '../utils/gameLogic'
 import { getImageForItem } from '../utils/imageMap'
 import { getProbabilityColor } from '../utils/solver'
@@ -13,7 +13,8 @@ type HoleProps = {
   isRevealed: boolean
   gameMode: GameMode
   gameActions: any
-  isSafest: boolean
+  isLowestProbability?: boolean
+  showProbabilitiesInPlay?: boolean
 }
 
 export default function Hole({ 
@@ -23,30 +24,33 @@ export default function Hole({
   isRevealed, 
   gameMode, 
   gameActions,
-  isSafest
+  isLowestProbability,
+  showProbabilitiesInPlay
 }: HoleProps) {
   const { gameState } = useGame()
-  const [fadeOut, setFadeOut] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const holeId = `hole_${col}_${row}`
   
   const itemName = getItemName(cellValue)
   
-  // Get solver probability if in solve mode
-  const solverProbability = gameState.solvedBoard 
+  // Get solver probability only in solve mode
+  const solverProbability = gameMode === 2 && gameState.solvedBoard 
     ? gameState.solvedBoard[row * gameState.config.width + col]
     : undefined
   
-  // Only display probability if it's actually a probability (0-1 range or -2 for unknown)
-  // If cellValue > 0, it's a known rupee so don't show probability
-  const displayProbability = cellValue === 0 && solverProbability !== undefined && solverProbability !== -2
+  // Only display probability if it's a valid probability (0-1 range)
+  // Show in solve mode always, or in play mode if setting is enabled
+  const displayProbability = cellValue === 0 && solverProbability !== undefined && solverProbability !== -2 && (gameMode === 2 || (gameMode === 1 && showProbabilitiesInPlay))
     ? Math.floor(solverProbability * 100)
     : undefined
 
   const handleClick = () => {
-    if (gameMode === 1) {
+    if (gameMode === 2) {
+  
+      // In solve mode, open the modal
+      setShowModal(true)
+    } else if (gameMode === 1) {
       if (isRevealed || gameState.isGameOver) return
-
       gameActions.revealCell(row, col)
 
       if (cellValue === -1) {
@@ -55,15 +59,11 @@ export default function Hole({
         gameActions.setGameOver(true)
         gameActions.addTotalRupees(gameState.currentRupees - gameState.config.houseFee)
       } else if (cellValue > 0) {
-        // Safe dig - add rupees and fade out text after delay
+        // Safe dig - add rupees
         console.log('Found rupee:', cellValue)
-        setTimeout(() => setFadeOut(true), 500)
         gameActions.setCurrentRupees(gameState.currentRupees + cellValue)
         gameActions.addTotalRupees(cellValue)
       }
-    } else if (gameMode === 2) {
-      // In solve mode, open the modal
-      setShowModal(true)
     }
   }
 
@@ -73,6 +73,7 @@ export default function Hole({
     console.log('Solve mode: placing', value, 'at', row, col)
     // Mark this cell as the one that just changed
     // Update previousValue to current before changing
+
     gameActions.updateCell(row, col, value)
   }
 
@@ -98,6 +99,10 @@ export default function Hole({
     }
   }
 
+  if (isLowestProbability && gameMode === 2) {
+    tileClass += ' lowest-hole-pulse'
+  }
+
   return (
     <button 
       className={tileClass} 
@@ -105,6 +110,9 @@ export default function Hole({
       onClick={handleClick}
       style={{ 
         width: 'var(--tile-size)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         ...(backgroundColor && { backgroundColor })
       }}
     >
@@ -114,8 +122,9 @@ export default function Hole({
             <img 
               className="solverimg" 
               style={{ 
-                opacity: fadeOut ? 0 : 1,
-                transition: 'opacity 0.5s ease-out'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }} 
               alt={itemName} 
               src={getImageForItem(itemName)} 
@@ -124,7 +133,7 @@ export default function Hole({
         </>
       ) : (
         <>
-          {cellValue === 0 && displayProbability !== undefined && (
+          {cellValue === 0 && displayProbability && (
             <p>{displayProbability}%</p>
           )}
           {cellValue !== 0 && (

@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useGame } from '../context/GameContext'
 import { getImageForItem } from '../utils/imageMap'
+import bombImg from '../assets/minigame/bomb.png'
 
 export default function HazardStats({ boardTotal }: { boardTotal: number }) {
   const { gameState } = useGame()
@@ -9,50 +10,65 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
   const rupoorIcon = getImageForItem('rupoor')
   const greenIcon = getImageForItem('green rupee')
 
-  const { rupoorCount, guaranteedBombs } = useMemo(() => {
+  const { remainingRupoors, remainingHazards } = useMemo(() => {
     const flat = board.flat()
-    const rupoorCount = flat.reduce((acc, cell) => (
+    const rupoorsFound = flat.reduce((acc, cell) => (
       cell === -10 || cell === -2 ? acc + 1 : acc
     ), 0)
 
-    let guaranteedBombs = 0
+    let guaranteedHazardsFound = 0
     if (solvedBoard && solvedBoard.length === flat.length) {
       for (let i = 0; i < solvedBoard.length; i++) {
         if (flat[i] === 0 && solvedBoard[i] === 1) {
-          guaranteedBombs++
+          guaranteedHazardsFound++
         }
       }
     }
 
-    return { rupoorCount, guaranteedBombs }
-  }, [board, solvedBoard])
+    // Remaining hazards = (total bombs + total rupoors) - rupoors found - 100% probability squares
+    const totalPossibleHazards = gameState.config.bombCount + gameState.config.rupoorCount
+    const remainingHazards = Math.max(0, totalPossibleHazards - rupoorsFound - guaranteedHazardsFound)
+    const remainingRupoors = Math.max(0, gameState.config.rupoorCount - rupoorsFound)
 
-  const showHazardDetails = difficulty !== 1
+    return { remainingRupoors, remainingHazards }
+  }, [board, solvedBoard, gameState.config.bombCount, gameState.config.rupoorCount])
+
+  const showRupoors = difficulty !== 1
 
   return (
     <div className="hazard-stats">
-      <div className="hazard-card">
+      <div className="hazard-card" title="Total rupees available on the board (bombs and rupoors don't count)">
         <span className="hazard-row" aria-label="Total rupees">
           <img src={greenIcon} alt="Rupees" />
           <span className="hazard-value">{boardTotal}</span>
         </span>
       </div>
-      {showHazardDetails && (
-        <>
-          <div className="hazard-card">
-            <span className="hazard-row" aria-label="Known rupoors">
-              <img src={rupoorIcon} alt="Rupoor" />
-              <span className="hazard-value">{rupoorCount}</span>
-            </span>
-          </div>
-          <div className="hazard-card">
-            <span className="hazard-row" aria-label="Guaranteed bombs">
-              <span className="hazard-emoji" role="img" aria-label="Bomb">💣</span>
-              <span className="hazard-value">{guaranteedBombs}</span>
-            </span>
-          </div>
-        </>
+      {showRupoors && (
+        <div className="hazard-card" title="Remaining rupoors to find (total - found)">
+          <span className="hazard-row" aria-label="Known rupoors">
+            <img src={rupoorIcon} alt="Rupoor" />
+            <span className="hazard-value">{remainingRupoors}</span>
+          </span>
+        </div>
       )}
+      <div className="hazard-card" title="Remaining hazards: bombs + rupoors - found - confirmed 100% squares">
+        <span className="hazard-row" aria-label="Remaining hazards">
+          {!showRupoors && (
+            <>
+              <img src={bombImg} alt="Bomb" />
+              <span className="hazard-value">{remainingHazards}</span>
+            </>
+          )}
+          {showRupoors && (
+            <>
+              <img src={rupoorIcon} alt="Rupoor" />
+              <span className="hazard-separator">&</span>
+              <img src={bombImg} alt="Bomb" />
+              <span className="hazard-value">{remainingHazards}</span>
+            </>
+          )}
+        </span>
+      </div>
     </div>
   )
 }

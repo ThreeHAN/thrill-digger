@@ -1,5 +1,6 @@
 import { 
   bluerupee, 
+  bomb,
   goldrupee, 
   greenrupee, 
   redrupee, 
@@ -10,6 +11,7 @@ import {
 
 export const imageMap: Record<string, string> = {
   'bluerupee': bluerupee,
+  'bomb': bomb,
   'goldrupee': goldrupee,
   'greenrupee': greenrupee,
   'redrupee': redrupee,
