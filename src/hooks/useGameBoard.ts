@@ -1,7 +1,7 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import type { BoardCell, GameConfig } from '../utils/gameLogic'
 import { getGameConfig, createEmptyBoard, generatePlayBoard } from '../utils/gameLogic'
-import { solveBoardProbabilities } from '../utils/solver'
+import { solveBoardProbabilities, calculateUnknownIndicesCount } from '../utils/solver'
 
 export type GameMode = 1 | 2 // 1=Play, 2=Solve
 export type Difficulty = 1 | 2 | 3 // 1=Beginner, 2=Intermediate, 3=Expert
@@ -57,19 +57,49 @@ const initialGameState = (difficulty: Difficulty): GameState => {
 
 export function useGameBoard(initialDifficulty: Difficulty = 1) {
   const [gameState, setGameState] = useState<GameState>(() => initialGameState(initialDifficulty))
+  const [showComputationWarning, setShowComputationWarning] = useState(false)
+  const [computationWarning, setComputationWarning] = useState({ time: 0, combinations: 0 })
+  const [solvedBoard, setSolvedBoard] = useState<ReturnType<typeof solveBoardProbabilities>>(undefined)
 
-  // Memoize solver results to avoid recalculating on every render
-  const solvedBoard = useMemo(() => {
+  // Detect heavy computation and show warning first
+  useEffect(() => {
     if (gameState.mode === 2) {
-      return solveBoardProbabilities(
-        gameState.board,
-        gameState.config.width,
-        gameState.config.height,
-        gameState.config.bombCount,
-        gameState.config.rupoorCount
-      )
+      const unknownIndicesCount = calculateUnknownIndicesCount(gameState.board, gameState.config.width, gameState.config.height)
+      const totalCombinations = Math.round(Math.pow(2, unknownIndicesCount))
+      
+      // Show warning if computation will be heavy
+      if (unknownIndicesCount >= 22) {
+        const estimatedTime = Math.floor(totalCombinations / 1111111)
+        setComputationWarning({ time: estimatedTime, combinations: totalCombinations })
+        setShowComputationWarning(true)
+        
+        // Defer the actual computation so the modal shows first
+        const timer = setTimeout(() => {
+          const result = solveBoardProbabilities(
+            gameState.board,
+            gameState.config.width,
+            gameState.config.height,
+            gameState.config.bombCount,
+            gameState.config.rupoorCount
+          )
+          setSolvedBoard(result)
+        }, 100)
+        return () => clearTimeout(timer)
+      } else {
+        // No warning needed, compute immediately
+        setShowComputationWarning(false)
+        const result = solveBoardProbabilities(
+          gameState.board,
+          gameState.config.width,
+          gameState.config.height,
+          gameState.config.bombCount,
+          gameState.config.rupoorCount
+        )
+        setSolvedBoard(result)
+      }
+    } else {
+      setSolvedBoard(undefined)
     }
-    return undefined
   }, [gameState.board, gameState.config, gameState.mode])
 
   const newGame = useCallback((difficulty: Difficulty, mode: GameMode) => {
@@ -137,5 +167,8 @@ export function useGameBoard(initialDifficulty: Difficulty = 1) {
     setRupoorCount,
     addTotalRupees,
     resetGame,
+    showComputationWarning,
+    setShowComputationWarning,
+    computationWarning,
   }
 }

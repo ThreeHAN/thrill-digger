@@ -105,14 +105,6 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   const unknownCount = unknownIndices.length
   const totalCombinations = Math.round(Math.pow(2, unknownCount))
 
-  // Alert if computation will be slow
-  if (unknownIndices.length >= 22) {
-    alert(
-      `There's a lot to compute with this board! Your browser will be unresponsive while calculating.\n\n` +
-      `Your estimated compute time is ${Math.floor(totalCombinations / 1111111)} seconds for ${totalCombinations} computations`
-    )
-  }
-
   // Test all possible bomb placements
   for (let combo = 0; combo < totalCombinations; ++combo) {
     if (combo > 1e8) {
@@ -165,7 +157,6 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
 
   // Validate board
   if (constraints.length > 0 && validSolutions.length === 0) {
-    alert('Not a valid board!')
     return null
   }
 
@@ -189,7 +180,6 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   }
 
   if (Math.round(remainingExpected * 100) < 0) {
-    alert('Not a valid board!')
     return null
   }
 
@@ -219,16 +209,123 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
 }
 
 /**
- * Get color for probability display (green for safe, red for bomb)
+ * Get color for probability display with 10 granular levels
  */
 export function getProbabilityColor(probability: number): string {
-  if (probability <= 0) {
-    return 'green'
-  } else if (probability >= 1) {
-    return 'red'
-  } else {
-    const hue = (1 - probability) * 120 // Green (120) to Red (0)
-    const saturation = Math.abs(probability - 0.5) * 200
-    return `hsl(${hue}, ${saturation}%, 70%)`
+  const percent = probability * 100
+  
+  // 10 granular color levels from green (safe) to red (dangerous)
+  if (percent <= 0) return '#3d5a3d'      // 0%: Dark green
+  if (percent <= 10) return '#4e7d5b'     // 1-10%: Forest green
+  if (percent <= 20) return '#6b9b6b'     // 11-20%: Light green
+  if (percent <= 30) return '#8bb58b'     // 21-30%: Pale green
+  if (percent <= 40) return '#b8b058'     // 31-40%: Yellow-green
+  if (percent <= 50) return '#c9a84a'     // 41-50%: Sandy yellow
+  if (percent <= 60) return '#d89847'     // 51-60%: Orange-yellow
+  if (percent <= 70) return '#d47a4a'     // 61-70%: Burnt orange
+  if (percent <= 80) return '#c55a3d'     // 71-80%: Red-orange
+  if (percent <= 90) return '#a84535'     // 81-90%: Deep red
+  return '#9e3a33'                         // 91-100%: Dark red
+}
+
+/**
+ * Check if a rupee value is valid for a cell based on nearby bomb/rupoor count
+ * Uses the same logic as calculateRupeeValue
+ */
+export function isValidRupeeForCell(
+  board: number[][],
+  row: number,
+  col: number,
+  rupeeValue: number,
+  width: number,
+  height: number
+): boolean {
+  // Undug, bombs, and rupoors are always valid
+  if (rupeeValue === 0 || rupeeValue === -3 || rupeeValue === -10) return true
+
+  // Count adjacent bombs and rupoors
+  let nearbyBombs = 0
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      if (dr === 0 && dc === 0) continue
+      const nr = row + dr
+      const nc = col + dc
+      if (nr >= 0 && nr < height && nc >= 0 && nc < width) {
+        const cell = board[nr][nc]
+        if (cell === -3 || cell === -10) nearbyBombs++
+      }
+    }
   }
+
+  // Check if this rupee value matches the bomb count using game logic
+  if (nearbyBombs <= 0 && rupeeValue === 1) return true      // Green
+  if (nearbyBombs >= 1 && nearbyBombs <= 2 && rupeeValue === 5) return true    // Blue
+  if (nearbyBombs >= 3 && nearbyBombs <= 4 && rupeeValue === 20) return true   // Red
+  if (nearbyBombs >= 5 && nearbyBombs <= 6 && rupeeValue === 100) return true  // Silver
+  if (nearbyBombs >= 7 && rupeeValue === 300) return true                      // Gold
+  
+  return false
+}
+
+/**
+ * Get all valid rupee options for a cell
+ * Returns all options without validation - solver will validate when computing
+ */
+export function getValidRupeeOptions(
+  board: number[][],
+  row: number,
+  col: number,
+  width: number,
+  height: number
+): number[] {
+  // Return all options; solver validates on probability compute
+  return [0, 1, 5, 20, 100, 300, -10, -3]
+}
+
+/**
+ * Calculate the number of unknown indices that would need computation
+ * Used to determine if a warning should be shown before heavy computation
+ */
+export function calculateUnknownIndicesCount(board: BoardCell[][], width: number, height: number): number {
+  const flat1D = board.flat()
+  let solvedBoard = flat1D.slice(0)
+
+  // Convert empty cells (0) to unknown (-1) for solving
+  for (let i = 0; i < solvedBoard.length; i++) {
+    if (solvedBoard[i] === 0) {
+      solvedBoard[i] = -1
+    }
+  }
+
+  const unknownIndices: number[] = []
+
+  // Build unknowns from numbered cells (rupee values)
+  for (let i = 0; i < solvedBoard.length; i++) {
+    const cell = solvedBoard[i]
+    // Treat positive values as number constraints (they indicate nearby bombs)
+    if (cell > 0) {
+      const colIndex = i % width
+      const rowIndex = Math.floor(i / width)
+      
+      for (let colOffset = -1; colOffset <= 1; colOffset++) {
+        for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
+          if (colIndex + colOffset >= 0 && colIndex + colOffset < width &&
+            rowIndex + rowOffset >= 0 && rowIndex + rowOffset < height) {
+            if (colOffset !== 0 || rowOffset !== 0) {
+              const neighborIdx = colIndex + colOffset + (rowIndex + rowOffset) * width
+              const neighborCell = solvedBoard[neighborIdx]
+              
+              if (neighborCell === -1) {
+                if (!unknownIndices.includes(neighborIdx)) {
+                  unknownIndices.push(neighborIdx)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return unknownIndices.length
 }

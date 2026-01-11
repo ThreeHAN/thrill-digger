@@ -104,7 +104,7 @@ export function getItemName(value: number): string {
   switch (value) {
     case -3:
       return 'Bomb'
-    case -2:
+    case -10:
       return 'Rupoor'
     case -1:
       return 'Undug'

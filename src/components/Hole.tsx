@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
-import { undug } from '../assets/images'
+import { useState, useEffect, useRef } from 'react'
 import { getItemName } from '../utils/gameLogic'
 import { getImageForItem } from '../utils/imageMap'
-import { getProbabilityColor } from '../utils/solver'
+import { getProbabilityColor, getValidRupeeOptions } from '../utils/solver'
 import { useGame } from '../context/GameContext'
 import type { GameMode } from '../hooks/useGameBoard'
+import RupeeModal from './RupeeModal'
+import ErrorModal from './ErrorModal'
 
 type HoleProps = {
   row: number
@@ -13,6 +14,7 @@ type HoleProps = {
   isRevealed: boolean
   gameMode: GameMode
   gameActions: any
+  isSafest: boolean
 }
 
 export default function Hole({ 
@@ -21,12 +23,49 @@ export default function Hole({
   cellValue, 
   isRevealed, 
   gameMode, 
-  gameActions
+  gameActions,
+  isSafest
 }: HoleProps) {
   const { gameState } = useGame()
   const [fadeOut, setFadeOut] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [showError, setShowError] = useState(false)
+  const [previousValue, setPreviousValue] = useState(cellValue)
+  const alreadyRestoredRef = useRef(false)
   const holeId = `hole_${col}_${row}`
   
+  // Update previousValue when board becomes valid (successful move)
+  useEffect(() => {
+    if (gameState.solvedBoard !== null) {
+      setPreviousValue(cellValue)
+      alreadyRestoredRef.current = false
+    }
+  }, [cellValue, gameState.solvedBoard])
+  
+  // Check if solver returned null (invalid board)
+  useEffect(() => {
+    if (gameMode === 2 && gameState.solvedBoard === null && cellValue !== 0 && !alreadyRestoredRef.current) {
+      // Invalid board detected - restore this cell to previous value
+      alreadyRestoredRef.current = true
+      setShowError(true)
+      gameActions.updateCell(row, col, previousValue)
+    }
+  }, [gameState.solvedBoard, gameMode, cellValue, previousValue, row, col, gameActions])
+  
+  const getShortLabel = (value: number): string => {
+    switch (value) {
+      case -3: return 'Bomb'
+      case -10: return 'Rupoor'
+      case -1: return 'Undug'
+      case 1: return 'Green'
+      case 5: return 'Blue'
+      case 20: return 'Red'
+      case 100: return 'Silver'
+      case 300: return 'Gold'
+      default: return 'Error'
+    }
+  }
+
   const itemName = getItemName(cellValue)
   const isUndug = cellValue === 0 || (gameMode === 1 && !isRevealed)
   
@@ -42,78 +81,107 @@ export default function Hole({
     : undefined
 
   const handleClick = () => {
-    if (isRevealed || gameState.isGameOver || gameMode !== 1) return
+    if (gameMode === 1) {
+      if (isRevealed || gameState.isGameOver) return
 
-    gameActions.revealCell(row, col)
-    
-    if (cellValue === -1) {
-      // Bomb - game over
-      gameActions.setGameOver(true)
-      gameActions.addTotalRupees(gameState.currentRupees - gameState.config.houseFee)
-    } else if (cellValue > 0) {
-      // Safe dig - add rupees and fade out text after delay
-      setTimeout(() => setFadeOut(true), 500)
-      gameActions.setCurrentRupees(gameState.currentRupees + cellValue)
+      gameActions.revealCell(row, col)
+      
+      if (cellValue === -1) {
+        // Bomb - game over
+        gameActions.setGameOver(true)
+        gameActions.addTotalRupees(gameState.currentRupees - gameState.config.houseFee)
+      } else if (cellValue > 0) {
+        // Safe dig - add rupees and fade out text after delay
+        setTimeout(() => setFadeOut(true), 500)
+        gameActions.setCurrentRupees(gameState.currentRupees + cellValue)
+      }
+    } else if (gameMode === 2) {
+      // In solve mode, open the modal
+      setShowModal(true)
     }
   }
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleModalSelect = (value: number) => {
     if (gameMode !== 2) return
     
-    const value = parseInt(e.target.value, 10)
     gameActions.updateCell(row, col, value)
   }
 
-  const displayValue = isUndug ? (displayProbability !== undefined ? `${displayProbability}% Bad` : '?% Bad') : getItemName(cellValue)
+  // Compute valid rupee options for this cell
+  const validRupeeOptions = getValidRupeeOptions(gameState.board, row, col, gameState.config.width, gameState.config.height)
   
-  // Determine background color for solve mode
-  let bgColor = undefined
-  if (gameMode === 2 && solverProbability !== undefined && solverProbability !== -2) {
-    bgColor = getProbabilityColor(solverProbability)
+  // Determine tile styling based on game mode and cell state
+  let tileClass = 'tile undug'
+  let backgroundColor: string | undefined
+
+  if (gameMode === 2) {
+    // In solve mode, use getProbabilityColor for gradient coloring
+    if (cellValue > 0) {
+      // Known rupee - show as cream white
+      backgroundColor = '#f5f5dc'
+    } else if (solverProbability !== undefined && solverProbability !== -2) {
+      // Unknown cell - color based on probability using getProbabilityColor
+      backgroundColor = getProbabilityColor(solverProbability)
+    }
+  } else if (gameMode === 1) {
+    // In play mode, show as safe if revealed
+    if (isRevealed && cellValue > 0) {
+      backgroundColor = '#4e7d5b'
+    } else if (isRevealed && cellValue === -1) {
+      backgroundColor = '#a84432'
+    }
   }
 
   return (
-    <div 
-      className={`hole ${isRevealed ? 'dug' : 'undug'}`} 
+    <button 
+      className={tileClass} 
       id={holeId}
       onClick={handleClick}
-      style={{ backgroundColor: bgColor }}
+      style={{ 
+        width: 'var(--tile-size)',
+        ...(backgroundColor && { backgroundColor })
+      }}
     >
       {gameMode === 1 ? (
         <>
-          <p style={{ display: fadeOut ? 'none' : 'block', opacity: fadeOut ? 0 : 1 }}>
-            {displayValue}
-          </p>
-          <img 
-            className="solverimg" 
-            style={{ 
-              opacity: fadeOut ? 0 : 1,
-              transition: 'opacity 0.5s ease-out'
-            }} 
-            alt={itemName} 
-            src={isRevealed ? getImageForItem(itemName) : undug} 
-          />
+          {isRevealed && (
+            <img 
+              className="solverimg" 
+              style={{ 
+                opacity: fadeOut ? 0 : 1,
+                transition: 'opacity 0.5s ease-out'
+              }} 
+              alt={itemName} 
+              src={getImageForItem(itemName)} 
+            />
+          )}
         </>
       ) : (
         <>
-          <p>{displayValue}</p>
-          <img 
-            className="solverimg" 
-            alt={itemName} 
-            src={cellValue !== 0 ? getImageForItem(itemName) : undug} 
+          {cellValue === 0 && displayProbability !== undefined && (
+            <p>{displayProbability}%</p>
+          )}
+          {cellValue !== 0 && (
+            <img 
+              className="solverimg" 
+              alt={itemName} 
+              src={getImageForItem(itemName)} 
+            />
+          )}
+          <RupeeModal 
+            isOpen={showModal}
+            onClose={() => setShowModal(false)}
+            onSelect={handleModalSelect}
+            currentValue={cellValue}
+            validOptions={validRupeeOptions}
           />
-          <select className="solverselect" onChange={handleSelectChange} value={cellValue}>
-            <option value="0">Undug</option>
-            <option value="1">Green rupee</option>
-            <option value="5">Blue rupee</option>
-            <option value="20">Red rupee</option>
-            <option value="100">Silver rupee</option>
-            <option value="300">Gold rupee</option>
-            <option value="-10">Rupoor</option>
-            <option value="-3">Bomb</option>
-          </select>
+          <ErrorModal
+            isOpen={showError}
+            onClose={() => setShowError(false)}
+            message="This placement creates an invalid board. The cell has been reset."
+          />
         </>
       )}
-    </div>
+    </button>
   )
 }

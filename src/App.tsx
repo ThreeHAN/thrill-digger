@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 import GameBoard from './components/GameBoard'
-import Controls from './components/Controls'
+import SettingsModal from './components/SettingsModal'
+import ComputationWarningModal from './components/ComputationWarningModal'
 import type { Level } from './constants/levels'
 import { useGameBoard } from './hooks/useGameBoard'
 import type { Difficulty, GameMode } from './hooks/useGameBoard'
@@ -15,8 +16,13 @@ const levelToDifficulty: Record<Level, Difficulty> = {
 
 function App() {
   const [level, setLevel] = useState<Level>('beginner')
-  const [gameMode, setGameMode] = useState<GameMode>(1)
-  const { gameState, newGame, revealCell, updateCell, setCurrentRupees, setGameOver, setRupoorCount, addTotalRupees, resetGame } = useGameBoard(levelToDifficulty[level])
+  const [gameMode, setGameMode] = useState<GameMode>(2)
+  const [showSettings, setShowSettings] = useState(false)
+  const { gameState, newGame, revealCell, updateCell, setCurrentRupees, setGameOver, setRupoorCount, addTotalRupees, resetGame, showComputationWarning, setShowComputationWarning, computationWarning } = useGameBoard(levelToDifficulty[level])
+
+  useEffect(() => {
+    newGame(levelToDifficulty[level], 2)
+  }, [newGame, level])
 
   const handleDifficultyChange = (newLevel: Level) => {
     setLevel(newLevel)
@@ -43,30 +49,33 @@ function App() {
 
   return (
     <GameProvider gameState={gameState} gameActions={gameActions}>
-      <div className="app-root">
-        <main>
-          <div className="header center">
-            <div className="title-block">
-              <h1>Thrill Digger Assistant</h1>
-              <h2>Overview</h2>
-              <p className="lead">A solver and simulator for the Thrill Digger minigame from Zelda: Skyward Sword!</p>
-            </div>
-          </div>
+      <div className="game-container">
+        <header className="game-header">
+          <button className="wood-btn" onClick={handleReset}>New Game</button>
+          <h1>Thrill Digger</h1>
+          <button className="wood-btn" onClick={() => setShowSettings(true)}>Settings</button>
+        </header>
 
+        <main>
           <div className="board-area">
             <GameBoard />
           </div>
-
-          <Controls 
-            level={level} 
-            setLevel={handleDifficultyChange}
-            gameMode={gameMode}
-            setGameMode={handleGameModeChange}
-            onReset={handleReset} 
-          />
-
         </main>
-        <footer className="footer center"><small>© 2021 Josh Scotland — Converted to React</small></footer>
+
+        <SettingsModal
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          level={level}
+          setLevel={handleDifficultyChange}
+        />
+
+        <ComputationWarningModal
+          isOpen={showComputationWarning}
+          onClose={() => setShowComputationWarning(false)}
+          message="There's a lot to compute with this board! Your browser will be unresponsive while calculating."
+          estimatedTime={computationWarning.time}
+          totalCombinations={computationWarning.combinations}
+        />
       </div>
     </GameProvider>
   )
