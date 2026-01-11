@@ -50,6 +50,48 @@
   white-space: nowrap;
 }
 
+.hazard-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+  justify-content: center;
+}
+
+.hazard-card {
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(243, 229, 171, 0.28);
+  color: #f3e5ab;
+  padding: 10px 14px;
+  border-radius: 10px;
+  min-width: 160px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.hazard-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+}
+
+.hazard-row img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+}
+
+.hazard-emoji {
+  font-size: 1.25rem;
+}
+
+.hazard-value {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
 /* Responsive Grid */
 .grid-board {
   display: grid;

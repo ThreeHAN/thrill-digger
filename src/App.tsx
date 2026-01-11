@@ -3,6 +3,7 @@ import './App.css'
 import GameBoard from './components/GameBoard'
 import SettingsModal from './components/SettingsModal'
 import ComputationWarningModal from './components/ComputationWarningModal'
+import HazardStats from './components/HazardStats'
 import type { Level } from './constants/levels'
 import { useGameBoard } from './hooks/useGameBoard'
 import type { Difficulty, GameMode } from './hooks/useGameBoard'
@@ -55,16 +56,13 @@ function App() {
         <header className="game-header">
           <button className="wood-btn" onClick={handleReset}>New Game</button>
           <h1>Thrill Digger</h1>
-          <div className="header-right">
-            <div className="rupee-total">
-              <span className="rupee-icon">💰</span>
-              <span>{boardTotal}</span>
+            <div className="header-right">
+              <button className="wood-btn" onClick={() => setShowSettings(true)}>Settings</button>
             </div>
-            <button className="wood-btn" onClick={() => setShowSettings(true)}>Settings</button>
-          </div>
         </header>
-
+        
         <main>
+            <HazardStats boardTotal={boardTotal} />
           <div className="board-area">
             <GameBoard />
           </div>
