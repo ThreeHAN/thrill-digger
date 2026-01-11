@@ -83,6 +83,8 @@ export function useGameBoard(initialDifficulty: Difficulty = 1) {
             gameState.config.rupoorCount
           )
           setSolvedBoard(result)
+          // Close the modal after computation finishes
+          setShowComputationWarning(false)
         }, 100)
         return () => clearTimeout(timer)
       } else {

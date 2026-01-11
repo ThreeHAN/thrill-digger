@@ -72,9 +72,6 @@ function App() {
         <ComputationWarningModal
           isOpen={showComputationWarning}
           onClose={() => setShowComputationWarning(false)}
-          message="There's a lot to compute with this board! Your browser will be unresponsive while calculating."
-          estimatedTime={computationWarning.time}
-          totalCombinations={computationWarning.combinations}
         />
       </div>
     </GameProvider>
