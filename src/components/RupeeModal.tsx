@@ -23,10 +23,9 @@ type RupeeModalProps = {
   onClose: () => void
   onSelect: (value: number) => void
   currentValue: number
-  validOptions?: number[]
 }
 
-export default function RupeeModal({ isOpen, onClose, onSelect, currentValue, validOptions }: RupeeModalProps) {
+export default function RupeeModal({ isOpen, onClose, onSelect, currentValue }: RupeeModalProps) {
   if (!isOpen) return null
 
   const handleSelect = (value: number, e: React.MouseEvent) => {
@@ -56,14 +55,12 @@ export default function RupeeModal({ isOpen, onClose, onSelect, currentValue, va
             Cancel
           </button>
           {rupeeOptions.map((option, index) => {
-            const isDisabled = validOptions && !validOptions.includes(option.value)
             const angle = (index / rupeeOptions.length) * 360
             return (
               <button
                 key={option.value}
-                className={`rupee-option-circular ${currentValue === option.value && currentValue !== 0 ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
-                onClick={(e) => !isDisabled && handleSelect(option.value, e)}
-                disabled={isDisabled}
+                className={`rupee-option-circular ${currentValue === option.value && currentValue !== 0 ? 'selected' : ''}`}
+                onClick={(e) => handleSelect(option.value, e)}
                 style={
                   { '--angle': `${angle}deg` } as React.CSSProperties & { '--angle': string }
                 }

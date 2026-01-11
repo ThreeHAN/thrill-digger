@@ -1,4 +1,5 @@
 import Hole from './Hole'
+import ErrorModal from './ErrorModal'
 import { useGame } from '../context/GameContext'
 import React, { useEffect, useState } from 'react'
 
@@ -49,8 +50,6 @@ export default function GameBoard() {
         minProbability = Math.min(minProbability, prob)
       }
     }
-
-    console.log(`Minimum probability found: ${minProbability}`)
     
     // Second pass: mark all cells with minimum probability
     for (let i = 0; i < gameState.solvedBoard.length; i++) {
@@ -60,7 +59,6 @@ export default function GameBoard() {
         safestHoles.add(i)
       }
     }
-    console.log(`Safest holes identified at indices: ${[...safestHoles].join(', ')}`)
   }
 
   const holes: React.ReactNode[] = []
@@ -99,6 +97,11 @@ export default function GameBoard() {
           {holes}
         </div>
       </div>
+      <ErrorModal
+        isOpen={gameActions.showInvalidBoardError}
+        onClose={() => gameActions.setShowInvalidBoardError(false)}
+        message="Not a valid board!"
+      />
     </div>
   )
 }

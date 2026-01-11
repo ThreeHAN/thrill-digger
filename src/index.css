@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'Breath of the Wild';
+  src: url('./assets/TheWildBreathOfZelda-15Lv.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   --bg-color: #4a3f35;
   --tile-undug: #6b5e4f;
@@ -9,10 +16,16 @@
 
 body {
   background-color: var(--bg-color);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Breath of the Wild', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   justify-content: center;
   padding: 20px;
+  letter-spacing: 0.05em;
+}
+
+h1, h2 {
+  font-family: 'Breath of the Wild', serif;
+  letter-spacing: 0.08em;
 }
 
 h1 {

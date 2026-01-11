@@ -20,6 +20,5 @@ export const imageMap: Record<string, string> = {
 
 export function getImageForItem(itemName: string): string {
   const imageName = itemName.toLowerCase().replace(/\s+/g, '');
-  console.log(`Getting image for item: "${itemName}" (mapped to "${imageName}")`)
   return imageMap[imageName] || undug
 }

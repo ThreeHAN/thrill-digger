@@ -21,6 +21,29 @@
   line-height: 1.1;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.rupee-total {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  font-weight: bold;
+  color: #f3e5ab;
+  background: rgba(0, 0, 0, 0.3);
+  padding: clamp(6px, 1vw, 12px) clamp(10px, 2vw, 16px);
+  border-radius: 8px;
+  border: 2px solid rgba(243, 229, 171, 0.3);
+}
+
+.rupee-icon {
+  font-size: 1.3em;
+}
+
 .game-header .wood-btn {
   font-size: clamp(0.75rem, 2vw, 1rem);
   padding: clamp(4px, 1vw, 10px) clamp(8px, 2vw, 15px);

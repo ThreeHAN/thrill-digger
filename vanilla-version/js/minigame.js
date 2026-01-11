@@ -48,7 +48,7 @@ class ThrillDiggerGame {
     solveBoardSolver(gameState) {
         let grid = gameState.grid;
         var solvedBoard = grid.slice(0);
-
+        debugger;
         // Clear constraints from revealed items
         for (let i = 0; i < solvedBoard.length; i++) {
             if (solvedBoard[i] === 1 || solvedBoard[i] === -2) {

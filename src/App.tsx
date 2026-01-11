@@ -18,7 +18,7 @@ function App() {
   const [level, setLevel] = useState<Level>('beginner')
   const [gameMode, setGameMode] = useState<GameMode>(2)
   const [showSettings, setShowSettings] = useState(false)
-  const { gameState, newGame, revealCell, updateCell, setCurrentRupees, setGameOver, setRupoorCount, addTotalRupees, resetGame, showComputationWarning, setShowComputationWarning, computationWarning } = useGameBoard(levelToDifficulty[level])
+  const { gameState, newGame, revealCell, updateCell, setCurrentRupees, setGameOver, setRupoorCount, addTotalRupees, resetGame, showComputationWarning, setShowComputationWarning, computationWarning, boardTotal, showInvalidBoardError, setShowInvalidBoardError } = useGameBoard(levelToDifficulty[level])
 
   useEffect(() => {
     newGame(levelToDifficulty[level], 2)
@@ -45,6 +45,8 @@ function App() {
     setGameOver,
     setRupoorCount,
     addTotalRupees,
+    showInvalidBoardError,
+    setShowInvalidBoardError,
   }
 
   return (
@@ -53,7 +55,13 @@ function App() {
         <header className="game-header">
           <button className="wood-btn" onClick={handleReset}>New Game</button>
           <h1>Thrill Digger</h1>
-          <button className="wood-btn" onClick={() => setShowSettings(true)}>Settings</button>
+          <div className="header-right">
+            <div className="rupee-total">
+              <span className="rupee-icon">💰</span>
+              <span>{boardTotal}</span>
+            </div>
+            <button className="wood-btn" onClick={() => setShowSettings(true)}>Settings</button>
+          </div>
         </header>
 
         <main>

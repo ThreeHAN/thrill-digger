@@ -30,7 +30,6 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   
   const flat1D = board.flat()
   let solvedBoard = flat1D.slice(0)
-
   // Convert empty cells (0) to unknown (-1) for solving
   for (let i = 0; i < solvedBoard.length; i++) {
     if (solvedBoard[i] === 0) {
@@ -38,31 +37,55 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
     }
   }
 
-  // Count manually placed bombs and rupoors
-  let manualBombCount = 0
-  let manualRupoorCount = 0
-  
+  // Vanilla parity: if a revealed green (1) or rupoor (-2) is on the board, clear nearby unknowns
+  // (vanilla marks adjacent -1 to 0 for green cells, effectively removing those
+  // neighbors from constraint consideration).
   for (let i = 0; i < solvedBoard.length; i++) {
-    if (solvedBoard[i] === -3) manualBombCount++ // Manually placed bomb
-    if (solvedBoard[i] === -10 || solvedBoard[i] === -2) manualRupoorCount++ // Manually placed rupoor
+    if (solvedBoard[i] === 1 || solvedBoard[i] === -2) {
+      const colIndex = i % width
+      const rowIndex = Math.floor(i / width)
+      
+      // Check all 8 neighbors
+      for (let colOffset = -1; colOffset <= 1; colOffset++) {
+        for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
+          if (colOffset !== 0 || rowOffset !== 0) {
+            const ncol = colIndex + colOffset
+            const nrow = rowIndex + rowOffset
+            if (ncol >= 0 && ncol < width && nrow >= 0 && nrow < height) {
+              const neighborIdx = ncol + nrow * width
+              if (solvedBoard[neighborIdx] === -1) {
+                solvedBoard[neighborIdx] = 0
+              }
+            }
+          }
+        }
+      }
+    }
   }
+
+  // Track already-known hazards so remaining counts reflect placed rupoors
+  const knownRupoorCount = solvedBoard.reduce((count, cell) => (
+    cell === -10 || cell === -2 ? count + 1 : count
+  ), 0)
 
   let safeCount = solvedBoard.length
   const constraints: number[][] = []
   const unknownIndices: number[] = []
 
   // Build constraints from numbered cells (rupee values)
+  // Build constraints from numbered cells (rupee values)
+  console.log('Building constraints from board...')
   for (let i = 0; i < solvedBoard.length; i++) {
     const cell = solvedBoard[i]
-    // Treat positive values as number constraints (they indicate nearby bombs)
-    if (cell > 0) {
+    // Vanilla parity: only treat values > 1 as constraint sources (greens are skipped)
+    if (cell > 1) {
       const unknownNeighbors: number[] = []
       let expectedBombs = getExpectedBombCount(cell)
-      
-      // Count adjacent bombs and rupoors
       const colIndex = i % width
       const rowIndex = Math.floor(i / width)
+      console.log(`Cell at [${rowIndex},${colIndex}] value=${cell} expects ${expectedBombs} bombs`)
       
+      // Count adjacent bombs and rupoors
       for (let colOffset = -1; colOffset <= 1; colOffset++) {
         for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
           if (colIndex + colOffset >= 0 && colIndex + colOffset < width &&
@@ -76,7 +99,8 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
                 if (!unknownIndices.includes(neighborIdx)) {
                   unknownIndices.push(neighborIdx)
                 }
-              } else if (neighborCell === -3 || neighborCell === -10) {
+              } else if (neighborCell === -10 || neighborCell === -2) {
+                // Rupoors decrement expected bombs (vanilla uses -2 as rupoor marker)
                 expectedBombs--
               }
             }
@@ -86,11 +110,15 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
       
       // Only add constraint if there are unknown neighbors
       if (unknownNeighbors.length > 0) {
+        console.log(`  -> Constraint: ${unknownNeighbors.length} unknowns, expecting ${expectedBombs} bombs`)
         unknownNeighbors.push(expectedBombs)
         constraints.push(unknownNeighbors)
+      } else {
+        console.log(`  -> No unknown neighbors, constraint skipped`)
       }
     }
   }
+  console.log(`Total constraints: ${constraints.length}`)
 
   // Count safeCount (cells that are not already known)
   for (let i = 0; i < solvedBoard.length; i++) {
@@ -104,6 +132,7 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   let computationLimitReached = false
   const unknownCount = unknownIndices.length
   const totalCombinations = Math.round(Math.pow(2, unknownCount))
+  const remainingHazards = Math.max(0, bombCount + rupoorCount - knownRupoorCount)
 
   // Test all possible bomb placements
   for (let combo = 0; combo < totalCombinations; ++combo) {
@@ -122,7 +151,7 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
       }
     }
 
-    if (bombsPlaced <= bombCount + rupoorCount && bombsPlaced >= bombCount + rupoorCount - safeCount) {
+    if (bombsPlaced <= remainingHazards && bombsPlaced >= remainingHazards - safeCount) {
       let constraintsSatisfied = 0
 
       for (let c = 0; c < constraints.length; c++) {
@@ -149,18 +178,22 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   }
 
   if (computationLimitReached) {
-    alert(
-      `Wow, you've computed 100,000,000 boards! The solver is going to stop here.\n\n` +
-      `The rest of the boards will not be computed, so the probabilities are not entirely accurate!`
-    )
+    // Computation limit reached at 100 million combinations
   }
 
   // Validate board
+  console.log('=== Validation Results ===')
+  console.log('Constraints:', constraints.length, 'Unknown indices:', unknownIndices.length)
+  console.log('Valid solutions found:', validSolutions.length)
+  console.log('Total combinations tested:', totalCombinations)
+  
   if (constraints.length > 0 && validSolutions.length === 0) {
+    console.log('❌ BOARD INVALID: No valid solutions found for constraints')
+    console.log('Constraints were:', constraints)
     return null
   }
 
-  let remainingExpected = (bombCount - manualBombCount) + (rupoorCount - manualRupoorCount)
+  let remainingExpected = remainingHazards
 
   // Calculate probability for each unknown cell
   for (let unknownPos = 0; unknownPos < unknownIndices.length; unknownPos++) {
@@ -180,7 +213,8 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   }
 
   if (Math.round(remainingExpected * 100) < 0) {
-    return null
+   console.log('❌ BOARD INVALID: Remaining expected bombs is negative:', remainingExpected)
+   return null
   }
 
   const defaultProbability = remainingExpected / safeCount
@@ -226,60 +260,6 @@ export function getProbabilityColor(probability: number): string {
   if (percent <= 80) return '#c55a3d'     // 71-80%: Red-orange
   if (percent <= 90) return '#a84535'     // 81-90%: Deep red
   return '#9e3a33'                         // 91-100%: Dark red
-}
-
-/**
- * Check if a rupee value is valid for a cell based on nearby bomb/rupoor count
- * Uses the same logic as calculateRupeeValue
- */
-export function isValidRupeeForCell(
-  board: number[][],
-  row: number,
-  col: number,
-  rupeeValue: number,
-  width: number,
-  height: number
-): boolean {
-  // Undug, bombs, and rupoors are always valid
-  if (rupeeValue === 0 || rupeeValue === -3 || rupeeValue === -10) return true
-
-  // Count adjacent bombs and rupoors
-  let nearbyBombs = 0
-  for (let dr = -1; dr <= 1; dr++) {
-    for (let dc = -1; dc <= 1; dc++) {
-      if (dr === 0 && dc === 0) continue
-      const nr = row + dr
-      const nc = col + dc
-      if (nr >= 0 && nr < height && nc >= 0 && nc < width) {
-        const cell = board[nr][nc]
-        if (cell === -3 || cell === -10) nearbyBombs++
-      }
-    }
-  }
-
-  // Check if this rupee value matches the bomb count using game logic
-  if (nearbyBombs <= 0 && rupeeValue === 1) return true      // Green
-  if (nearbyBombs >= 1 && nearbyBombs <= 2 && rupeeValue === 5) return true    // Blue
-  if (nearbyBombs >= 3 && nearbyBombs <= 4 && rupeeValue === 20) return true   // Red
-  if (nearbyBombs >= 5 && nearbyBombs <= 6 && rupeeValue === 100) return true  // Silver
-  if (nearbyBombs >= 7 && rupeeValue === 300) return true                      // Gold
-  
-  return false
-}
-
-/**
- * Get all valid rupee options for a cell
- * Returns all options without validation - solver will validate when computing
- */
-export function getValidRupeeOptions(
-  board: number[][],
-  row: number,
-  col: number,
-  width: number,
-  height: number
-): number[] {
-  // Return all options; solver validates on probability compute
-  return [0, 1, 5, 20, 100, 300, -10, -3]
 }
 
 /**

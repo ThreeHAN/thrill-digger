@@ -60,15 +60,28 @@ export function useGameBoard(initialDifficulty: Difficulty = 1) {
   const [showComputationWarning, setShowComputationWarning] = useState(false)
   const [computationWarning, setComputationWarning] = useState({ time: 0, combinations: 0 })
   const [solvedBoard, setSolvedBoard] = useState<ReturnType<typeof solveBoardProbabilities>>(undefined)
+  const [isComputing, setIsComputing] = useState(false)
+  const [boardTotal, setBoardTotal] = useState(0)
+  const [showInvalidBoardError, setShowInvalidBoardError] = useState(false)
+
+  // Calculate board total whenever board changes
+  useEffect(() => {
+    const total = gameState.board.flat().reduce((sum, cell) => {
+      return sum + (cell != -3 ? cell : 0)
+    }, 0)
+    console.log('Calculated board total:', total);
+    setBoardTotal(total)
+  }, [gameState.board])
 
   // Detect heavy computation and show warning first
   useEffect(() => {
-    if (gameState.mode === 2) {
+    if (gameState.mode === 2 && !isComputing) {
       const unknownIndicesCount = calculateUnknownIndicesCount(gameState.board, gameState.config.width, gameState.config.height)
       const totalCombinations = Math.round(Math.pow(2, unknownIndicesCount))
       
       // Show warning if computation will be heavy
       if (unknownIndicesCount >= 22) {
+        setIsComputing(true)
         const estimatedTime = Math.floor(totalCombinations / 1111111)
         setComputationWarning({ time: estimatedTime, combinations: totalCombinations })
         setShowComputationWarning(true)
@@ -80,27 +93,37 @@ export function useGameBoard(initialDifficulty: Difficulty = 1) {
             gameState.config.width,
             gameState.config.height,
             gameState.config.bombCount,
-            gameState.config.rupoorCount
+            gameState.rupoorCount
           )
           setSolvedBoard(result)
+          if (result === null) {
+            setShowInvalidBoardError(true)
+          }
           // Close the modal after computation finishes
           setShowComputationWarning(false)
+          setIsComputing(false)
         }, 100)
         return () => clearTimeout(timer)
       } else {
         // No warning needed, compute immediately
+        setIsComputing(true)
         setShowComputationWarning(false)
         const result = solveBoardProbabilities(
           gameState.board,
           gameState.config.width,
           gameState.config.height,
           gameState.config.bombCount,
-          gameState.config.rupoorCount
+          gameState.rupoorCount
         )
         setSolvedBoard(result)
+        if (result === null) {
+          setShowInvalidBoardError(true)
+        }
+        setIsComputing(false)
       }
-    } else {
+    } else if (gameState.mode !== 2) {
       setSolvedBoard(undefined)
+      setIsComputing(false)
     }
   }, [gameState.board, gameState.config, gameState.mode])
 
@@ -152,7 +175,11 @@ export function useGameBoard(initialDifficulty: Difficulty = 1) {
   }, [])
 
   const addTotalRupees = useCallback((amount: number) => {
-    setGameState(prev => ({ ...prev, totalRupeesAllTime: prev.totalRupeesAllTime + amount }))
+    setGameState(prev => {
+      const updated = { ...prev, totalRupeesAllTime: prev.totalRupeesAllTime + amount }
+      console.log('Adding', amount, 'rupees. New total:', updated.totalRupeesAllTime)
+      return updated
+    })
   }, [])
 
   const resetGame = useCallback((difficulty: Difficulty, mode: GameMode) => {
@@ -172,5 +199,8 @@ export function useGameBoard(initialDifficulty: Difficulty = 1) {
     showComputationWarning,
     setShowComputationWarning,
     computationWarning,
+    boardTotal,
+    showInvalidBoardError,
+    setShowInvalidBoardError,
   }
 }
