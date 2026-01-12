@@ -1,73 +1,75 @@
-# React + TypeScript + Vite
+# Thrill Digger
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + TypeScript web app recreation of the Thrill Digger minigame from The Legend of Zelda: Skyward Sword, featuring both a playable game mode and an interactive solver.
 
-Currently, two official plugins are available:
+## Credits
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This project is built on the foundation of the original [Thrill Digger Assistant](https://www.joshscotland.com/thrill-digger-assistant/) by **Josh Scotland**. Major credit goes to Josh for the constraint satisfaction solver algorithm that powers the probability calculations in Solve Mode.
 
-## React Compiler
+Original game © Nintendo. The Legend of Zelda: Skyward Sword © Nintendo.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+### Play Mode
+- Dig up rupees on a randomly generated board
+- Avoid bombs and rupoors that end the game
+- Collect as much money as possible before hitting a hazard
+- The revealed rupee value tells you how many bombs/rupoors are in adjacent squares
+- Game over modal displays your total earnings
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Solve Mode
+- Edit the board manually to set up specific scenarios
+- Real-time constraint satisfaction solver calculates bomb probabilities
+- Color-coded board: green (safe) to red (dangerous) based on probability
+- Highlights the lowest-probability square to guide decision-making
+- Visual display of probability percentages for each cell
+- Track remaining bombs and rupoors on the board
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Game Modes
+- **Beginner**: 5×4 board, 4 bombs, no rupoors, -30 house fee
+- **Intermediate**: 6×5 board, 4 bombs, 4 rupoors, -50 house fee
+- **Expert**: 8×5 board, 8 bombs, 8 rupoors, -70 house fee
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## How to Run
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Tech Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Frontend**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: CSS with custom theming
+- **Game Logic**: Constraint satisfaction solver for probability calculation
+- **State Management**: React Context API with custom hooks
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Project Structure
+
+- `src/components/` - React components (GameBoard, Hole, modals, etc.)
+- `src/hooks/` - Custom React hooks (useGameBoard for state management)
+- `src/utils/` - Game logic, solver algorithm, and utilities
+- `src/context/` - React Context for game state
+- `src/assets/` - Game images (rupees, bombs)
+- `src/constants/` - Game configuration and difficulty levels
+
+## Game Rules
+
+The game is similar to Minesweeper. When you dig up a rupee:
+- **Green Rupee** (+1): 0 nearby hazards
+- **Blue Rupee** (+5): 1-2 nearby hazards
+- **Red Rupee** (+20): 3-4 nearby hazards
+- **Silver Rupee** (+100): 5-6 nearby hazards
+- **Gold Rupee** (+300): 7-8 nearby hazards
+
+Hitting a bomb or rupoor ends the game immediately. Your final score is the total rupees collected minus the house fee.
