@@ -1,14 +1,11 @@
-import React from 'react'
 import { createPortal } from 'react-dom'
 
 type ComputationWarningModalProps = {
   isOpen: boolean
-  onClose: () => void
 }
 
 export default function ComputationWarningModal({ 
-  isOpen, 
-  onClose
+  isOpen
 }: ComputationWarningModalProps) {
   if (!isOpen) return null
 
