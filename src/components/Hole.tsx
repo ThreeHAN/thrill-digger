@@ -3,33 +3,27 @@ import { getItemName } from '../utils/gameLogic'
 import { getImageForItem } from '../utils/imageMap'
 import { getProbabilityColor } from '../utils/solver'
 import { useGame } from '../context/GameContext'
-import type { GameMode } from '../hooks/useGameBoard'
 import RupeeModal from './RupeeModal'
 
 type HoleProps = {
   row: number
   col: number
-  cellValue: number
-  isRevealed: boolean
-  gameMode: GameMode
-  gameActions: any
   isLowestProbability?: boolean
-  showProbabilitiesInPlay?: boolean
 }
 
 export default function Hole({ 
   row, 
   col, 
-  cellValue, 
-  isRevealed, 
-  gameMode, 
-  gameActions,
-  isLowestProbability,
-  showProbabilitiesInPlay
+  isLowestProbability
 }: HoleProps) {
-  const { gameState } = useGame()
+  const { gameState, gameActions } = useGame()
   const [showModal, setShowModal] = useState(false)
   const holeId = `hole_${col}_${row}`
+  
+  // Get cell data from game state
+  const cellValue = gameState.board[row][col]
+  const isRevealed = gameState.revealed[row][col]
+  const gameMode = gameState.mode
   
   const itemName = getItemName(cellValue)
   
@@ -38,11 +32,22 @@ export default function Hole({
     ? gameState.solvedBoard[row * gameState.config.width + col]
     : undefined
   
-  // Only display probability if it's a valid probability (0-1 range)
-  // Show in solve mode always, or in play mode if setting is enabled
-  const displayProbability = cellValue === 0 && solverProbability !== undefined && solverProbability !== -2 && (gameMode === 2 || (gameMode === 1 && showProbabilitiesInPlay))
-    ? Math.floor(solverProbability * 100)
-    : undefined
+  // Helper function to determine if we should display probability and return formatted value
+  const canDisplayProbability = (
+    cellVal: number,
+    prob: number | undefined,
+    mode: number
+  ): number | undefined => {
+    if (cellVal !== 0 || prob === undefined || prob === -2) {
+      return undefined
+    }
+    if (mode === 2) {
+      return Math.floor(prob * 100)
+    }
+    return undefined
+  }
+  
+  const displayProbability = canDisplayProbability(cellValue, solverProbability, gameMode)
 
   const handleClick = () => {
     if (gameMode === 2) {
@@ -133,7 +138,7 @@ export default function Hole({
         </>
       ) : (
         <>
-          {cellValue === 0 && displayProbability && (
+          {cellValue === 0 && displayProbability !== undefined&& (
             <p>{displayProbability}%</p>
           )}
           {cellValue !== 0 && (

@@ -11,13 +11,12 @@ export interface GameConfig {
   houseFee: number
   bombCount: number
   rupoorCount: number
-  showProbabilitiesInPlay: boolean
 }
 
 const DIFFICULTY_CONFIGS: Record<1 | 2 | 3, GameConfig> = {
-  1: { difficulty: 1, width: 5, height: 4, houseFee: 30, bombCount: 4, rupoorCount: 0, showProbabilitiesInPlay: false },
-  2: { difficulty: 2, width: 6, height: 5, houseFee: 50, bombCount: 4, rupoorCount: 4, showProbabilitiesInPlay: false },
-  3: { difficulty: 3, width: 8, height: 5, houseFee: 70, bombCount: 8, rupoorCount: 8, showProbabilitiesInPlay: false },
+  1: { difficulty: 1, width: 5, height: 4, houseFee: 30, bombCount: 4, rupoorCount: 0 },
+  2: { difficulty: 2, width: 6, height: 5, houseFee: 50, bombCount: 4, rupoorCount: 4 },
+  3: { difficulty: 3, width: 8, height: 5, houseFee: 70, bombCount: 8, rupoorCount: 8 },
 }
 
 export function getGameConfig(difficulty: 1 | 2 | 3): GameConfig {

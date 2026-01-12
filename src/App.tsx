@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import GameBoard from './components/GameBoard'
 import SettingsModal from './components/SettingsModal'
+import InfoModal from './components/InfoModal'
 import ComputationWarningModal from './components/ComputationWarningModal'
+import GameOverModal from './components/GameOverModal'
 import HazardStats from './components/HazardStats'
 import type { Level } from './constants/levels'
 import { useGameBoard } from './hooks/useGameBoard'
@@ -19,6 +21,7 @@ function App() {
   const [level, setLevel] = useState<Level>('beginner')
   const [gameMode, setGameMode] = useState<GameMode>(2)
   const [showSettings, setShowSettings] = useState(false)
+  const [showInfo, setShowInfo] = useState(false)
   const { gameState, newGame, revealCell, updateCell, setCurrentRupees, setGameOver, setRupoorCount, addTotalRupees, setGameConfig, resetGame, showComputationWarning, setShowComputationWarning, boardTotal, showInvalidBoardError, setShowInvalidBoardError } = useGameBoard(levelToDifficulty[level])
 
   useEffect(() => {
@@ -58,6 +61,7 @@ function App() {
           <button className="wood-btn" onClick={handleReset}>New Game</button>
           <h1>Thrill Digger</h1>
             <div className="header-right">
+              <button className="wood-btn" onClick={() => setShowInfo(true)}>Info</button>
               <button className="wood-btn" onClick={() => setShowSettings(true)}>Settings</button>
             </div>
         </header>
@@ -78,9 +82,20 @@ function App() {
           setGameMode={handleGameModeChange}
         />
 
+        <InfoModal
+          isOpen={showInfo}
+          onClose={() => setShowInfo(false)}
+        />
+
         <ComputationWarningModal
           isOpen={showComputationWarning}
           onClose={() => setShowComputationWarning(false)}
+        />
+
+        <GameOverModal
+          isOpen={gameState.isGameOver && gameState.mode === 1}
+          totalRupees={gameState.currentRupees}
+          onPlayAgain={handleReset}
         />
       </div>
     </GameProvider>

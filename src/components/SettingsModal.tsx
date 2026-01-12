@@ -45,20 +45,6 @@ export default function SettingsModal({ isOpen, onClose, level, setLevel, gameMo
           <h2>Settings</h2>
           <button className="modal-close" onClick={handleCloseClick}>×</button>
         </div>
-        <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ color: '#f3e5ab', marginBottom: '12px', fontSize: '1.2rem' }}>Display Options</h3>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f3e5ab', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={gameState.config.showProbabilitiesInPlay}
-              onChange={(e) => {
-                gameActions.setGameConfig?.({ ...gameState.config, showProbabilitiesInPlay: e.target.checked })
-              }}
-              style={{ cursor: 'pointer' }}
-            />
-            <span>Show probabilities in play mode</span>
-          </label>
-        </div>
         <div>
           <h3 style={{ color: '#f3e5ab', marginBottom: '12px', fontSize: '1.2rem' }}>Game Mode</h3>
           <div className="difficulty-grid">

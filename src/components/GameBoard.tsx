@@ -102,12 +102,7 @@ export default function GameBoard() {
           key={`${col}-${row}`} 
           row={row} 
           col={col} 
-          cellValue={board[row][col]}
-          isRevealed={gameState.revealed[row][col]}
-          gameMode={gameState.mode}
-          gameActions={gameActions}
           isLowestProbability={index === lowestProbabilityIndex}
-          showProbabilitiesInPlay={gameState.config.showProbabilitiesInPlay}
         />
       )
     }
