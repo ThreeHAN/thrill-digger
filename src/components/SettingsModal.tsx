@@ -1,9 +1,8 @@
+import React from 'react'
 import { createPortal } from 'react-dom'
-import type React from 'react'
 import type { Level } from '../constants/levels'
 import { LEVELS } from '../constants/levels'
 import type { GameMode } from '../hooks/useGameBoard'
-import { useGame } from '../context/GameContext'
 
 type SettingsModalProps = {
   isOpen: boolean
@@ -14,8 +13,7 @@ type SettingsModalProps = {
   setGameMode: (mode: GameMode) => void
 }
 
-export default function SettingsModal({ isOpen }: SettingsModalProps) {
-  const { gameState, gameActions } = useGame()
+export default function SettingsModal({ isOpen, onClose, level, setLevel, gameMode, setGameMode }: SettingsModalProps) {
   if (!isOpen) return null
 
   const handleLevelChange = (l: Level) => {

@@ -22,7 +22,7 @@ function App() {
   const [gameMode, setGameMode] = useState<GameMode>(2)
   const [showSettings, setShowSettings] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
-  const { gameState, newGame, revealCell, updateCell, setCurrentRupees, setGameOver, setRupoorCount, addTotalRupees, setGameConfig, resetGame, showComputationWarning, setShowComputationWarning, boardTotal, showInvalidBoardError, setShowInvalidBoardError } = useGameBoard(levelToDifficulty[level])
+  const { gameState, newGame, revealCell, updateCell, setCurrentRupees, setGameOver, setRupoorCount, addTotalRupees, setGameConfig, resetGame, showComputationWarning, boardTotal, showInvalidBoardError, setShowInvalidBoardError } = useGameBoard(levelToDifficulty[level])
 
   useEffect(() => {
     newGame(levelToDifficulty[level], gameMode)
@@ -89,7 +89,6 @@ function App() {
 
         <ComputationWarningModal
           isOpen={showComputationWarning}
-          onClose={() => setShowComputationWarning(false)}
         />
 
         <GameOverModal
