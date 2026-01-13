@@ -15,7 +15,7 @@
   justify-content: center;
   align-items: flex-start;
   color: #f3e5ab;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
   gap: 10px;
   width: 100%;
 }
@@ -157,6 +157,20 @@
   font-size: clamp(0.75rem, 2vw, 1rem);
   padding: clamp(4px, 1vw, 10px) clamp(8px, 2vw, 15px);
   white-space: nowrap;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.board-area {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .hazard-stats {
@@ -728,6 +742,13 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
 
+/* Mobile width - hide title */
+@media (max-width: 600px) {
+  .game-header {
+    display: none;
+  }
+}
+
 /* Landscape Mode Optimizations */
 @media (orientation: landscape) {
   .game-container {
@@ -737,15 +758,8 @@
   }
 
   .game-header {
-    position: absolute;
-    top: 8px;
-    right: 8px;
     margin: 0;
     z-index: 10;
-  }
-
-  .game-header h1 {
-    display: none;
   }
 
   main {
