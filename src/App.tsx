@@ -3,6 +3,7 @@ import './App.css'
 import GameBoard from './components/GameBoard'
 import SettingsModal from './components/SettingsModal'
 import InfoModal from './components/InfoModal'
+import HamburgerMenu from './components/HamburgerMenu'
 import ComputationWarningModal from './components/ComputationWarningModal'
 import GameOverModal from './components/GameOverModal'
 import HazardStats from './components/HazardStats'
@@ -58,12 +59,12 @@ function App() {
     <GameProvider gameState={gameState} gameActions={gameActions}>
       <div className="game-container">
         <header className="game-header">
-          <button className="wood-btn" onClick={handleReset}>New Game</button>
           <h1>Thrill Digger</h1>
-            <div className="header-right">
-              <button className="wood-btn" onClick={() => setShowInfo(true)}>Info</button>
-              <button className="wood-btn" onClick={() => setShowSettings(true)}>Settings</button>
-            </div>
+          <HamburgerMenu
+            onNewGame={handleReset}
+            onInfo={() => setShowInfo(true)}
+            onSettings={() => setShowSettings(true)}
+          />
         </header>
         
         <main>

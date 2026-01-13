@@ -113,24 +113,13 @@ export default function Hole({
       className={tileClass} 
       id={holeId}
       onClick={handleClick}
-      style={{ 
-        width: 'var(--tile-size)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        ...(backgroundColor && { backgroundColor })
-      }}
+      style={backgroundColor ? { backgroundColor } : undefined}
     >
       {gameMode === 1 ? (
         <>
           {isRevealed && (
             <img 
               className="solverimg" 
-              style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }} 
               alt={itemName} 
               src={getImageForItem(itemName)} 
             />
@@ -138,8 +127,8 @@ export default function Hole({
         </>
       ) : (
         <>
-          {cellValue === 0 && displayProbability !== undefined&& (
-            <p>{displayProbability}%</p>
+          {cellValue === 0 && displayProbability !== undefined && (
+            <p className="probability-text">{displayProbability}%</p>
           )}
           {cellValue !== 0 && (
             <img 

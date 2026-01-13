@@ -1,18 +1,23 @@
 /* Thrill Digger layout additions */
 .game-container {
-  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
   width: 100%;
-  padding: 0 20px;
+  padding: 0;
   box-sizing: border-box;
 }
 
 .game-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: center;
+  align-items: flex-start;
   color: #f3e5ab;
   margin-bottom: 20px;
   gap: 10px;
+  width: 100%;
 }
 
 .game-header h1 {
@@ -25,6 +30,85 @@
   display: flex;
   align-items: center;
   gap: 15px;
+}
+
+/* Hamburger Menu */
+.hamburger-menu {
+  position: absolute;
+  right: 0;
+}
+
+.hamburger-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  align-self: flex-start;
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background-color: #f3e5ab;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-btn.active span:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(8px, -8px);
+}
+
+.hamburger-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.hamburger-menu-content {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 250px;
+  background-color: #5d3a1a;
+  border-left: 3px solid #8b5a2b;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  z-index: 1000;
+  box-shadow: -4px 0 6px rgba(0, 0, 0, 0.3);
+}
+
+.hamburger-menu-item {
+  background: none;
+  border: none;
+  color: #f3e5ab;
+  padding: 16px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: left;
+  border-bottom: 1px solid rgba(243, 229, 171, 0.2);
+  transition: background-color 0.2s;
+}
+
+.hamburger-menu-item:hover {
+  background-color: rgba(243, 229, 171, 0.1);
 }
 
 .rupee-total {
@@ -52,7 +136,7 @@
 
 .hazard-stats {
   display: flex;
-  gap: 12px;
+  gap: clamp(8px, 2vw, 12px);
   flex-wrap: wrap;
   margin: 0 0 16px;
   justify-content: center;
@@ -62,38 +146,38 @@
   background: rgba(0, 0, 0, 0.35);
   border: 2px solid rgba(243, 229, 171, 0.28);
   color: #f3e5ab;
-  padding: 10px 14px;
-  border-radius: 10px;
-  min-width: 160px;
+  padding: clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 14px);
+  border-radius: 8px;
+  min-width: auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
 }
 
 .hazard-row {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 1.1rem;
+  gap: clamp(4px, 1vw, 8px);
+  font-size: clamp(0.85rem, 2vw, 1.1rem);
 }
 
 .hazard-row img {
-  width: 22px;
-  height: 22px;
+  width: clamp(18px, 3vw, 22px);
+  height: clamp(18px, 3vw, 22px);
   object-fit: contain;
   display: block;
 }
 
 .hazard-emoji {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
 }
 
 .hazard-separator {
-  font-size: 1rem;
+  font-size: clamp(0.8rem, 1.5vw, 1rem);
   opacity: 0.7;
 }
 
 .hazard-value {
   display: block;
-  font-size: 1.4rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
   font-weight: 700;
 }
 
@@ -105,6 +189,8 @@
   padding: 10px;
   border-radius: 12px;
   box-sizing: border-box;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 /* The "Stone Tile" Button */
@@ -119,6 +205,10 @@
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.1s;
   position: relative;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
   /* The Secret Sauce: Layered Shadows */
   box-shadow: 
@@ -152,7 +242,28 @@
   max-height: 80%;
   object-fit: contain;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+/* Hole tile button styles */
+.hole-tile {
+  width: var(--tile-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Probability text styling */
+.probability-text {
+  font-size: clamp(1rem, calc(var(--tile-size) * 0.2), 5.0rem);
+  font-weight: bold;
+  color: #f3e5ab;
+  margin: 0;
+}
+
 
 /* Wood Button Style for Header */
 .wood-btn {
@@ -526,4 +637,66 @@
   font-size: 0.95rem;
   line-height: 1.6;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+/* Landscape Mode Optimizations */
+@media (orientation: landscape) {
+  .game-container {
+    min-height: auto;
+    justify-content: flex-start;
+    padding-top: 8px;
+  }
+
+  .game-header {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    margin: 0;
+    z-index: 10;
+  }
+
+  .game-header h1 {
+    display: none;
+  }
+
+  main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hazard-stats {
+    margin: 0 0 8px;
+    gap: clamp(4px, 1vw, 8px);
+    padding-right: 50px;
+  }
+
+  .hazard-card {
+    padding: clamp(4px, 1vw, 6px) clamp(6px, 1.5vw, 8px);
+  }
+
+  .hazard-row {
+    gap: clamp(2px, 0.8vw, 4px);
+    font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+  }
+
+  .hazard-row img {
+    width: clamp(14px, 2vw, 18px);
+    height: clamp(14px, 2vw, 18px);
+  }
+
+  .hazard-value {
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+  }
+
+  .grid-board {
+    gap: 6px;
+    padding: 6px;
+  }
+
+  :root {
+    --tile-size: clamp(24px, 4.5vh, 40px);
+  }
 }
