@@ -255,6 +255,64 @@
 .mid-risk { background-color: var(--tile-mid); }
 .high-risk { background-color: var(--tile-high); }
 
+/* Tile color classes */
+.tile-safe {
+  background-color: #4e7d5b;
+}
+
+.tile-bomb {
+  background-color: #a84432;
+}
+
+.tile-rupee {
+  background-color: #f5f5dc;
+}
+
+/* Probability color classes */
+.prob-0 {
+  background-color: #3d5a3d; /* 0%: Dark green */
+}
+
+.prob-10 {
+  background-color: #4e7d5b; /* 1-10%: Forest green */
+}
+
+.prob-20 {
+  background-color: #6b9b6b; /* 11-20%: Light green */
+}
+
+.prob-30 {
+  background-color: #8bb58b; /* 21-30%: Pale green */
+}
+
+.prob-40 {
+  background-color: #b8b058; /* 31-40%: Yellow-green */
+}
+
+.prob-50 {
+  background-color: #c9a84a; /* 41-50%: Sandy yellow */
+}
+
+.prob-60 {
+  background-color: #d89847; /* 51-60%: Orange-yellow */
+}
+
+.prob-70 {
+  background-color: #d47a4a; /* 61-70%: Burnt orange */
+}
+
+.prob-80 {
+  background-color: #c55a3d; /* 71-80%: Red-orange */
+}
+
+.prob-90 {
+  background-color: #a84535; /* 81-90%: Deep red */
+}
+
+.prob-100 {
+  background-color: #9e3a33; /* 91-100%: Dark red */
+}
+
 /* Interaction Feel */
 .tile:active {
   transform: translateY(2px);
@@ -287,6 +345,12 @@
   font-weight: bold;
   color: #f3e5ab;
   margin: 0;
+  letter-spacing: 0.05em;
+  text-shadow: 
+    1px 1px 2px rgba(0, 0, 0, 0.8),
+    -1px -1px 2px rgba(0, 0, 0, 0.8),
+    1px -1px 2px rgba(0, 0, 0, 0.8),
+    -1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 

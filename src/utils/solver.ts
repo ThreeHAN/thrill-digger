@@ -243,23 +243,23 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
 }
 
 /**
- * Get color for probability display with 10 granular levels
+ * Get CSS class name for probability display with 10 granular levels
  */
 export function getProbabilityColor(probability: number): string {
   const percent = probability * 100
   
   // 10 granular color levels from green (safe) to red (dangerous)
-  if (percent <= 0) return '#3d5a3d'      // 0%: Dark green
-  if (percent <= 10) return '#4e7d5b'     // 1-10%: Forest green
-  if (percent <= 20) return '#6b9b6b'     // 11-20%: Light green
-  if (percent <= 30) return '#8bb58b'     // 21-30%: Pale green
-  if (percent <= 40) return '#b8b058'     // 31-40%: Yellow-green
-  if (percent <= 50) return '#c9a84a'     // 41-50%: Sandy yellow
-  if (percent <= 60) return '#d89847'     // 51-60%: Orange-yellow
-  if (percent <= 70) return '#d47a4a'     // 61-70%: Burnt orange
-  if (percent <= 80) return '#c55a3d'     // 71-80%: Red-orange
-  if (percent <= 90) return '#a84535'     // 81-90%: Deep red
-  return '#9e3a33'                         // 91-100%: Dark red
+  if (percent <= 0) return 'prob-0'      // 0%: Dark green
+  if (percent <= 10) return 'prob-10'    // 1-10%: Forest green
+  if (percent <= 20) return 'prob-20'    // 11-20%: Light green
+  if (percent <= 30) return 'prob-30'    // 21-30%: Pale green
+  if (percent <= 40) return 'prob-40'    // 31-40%: Yellow-green
+  if (percent <= 50) return 'prob-50'    // 41-50%: Sandy yellow
+  if (percent <= 60) return 'prob-60'    // 51-60%: Orange-yellow
+  if (percent <= 70) return 'prob-70'    // 61-70%: Burnt orange
+  if (percent <= 80) return 'prob-80'    // 71-80%: Red-orange
+  if (percent <= 90) return 'prob-90'    // 81-90%: Deep red
+  return 'prob-100'                       // 91-100%: Dark red
 }
 
 /**

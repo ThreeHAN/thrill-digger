@@ -84,23 +84,22 @@ export default function Hole({
 
   // Determine tile styling based on game mode and cell state
   let tileClass = 'tile undug'
-  let backgroundColor: string | undefined
 
   if (gameMode === 2) {
     // In solve mode, use getProbabilityColor for gradient coloring
     if (cellValue > 0) {
       // Known rupee - show as cream white
-      backgroundColor = '#f5f5dc'
+      tileClass += ' tile-rupee'
     } else if (solverProbability !== undefined && solverProbability !== -2) {
       // Unknown cell - color based on probability using getProbabilityColor
-      backgroundColor = getProbabilityColor(solverProbability)
+      tileClass += ' ' + getProbabilityColor(solverProbability)
     }
   } else if (gameMode === 1) {
     // In play mode, show as safe if revealed
     if (isRevealed && cellValue > 0) {
-      backgroundColor = '#4e7d5b'
+      tileClass += ' tile-safe'
     } else if (isRevealed && cellValue === -1) {
-      backgroundColor = '#a84432'
+      tileClass += ' tile-bomb'
     }
   }
 
@@ -113,7 +112,6 @@ export default function Hole({
       className={tileClass} 
       id={holeId}
       onClick={handleClick}
-      style={backgroundColor ? { backgroundColor } : undefined}
     >
       {gameMode === 1 ? (
         <>
