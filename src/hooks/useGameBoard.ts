@@ -1,11 +1,9 @@
 import { useState, useCallback, useEffect } from 'react'
 import type { BoardCell, GameConfig } from '../utils/gameLogic'
-import { getGameConfig, createEmptyBoard, generatePlayBoard } from '../utils/gameLogic'
+import { getGameConfig, createEmptyBoard, generatePlayBoard, Difficulty } from '../utils/gameLogic'
 import { solveBoardProbabilities, calculateUnknownIndicesCount } from '../utils/solver'
 import type { SolvedBoard } from '../utils/solver'
-
-export type GameMode = 1 | 2 // 1=Play, 2=Solve
-export type Difficulty = 1 | 2 | 3 // 1=Beginner, 2=Intermediate, 3=Expert
+import type { GameMode } from '../stores/gameStore'
 
 export type GameBoardActions = {
   revealCell: (row: number, col: number) => void
@@ -62,7 +60,7 @@ const initialGameState = (difficulty: Difficulty): GameState => {
   }
 }
 
-export function useGameBoard(initialDifficulty: Difficulty = 1) {
+export function useGameBoard(initialDifficulty: Difficulty = Difficulty.Beginner) {
   const [gameState, setGameState] = useState<GameState>(() => initialGameState(initialDifficulty))
   const [showComputationWarning, setShowComputationWarning] = useState(false)
   const [computationWarning, setComputationWarning] = useState({ time: 0, combinations: 0 })

@@ -1,11 +1,16 @@
 import { create } from 'zustand'
 import type { BoardCell, GameConfig } from '../utils/gameLogic'
-import { getGameConfig, createEmptyBoard, generatePlayBoard } from '../utils/gameLogic'
+import { getGameConfig, createEmptyBoard, generatePlayBoard, Difficulty } from '../utils/gameLogic'
 import { solveBoardProbabilities, calculateUnknownIndicesCount } from '../utils/solver'
 import type { SolvedBoard } from '../utils/solver'
 
-export type GameMode = 1 | 2 // 1=Play, 2=Solve
-export type Difficulty = 1 | 2 | 3 // 1=Beginner, 2=Intermediate, 3=Expert
+export const GameMode = {
+  Play: 1,
+  Solve: 2,
+} as const
+
+export type GameMode = typeof GameMode[keyof typeof GameMode]
+export type { Difficulty }
 
 export interface GameState {
   mode: GameMode
@@ -75,11 +80,11 @@ const initialGameState = (difficulty: Difficulty): GameState => {
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
-  ...initialGameState(1),
+  ...initialGameState(Difficulty.Beginner),
 
   newGame: (difficulty: Difficulty, mode: GameMode) => {
     const config = getGameConfig(difficulty)
-    const board = mode === 1 
+    const board = mode === GameMode.Play 
       ? generatePlayBoard(config.width, config.height, config.bombCount, config.rupoorCount)
       : createEmptyBoard(config.width, config.height)
 
@@ -102,7 +107,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })
 
     // Trigger solver if in solve mode
-    if (mode === 2) {
+    if (mode === GameMode.Solve) {
       get().solveBoardInternal()
     }
   },
@@ -133,7 +138,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })
 
     // Trigger solver if in solve mode
-    if (state.mode === 2) {
+    if (state.mode === GameMode.Solve) {
       get().solveBoardInternal()
     }
   },
@@ -171,7 +176,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   solveBoardInternal: () => {
     const state = get()
-    if (state.mode !== 2) return
+    if (state.mode !== GameMode.Solve) return
 
     const unknownIndicesCount = calculateUnknownIndicesCount(
       state.board,

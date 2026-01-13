@@ -8,18 +8,18 @@ import ComputationWarningModal from './components/ComputationWarningModal'
 import GameOverModal from './components/GameOverModal'
 import HazardStats from './components/HazardStats'
 import type { Level } from './constants/levels'
-import type { Difficulty, GameMode } from './stores/gameStore'
-import { useGameStore } from './stores/gameStore'
+import { Difficulty } from './utils/gameLogic'
+import { GameMode, useGameStore } from './stores/gameStore'
 
 const levelToDifficulty: Record<Level, Difficulty> = {
-  beginner: 1,
-  intermediate: 2,
-  expert: 3,
+  beginner: Difficulty.Beginner,
+  intermediate: Difficulty.Intermediate,
+  expert: Difficulty.Expert,
 }
 
 function App() {
   const [level, setLevel] = useState<Level>('beginner')
-  const [gameMode, setGameMode] = useState<GameMode>(2)
+  const [gameMode, setGameMode] = useState<GameMode>(GameMode.Solve)
   const [showSettings, setShowSettings] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
   
@@ -70,7 +70,7 @@ function App() {
         <div className="board-area">
           <GameBoard />
         </div>
-        <HazardStats boardTotal={gameMode === 1 ? currentRupees : boardTotal} />
+        <HazardStats boardTotal={gameMode === GameMode.Play ? currentRupees : boardTotal} />
       </main>
 
       <footer className="app-footer">
@@ -96,7 +96,7 @@ function App() {
       />
 
       <GameOverModal
-        isOpen={isGameOver && mode === 1}
+        isOpen={isGameOver && mode === GameMode.Play}
         totalRupees={currentRupees}
         onPlayAgain={handleReset}
       />

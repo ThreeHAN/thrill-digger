@@ -2,10 +2,18 @@
  * Pure game logic functions
  */
 
+export const Difficulty = {
+  Beginner: 1,
+  Intermediate: 2,
+  Expert: 3,
+} as const
+
+export type Difficulty = typeof Difficulty[keyof typeof Difficulty]
+
 export type BoardCell = number // -3=bomb, -2=rupoor, -1=undug, 0+=rupee value or probability
 
 export interface GameConfig {
-  difficulty: 1 | 2 | 3 // 1=Beginner, 2=Intermediate, 3=Expert
+  difficulty: Difficulty
   width: number
   height: number
   houseFee: number
@@ -13,13 +21,13 @@ export interface GameConfig {
   rupoorCount: number
 }
 
-const DIFFICULTY_CONFIGS: Record<1 | 2 | 3, GameConfig> = {
-  1: { difficulty: 1, width: 5, height: 4, houseFee: 30, bombCount: 4, rupoorCount: 0 },
-  2: { difficulty: 2, width: 6, height: 5, houseFee: 50, bombCount: 4, rupoorCount: 4 },
-  3: { difficulty: 3, width: 8, height: 5, houseFee: 70, bombCount: 8, rupoorCount: 8 },
+const DIFFICULTY_CONFIGS: Record<Difficulty, GameConfig> = {
+  [Difficulty.Beginner]: { difficulty: Difficulty.Beginner, width: 5, height: 4, houseFee: 30, bombCount: 4, rupoorCount: 0 },
+  [Difficulty.Intermediate]: { difficulty: Difficulty.Intermediate, width: 6, height: 5, houseFee: 50, bombCount: 4, rupoorCount: 4 },
+  [Difficulty.Expert]: { difficulty: Difficulty.Expert, width: 8, height: 5, houseFee: 70, bombCount: 8, rupoorCount: 8 },
 }
 
-export function getGameConfig(difficulty: 1 | 2 | 3): GameConfig {
+export function getGameConfig(difficulty: Difficulty): GameConfig {
   return { ...DIFFICULTY_CONFIGS[difficulty] }
 }
 

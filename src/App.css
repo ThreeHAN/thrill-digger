@@ -463,10 +463,10 @@ main {
   background: transparent;
   border-radius: 12px;
   padding: 0;
-  width: min(500px, 90vw);
-  height: min(500px, 90vh);
-  max-width: 500px;
-  max-height: 500px;
+  width: min(600px, 90vw);
+  height: min(600px, 90vh);
+  max-width: 600px;
+  max-height: 600px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -477,8 +477,8 @@ main {
   position: relative;
   width: 80%;
   height: 80%;
-  max-width: 400px;
-  max-height: 400px;
+  max-width: 500px;
+  max-height: 500px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -486,8 +486,8 @@ main {
 
 .wheel-cancel {
   position: absolute;
-  width: clamp(70px, 20%, 100px);
-  height: clamp(70px, 20%, 100px);
+  width: clamp(70px, 20%, 120px);
+  height: clamp(70px, 20%, 120px);
   border-radius: 50%;
   background: rgba(90, 78, 66, 0.9);
   border: 3px solid #f3e5ab;
@@ -516,8 +516,8 @@ main {
 
 .rupee-option-circular {
   position: absolute;
-  width: clamp(70px, 20%, 100px);
-  height: clamp(70px, 20%, 100px);
+  width: clamp(70px, 20%, 120px);
+  height: clamp(70px, 20%, 120px);
   border-radius: 50%;
   background: rgba(90, 78, 66, 0.85);
   border: 3px solid #d4a574;
@@ -531,11 +531,11 @@ main {
   transition: all 0.2s;
   color: white;
   box-sizing: border-box;
-  transform: rotate(var(--angle)) translateY(calc(clamp(70px, 20%, 100px) * -2.3)) rotate(calc(var(--angle) * -1));
+  transform: rotate(var(--angle)) translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1));
 }
 
 .rupee-option-circular:hover {
-  transform: rotate(var(--angle)) translateY(calc(clamp(70px, 20%, 100px) * -2.3)) rotate(calc(var(--angle) * -1)) scale(1.1);
+  transform: rotate(var(--angle)) translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1)) scale(1.1);
   background: rgba(122, 109, 95, 0.95);
   border-color: #f3e5ab;
   box-shadow: 0 0 15px rgba(243, 229, 171, 0.4);
@@ -545,7 +545,7 @@ main {
   border-color: #4e7d5b;
   background: rgba(78, 125, 91, 0.9);
   box-shadow: 0 0 20px rgba(78, 125, 91, 0.6);
-  transform: rotate(var(--angle)) translateY(calc(clamp(70px, 20%, 100px) * -2.3)) rotate(calc(var(--angle) * -1)) scale(1.15);
+  transform: rotate(var(--angle)) translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1)) scale(1.15);
 }
 
 .rupee-option-circular.disabled {
@@ -555,7 +555,7 @@ main {
 }
 
 .rupee-option-circular.disabled:hover {
-  transform: rotate(var(--angle)) translateY(calc(clamp(70px, 20%, 100px) * -2.3)) rotate(calc(var(--angle) * -1));
+  transform: rotate(var(--angle)) translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1));
   background-color: rgba(61, 61, 61, 0.7);
   border-color: #5d3a1a;
   box-shadow: none;
