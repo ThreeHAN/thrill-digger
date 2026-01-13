@@ -74,6 +74,10 @@ function App() {
           <HazardStats boardTotal={gameMode === 1 ? gameState.currentRupees : boardTotal} />
         </main>
 
+        <footer className="app-footer">
+          <p>Reskinned version of the original <a href="https://www.joshscotland.com/thrill-digger-assistant/" target="_blank" rel="noopener noreferrer">Thrill Digger Assistant</a> by Josh Scotland</p>
+        </footer>
+
         <SettingsModal
           isOpen={showSettings}
           onClose={() => setShowSettings(false)}
