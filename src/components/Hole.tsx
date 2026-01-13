@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { getItemName } from '../utils/gameLogic'
 import { getImageForItem } from '../utils/imageMap'
 import { getProbabilityColor } from '../utils/solver'
-import { useGame } from '../context/GameContext'
+import { useGameStore } from '../stores/gameStore'
 import RupeeModal from './RupeeModal'
 
 type HoleProps = {
@@ -16,76 +16,85 @@ export default function Hole({
   col, 
   isLowestProbability
 }: HoleProps) {
-  const { gameState, gameActions } = useGame()
+  const board = useGameStore(state => state.board)
+  const revealed = useGameStore(state => state.revealed)
+  const mode = useGameStore(state => state.mode)
+  const solvedBoard = useGameStore(state => state.solvedBoard)
+  const config = useGameStore(state => state.config)
+  const isGameOver = useGameStore(state => state.isGameOver)
+  const currentRupees = useGameStore(state => state.currentRupees)
+  const revealCell = useGameStore(state => state.revealCell)
+  const setGameOver = useGameStore(state => state.setGameOver)
+  const addTotalRupees = useGameStore(state => state.addTotalRupees)
+  const setCurrentRupees = useGameStore(state => state.setCurrentRupees)
+  const updateCell = useGameStore(state => state.updateCell)
+  
   const [showModal, setShowModal] = useState(false)
   const holeId = `hole_${col}_${row}`
   
   // Get cell data from game state
-  const cellValue = gameState.board[row][col]
-  const isRevealed = gameState.revealed[row][col]
-  const gameMode = gameState.mode
+  const cellValue = board[row][col]
+  const isRevealed = revealed[row][col]
   
   const itemName = getItemName(cellValue)
   
   // Get solver probability only in solve mode
-  const solverProbability = gameMode === 2 && gameState.solvedBoard 
-    ? gameState.solvedBoard[row * gameState.config.width + col]
+  const solverProbability = mode === 2 && solvedBoard 
+    ? solvedBoard[row * config.width + col]
     : undefined
   
   // Helper function to determine if we should display probability and return formatted value
   const canDisplayProbability = (
     cellVal: number,
     prob: number | undefined,
-    mode: number
+    gameMode: number
   ): number | undefined => {
     if (cellVal !== 0 || prob === undefined || prob === -2) {
       return undefined
     }
-    if (mode === 2) {
+    if (gameMode === 2) {
       return Math.floor(prob * 100)
     }
     return undefined
   }
   
-  const displayProbability = canDisplayProbability(cellValue, solverProbability, gameMode)
+  const displayProbability = canDisplayProbability(cellValue, solverProbability, mode)
 
   const handleClick = () => {
-    if (gameMode === 2) {
+    if (mode === 2) {
   
       // In solve mode, open the modal
       setShowModal(true)
-    } else if (gameMode === 1) {
-      if (isRevealed || gameState.isGameOver) return
-      gameActions.revealCell(row, col)
+    } else if (mode === 1) {
+      if (isRevealed || isGameOver) return
+      revealCell(row, col)
 
       if (cellValue === -1) {
         // Bomb - game over
         console.log('Hit bomb!')
-        gameActions.setGameOver(true)
-        gameActions.addTotalRupees(gameState.currentRupees - gameState.config.houseFee)
+        setGameOver(true)
+        addTotalRupees(currentRupees - config.houseFee)
       } else if (cellValue > 0) {
         // Safe dig - add rupees
         console.log('Found rupee:', cellValue)
-        gameActions.setCurrentRupees(gameState.currentRupees + cellValue)
-        gameActions.addTotalRupees(cellValue)
+        setCurrentRupees(currentRupees + cellValue)
+        addTotalRupees(cellValue)
       }
     }
   }
 
   const handleModalSelect = (value: number) => {
-    if (gameMode !== 2) return
+    if (mode !== 2) return
     
     console.log('Solve mode: placing', value, 'at', row, col)
-    // Mark this cell as the one that just changed
-    // Update previousValue to current before changing
 
-    gameActions.updateCell(row, col, value)
+    updateCell(row, col, value)
   }
 
   // Determine tile styling based on game mode and cell state
   let tileClass = 'tile undug'
 
-  if (gameMode === 2) {
+  if (mode === 2) {
     // In solve mode, use getProbabilityColor for gradient coloring
     if (cellValue > 0) {
       // Known rupee - show as cream white
@@ -94,7 +103,7 @@ export default function Hole({
       // Unknown cell - color based on probability using getProbabilityColor
       tileClass += ' ' + getProbabilityColor(solverProbability)
     }
-  } else if (gameMode === 1) {
+  } else if (mode === 1) {
     // In play mode, show as safe if revealed
     if (isRevealed && cellValue > 0) {
       tileClass += ' tile-safe'
@@ -103,7 +112,7 @@ export default function Hole({
     }
   }
 
-  if (isLowestProbability && gameMode === 2) {
+  if (isLowestProbability && mode === 2) {
     tileClass += ' lowest-hole-pulse'
   }
 
@@ -113,7 +122,7 @@ export default function Hole({
       id={holeId}
       onClick={handleClick}
     >
-      {gameMode === 1 ? (
+      {mode === 1 ? (
         <>
           {isRevealed && (
             <img 

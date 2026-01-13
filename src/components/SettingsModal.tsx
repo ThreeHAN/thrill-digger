@@ -2,7 +2,7 @@ import React from 'react'
 import { createPortal } from 'react-dom'
 import type { Level } from '../constants/levels'
 import { LEVELS } from '../constants/levels'
-import type { GameMode } from '../hooks/useGameBoard'
+import type { GameMode } from '../stores/gameStore'
 
 type SettingsModalProps = {
   isOpen: boolean

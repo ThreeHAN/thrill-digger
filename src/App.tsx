@@ -8,9 +8,8 @@ import ComputationWarningModal from './components/ComputationWarningModal'
 import GameOverModal from './components/GameOverModal'
 import HazardStats from './components/HazardStats'
 import type { Level } from './constants/levels'
-import { useGameBoard } from './hooks/useGameBoard'
-import type { Difficulty, GameMode } from './hooks/useGameBoard'
-import { GameProvider } from './context/GameContext'
+import type { Difficulty, GameMode } from './stores/gameStore'
+import { useGameStore } from './stores/gameStore'
 
 const levelToDifficulty: Record<Level, Difficulty> = {
   beginner: 1,
@@ -23,11 +22,19 @@ function App() {
   const [gameMode, setGameMode] = useState<GameMode>(2)
   const [showSettings, setShowSettings] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
-  const { gameState, newGame, revealCell, updateCell, setCurrentRupees, setGameOver, setRupoorCount, addTotalRupees, setGameConfig, resetGame, showComputationWarning, boardTotal, showInvalidBoardError, setShowInvalidBoardError } = useGameBoard(levelToDifficulty[level])
+  
+  const difficulty = levelToDifficulty[level]
+  const newGame = useGameStore(state => state.newGame)
+  const resetGame = useGameStore(state => state.resetGame)
+  const isGameOver = useGameStore(state => state.isGameOver)
+  const mode = useGameStore(state => state.mode)
+  const currentRupees = useGameStore(state => state.currentRupees)
+  const boardTotal = useGameStore(state => state.boardTotal)
+  const showComputationWarning = useGameStore(state => state.showComputationWarning)
 
   useEffect(() => {
-    newGame(levelToDifficulty[level], gameMode)
-  }, [newGame, level, gameMode])
+    newGame(difficulty, gameMode)
+  }, [newGame, difficulty, gameMode])
 
   const handleDifficultyChange = (newLevel: Level) => {
     setLevel(newLevel)
@@ -36,73 +43,64 @@ function App() {
 
   const handleGameModeChange = (mode: GameMode) => {
     setGameMode(mode)
-    newGame(levelToDifficulty[level], mode)
+    newGame(difficulty, mode)
   }
 
   const handleReset = () => {
-    resetGame(levelToDifficulty[level], gameMode)
+    resetGame(difficulty, gameMode)
   }
 
-  const gameActions = {
-    revealCell,
-    updateCell,
-    setCurrentRupees,
-    setGameOver,
-    setRupoorCount,
-    addTotalRupees,
-    setGameConfig,
-    showInvalidBoardError,
-    setShowInvalidBoardError,
-  }
+  const handleInfoOpen = () => setShowInfo(true)
+  const handleSettingsOpen = () => setShowSettings(true)
+  const handleInfoClose = () => setShowInfo(false)
+  const handleSettingsClose = () => setShowSettings(false)
 
   return (
-    <GameProvider gameState={gameState} gameActions={gameActions}>
-      <div className="game-container">
-        <header className="game-header">
-          <h1>Thrill Digger</h1>
-          <HamburgerMenu
-            onNewGame={handleReset}
-            onInfo={() => setShowInfo(true)}
-            onSettings={() => setShowSettings(true)}
-          />
-        </header>
-        
-        <main>
-          <div className="board-area">
-            <GameBoard />
-          </div>
-          <HazardStats boardTotal={gameMode === 1 ? gameState.currentRupees : boardTotal} />
-        </main>
-
-        <footer className="app-footer">
-          <p>Reskinned version of the original <a href="https://www.joshscotland.com/thrill-digger-assistant/" target="_blank" rel="noopener noreferrer">Thrill Digger Assistant</a> by Josh Scotland</p>
-        </footer>
-
-        <SettingsModal
-          isOpen={showSettings}
-          onClose={() => setShowSettings(false)}
-          level={level}
-          setLevel={handleDifficultyChange}
-          gameMode={gameMode}
-          setGameMode={handleGameModeChange}
+    <div className="game-container">
+      <header className="game-header">
+        <h1>Thrill Digger</h1>
+        <HamburgerMenu
+          onNewGame={handleReset}
+          onInfo={handleInfoOpen}
+          onSettings={handleSettingsOpen}
         />
+      </header>
+      
+      <main>
+        <div className="board-area">
+          <GameBoard />
+        </div>
+        <HazardStats boardTotal={gameMode === 1 ? currentRupees : boardTotal} />
+      </main>
 
-        <InfoModal
-          isOpen={showInfo}
-          onClose={() => setShowInfo(false)}
-        />
+      <footer className="app-footer">
+        <p>Reskinned version of the original <a href="https://www.joshscotland.com/thrill-digger-assistant/" target="_blank" rel="noopener noreferrer">Thrill Digger Assistant</a> by Josh Scotland</p>
+      </footer>
 
-        <ComputationWarningModal
-          isOpen={showComputationWarning}
-        />
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={handleSettingsClose}
+        level={level}
+        setLevel={handleDifficultyChange}
+        gameMode={gameMode}
+        setGameMode={handleGameModeChange}
+      />
 
-        <GameOverModal
-          isOpen={gameState.isGameOver && gameState.mode === 1}
-          totalRupees={gameState.currentRupees}
-          onPlayAgain={handleReset}
-        />
-      </div>
-    </GameProvider>
+      <InfoModal
+        isOpen={showInfo}
+        onClose={handleInfoClose}
+      />
+
+      <ComputationWarningModal
+        isOpen={showComputationWarning}
+      />
+
+      <GameOverModal
+        isOpen={isGameOver && mode === 1}
+        totalRupees={currentRupees}
+        onPlayAgain={handleReset}
+      />
+    </div>
   )
 }
 

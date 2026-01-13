@@ -1,11 +1,13 @@
 import { useMemo } from 'react'
-import { useGame } from '../context/GameContext'
+import { useGameStore } from '../stores/gameStore'
 import { getImageForItem } from '../utils/imageMap'
 import bombImg from '../assets/minigame/bomb.png'
 
 export default function HazardStats({ boardTotal }: { boardTotal: number }) {
-  const { gameState } = useGame()
-  const { board, solvedBoard, difficulty } = gameState
+  const board = useGameStore(state => state.board)
+  const solvedBoard = useGameStore(state => state.solvedBoard)
+  const difficulty = useGameStore(state => state.difficulty)
+  const config = useGameStore(state => state.config)
 
   const rupoorIcon = getImageForItem('rupoor')
   const greenIcon = getImageForItem('green rupee')
@@ -26,12 +28,12 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
     }
 
     // Remaining hazards = (total bombs + total rupoors) - rupoors found - 100% probability squares
-    const totalPossibleHazards = gameState.config.bombCount + gameState.config.rupoorCount
+    const totalPossibleHazards = config.bombCount + config.rupoorCount
     const remainingHazards = Math.max(0, totalPossibleHazards - rupoorsFound - guaranteedHazardsFound)
-    const remainingRupoors = Math.max(0, gameState.config.rupoorCount - rupoorsFound)
+    const remainingRupoors = Math.max(0, config.rupoorCount - rupoorsFound)
 
     return { remainingRupoors, remainingHazards }
-  }, [board, solvedBoard, gameState.config.bombCount, gameState.config.rupoorCount])
+  }, [board, solvedBoard, config.bombCount, config.rupoorCount])
 
   const showRupoors = difficulty !== 1
 

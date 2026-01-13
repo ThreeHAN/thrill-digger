@@ -1,11 +1,16 @@
 import Hole from './Hole'
 import ErrorModal from './ErrorModal'
-import { useGame } from '../context/GameContext'
+import { useGameStore } from '../stores/gameStore'
 import React, { useEffect, useState } from 'react'
 
 export default function GameBoard() {
-  const { gameState, gameActions } = useGame()
-  const { config, board } = gameState
+  const config = useGameStore(state => state.config)
+  const board = useGameStore(state => state.board)
+  const mode = useGameStore(state => state.mode)
+  const solvedBoard = useGameStore(state => state.solvedBoard)
+  const showInvalidBoardError = useGameStore(state => state.showInvalidBoardError)
+  const setShowInvalidBoardError = useGameStore(state => state.setShowInvalidBoardError)
+  
   const [tileSize, setTileSize] = useState<number>(64)
 
   useEffect(() => {
@@ -38,15 +43,15 @@ export default function GameBoard() {
 
   // Find lowest probability hole for highlighting
   let lowestProbabilityIndex = -1
-  if (gameState.mode === 2 && gameState.solvedBoard) {
+  if (mode === 2 && solvedBoard) {
     const flatBoard = board.flat()
     let minProbability = Infinity
     let maxProbability = -Infinity
     
     // First pass: find minimum and maximum probability
-    for (let i = 0; i < gameState.solvedBoard.length; i++) {
+    for (let i = 0; i < solvedBoard.length; i++) {
       const boardCell = flatBoard[i]
-      const prob = gameState.solvedBoard[i]
+      const prob = solvedBoard[i]
       if (boardCell === 0 && typeof prob === 'number' && prob >= 0 && prob < Infinity) {
         minProbability = Math.min(minProbability, prob)
         maxProbability = Math.max(maxProbability, prob)
@@ -57,37 +62,34 @@ export default function GameBoard() {
     if (minProbability < maxProbability) {
       // Collect all candidate indices with the minimum probability
       const candidates: number[] = []
-      for (let i = 0; i < gameState.solvedBoard.length; i++) {
+      for (let i = 0; i < solvedBoard.length; i++) {
         const boardCell = flatBoard[i]
-        const prob = gameState.solvedBoard[i]
+        const prob = solvedBoard[i]
         if (boardCell === 0 && typeof prob === 'number' && Math.abs(prob - minProbability) < 0.0001) {
           candidates.push(i)
         }
       }
 
-      if (candidates.length > 0) {
-        // If we know the last changed index, pick the nearest candidate
-        const lastIdx = gameState.lastChangedIndex
-        if (typeof lastIdx === 'number') {
-          const w = config.width
-          const lastRow = Math.floor(lastIdx / w)
-          const lastCol = lastIdx % w
-          let bestIdx = candidates[0]
-          let bestDist = Infinity
-          for (const i of candidates) {
-            const r = Math.floor(i / w)
-            const c = i % w
-            const dist = Math.abs(r - lastRow) + Math.abs(c - lastCol)
-            if (dist < bestDist) {
-              bestDist = dist
-              bestIdx = i
-            }
+      const lastIdx = useGameStore.getState().lastChangedIndex
+      if (typeof lastIdx === 'number' && candidates.length > 0) {
+        const w = config.width
+        const lastRow = Math.floor(lastIdx / w)
+        const lastCol = lastIdx % w
+        let bestIdx = candidates[0]
+        let bestDist = Infinity
+        for (const i of candidates) {
+          const r = Math.floor(i / w)
+          const c = i % w
+          const dist = Math.abs(r - lastRow) + Math.abs(c - lastCol)
+          if (dist < bestDist) {
+            bestDist = dist
+            bestIdx = i
           }
-          lowestProbabilityIndex = bestIdx
-        } else {
-          // Fallback: first candidate
-          lowestProbabilityIndex = candidates[0]
         }
+        lowestProbabilityIndex = bestIdx
+      } else {
+        // Fallback: first candidate
+        lowestProbabilityIndex = candidates[0]
       }
     }
   }
@@ -115,7 +117,6 @@ export default function GameBoard() {
           className="grid-board" 
           style={{ 
             gridTemplateColumns: `repeat(${config.width}, var(--tile-size))`,
-            // expose CSS var for tiles
             ['--tile-size' as any]: `${tileSize}px`
           }}
         >
@@ -123,8 +124,8 @@ export default function GameBoard() {
         </div>
       </div>
       <ErrorModal
-        isOpen={gameActions.showInvalidBoardError}
-        onClose={() => gameActions.setShowInvalidBoardError(false)}
+        isOpen={showInvalidBoardError}
+        onClose={() => setShowInvalidBoardError(false)}
         message="Not a valid board!"
       />
     </div>
