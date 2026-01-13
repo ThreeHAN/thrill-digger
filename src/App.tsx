@@ -68,10 +68,10 @@ function App() {
         </header>
         
         <main>
-            <HazardStats boardTotal={gameMode === 1 ? gameState.currentRupees : boardTotal} />
           <div className="board-area">
             <GameBoard />
           </div>
+          <HazardStats boardTotal={gameMode === 1 ? gameState.currentRupees : boardTotal} />
         </main>
 
         <SettingsModal

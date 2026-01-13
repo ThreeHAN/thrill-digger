@@ -5,7 +5,6 @@
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport height - accounts for browser UI */
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
@@ -643,19 +642,15 @@
 /* Landscape Mode Optimizations */
 @media (orientation: landscape) {
   .game-container {
-    min-height: 100vh;
-    min-height: 100dvh;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
+    min-height: auto;
     justify-content: flex-start;
-    padding: 4px;
+    padding-top: 8px;
   }
 
   .game-header {
     position: absolute;
-    top: 4px;
-    right: 4px;
+    top: 8px;
+    right: 8px;
     margin: 0;
     z-index: 10;
   }
@@ -667,19 +662,24 @@
   main {
     width: 100%;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+    align-items: flex-start;
     justify-content: center;
+    gap: 12px;
   }
 
   .hazard-stats {
-    margin: 0 0 8px;
-    gap: clamp(4px, 1vw, 8px);
-    padding-right: 50px;
+    flex-direction: column;
+    margin: 0;
+    margin-top: 40px;
+    gap: 6px;
+    padding-right: 0;
+    align-items: stretch;
   }
 
   .hazard-card {
     padding: clamp(4px, 1vw, 6px) clamp(6px, 1.5vw, 8px);
+    width: auto;
   }
 
   .hazard-row {
