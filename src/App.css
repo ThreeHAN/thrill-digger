@@ -6,7 +6,7 @@
   justify-content: center;
   min-height: 100vh;
   width: 100%;
-  padding: 0;
+  padding: 8px;
   box-sizing: border-box;
 }
 
@@ -361,7 +361,7 @@
   border-radius: 12px;
   padding: 0;
   width: min(500px, 90vw);
-  height: min(500px, 90vw);
+  height: min(500px, 90vh);
   max-width: 500px;
   max-height: 500px;
   display: flex;
@@ -698,5 +698,82 @@
 
   :root {
     --tile-size: clamp(24px, 4.5vh, 40px);
+  }
+
+  /* Rupee modal adjustments for landscape */
+  .circular-modal-content {
+    width: min(400px, 80vw, 90vh);
+    height: min(400px, 80vw, 90vh);
+    max-width: 400px;
+    max-height: 400px;
+  }
+
+  .rupee-wheel {
+    width: 85%;
+    height: 85%;
+  }
+
+  .wheel-cancel {
+    width: clamp(50px, 15%, 70px);
+    height: clamp(50px, 15%, 70px);
+    font-size: clamp(0.65rem, 2.5vw, 0.85rem);
+  }
+
+  .rupee-option-circular {
+    width: clamp(50px, 15%, 70px);
+    height: clamp(50px, 15%, 70px);
+    transform: rotate(var(--angle)) translateY(calc(clamp(50px, 15%, 70px) * -2.3)) rotate(calc(var(--angle) * -1));
+  }
+
+  .rupee-option-circular:hover {
+    transform: rotate(var(--angle)) translateY(calc(clamp(50px, 15%, 70px) * -2.3)) rotate(calc(var(--angle) * -1)) scale(1.1);
+  }
+
+  .rupee-option-circular.selected {
+    transform: rotate(var(--angle)) translateY(calc(clamp(50px, 15%, 70px) * -2.3)) rotate(calc(var(--angle) * -1)) scale(1.15);
+  }
+
+  .rupee-option-circular.disabled:hover {
+    transform: rotate(var(--angle)) translateY(calc(clamp(50px, 15%, 70px) * -2.3)) rotate(calc(var(--angle) * -1));
+  }
+}
+
+/* Mobile portrait adjustments */
+@media (max-width: 600px) {
+  .circular-modal-content {
+    width: min(350px, 85vw);
+    height: min(350px, 85vw);
+    max-width: 350px;
+    max-height: 350px;
+  }
+
+  .rupee-wheel {
+    width: 85%;
+    height: 85%;
+  }
+
+  .wheel-cancel {
+    width: clamp(55px, 16%, 75px);
+    height: clamp(55px, 16%, 75px);
+    font-size: clamp(0.7rem, 2.8vw, 0.9rem);
+  }
+
+  .rupee-option-circular {
+    width: clamp(55px, 16%, 75px);
+    height: clamp(55px, 16%, 75px);
+    padding: 6px;
+    transform: rotate(var(--angle)) translateY(calc(clamp(55px, 16%, 75px) * -2.2)) rotate(calc(var(--angle) * -1));
+  }
+
+  .rupee-option-circular:hover {
+    transform: rotate(var(--angle)) translateY(calc(clamp(55px, 16%, 75px) * -2.2)) rotate(calc(var(--angle) * -1)) scale(1.1);
+  }
+
+  .rupee-option-circular.selected {
+    transform: rotate(var(--angle)) translateY(calc(clamp(55px, 16%, 75px) * -2.2)) rotate(calc(var(--angle) * -1)) scale(1.15);
+  }
+
+  .rupee-option-circular.disabled:hover {
+    transform: rotate(var(--angle)) translateY(calc(clamp(55px, 16%, 75px) * -2.2)) rotate(calc(var(--angle) * -1));
   }
 }
