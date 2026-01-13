@@ -742,13 +742,6 @@ main {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
 
-/* Mobile width - hide title */
-@media (max-width: 600px) {
-  .game-header {
-    display: none;
-  }
-}
-
 /* Landscape Mode Optimizations */
 @media (orientation: landscape) {
   .game-container {
@@ -761,6 +754,7 @@ main {
     margin: 0;
     z-index: 10;
   }
+
 
   main {
     width: 100%;
