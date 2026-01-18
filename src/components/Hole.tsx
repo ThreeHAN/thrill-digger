@@ -33,6 +33,7 @@ export default function Hole({
   const addTotalRupees = useGameStore(state => state.addTotalRupees)
   const setCurrentRupees = useGameStore(state => state.setCurrentRupees)
   const updateCell = useGameStore(state => state.updateCell)
+  const difficulty = useGameStore(state => state.difficulty)
   
   const [showModal, setShowModal] = useState(false)
   const holeId = `hole_${col}_${row}`
@@ -187,6 +188,7 @@ export default function Hole({
             onSelect={handleModalSelect}
             currentValue={cellValue}
             container={modalContainer}
+            difficulty={difficulty}
           />
         </>
       )}

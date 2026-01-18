@@ -77,30 +77,6 @@
     height: clamp(50px, 15%, 70px);
     font-size: clamp(0.65rem, 2.5vw, 0.85rem);
   }
-
-  .rupee-option-circular {
-    width: clamp(50px, 15%, 70px);
-    height: clamp(50px, 15%, 70px);
-    transform: rotate(var(--angle))
-      translateY(calc(clamp(50px, 15%, 70px) * -2.3)) rotate(calc(var(--angle) * -1));
-
-    &:hover {
-      transform: rotate(var(--angle))
-        translateY(calc(clamp(50px, 15%, 70px) * -2.3)) rotate(calc(var(--angle) * -1))
-        scale(1.1);
-    }
-
-    &.selected {
-      transform: rotate(var(--angle))
-        translateY(calc(clamp(50px, 15%, 70px) * -2.3)) rotate(calc(var(--angle) * -1))
-        scale(1.15);
-    }
-
-    &.disabled:hover {
-      transform: rotate(var(--angle))
-        translateY(calc(clamp(50px, 15%, 70px) * -2.3)) rotate(calc(var(--angle) * -1));
-    }
-  }
 }
 
 // Mobile portrait adjustments

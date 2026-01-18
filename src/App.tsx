@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import GameBoard from './components/GameBoard'
-import SettingsModal from './components/SettingsModal'
 import InfoModal from './components/InfoModal'
 import HamburgerMenu from './components/HamburgerMenu'
 import ComputationWarningModal from './components/ComputationWarningModal'
@@ -19,7 +18,6 @@ const levelToDifficulty: Record<Level, Difficulty> = {
 function App() {
   const [level, setLevel] = useState<Level>('beginner')
   const [gameMode, setGameMode] = useState<GameMode>(GameMode.Solve)
-  const [showSettings, setShowSettings] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
   
   const difficulty = levelToDifficulty[level]
@@ -50,9 +48,7 @@ function App() {
   }
 
   const handleInfoOpen = () => setShowInfo(true)
-  const handleSettingsOpen = () => setShowSettings(true)
   const handleInfoClose = () => setShowInfo(false)
-  const handleSettingsClose = () => setShowSettings(false)
 
   return (
     <div className="game-container">
@@ -61,7 +57,10 @@ function App() {
         <HamburgerMenu
           onNewGame={handleReset}
           onInfo={handleInfoOpen}
-          onSettings={handleSettingsOpen}
+          level={level}
+          setLevel={handleDifficultyChange}
+          gameMode={gameMode}
+          setGameMode={handleGameModeChange}
         />
       </header>
       
@@ -75,15 +74,6 @@ function App() {
       <footer className="app-footer">
         <p>Reskinned version of the original <a href="https://www.joshscotland.com/thrill-digger-assistant/" target="_blank" rel="noopener noreferrer">Thrill Digger Assistant</a> by Josh Scotland</p>
       </footer>
-
-      <SettingsModal
-        isOpen={showSettings}
-        onClose={handleSettingsClose}
-        level={level}
-        setLevel={handleDifficultyChange}
-        gameMode={gameMode}
-        setGameMode={handleGameModeChange}
-      />
 
       <InfoModal
         isOpen={showInfo}

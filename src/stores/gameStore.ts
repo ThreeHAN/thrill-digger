@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { devtools } from 'zustand/middleware'
 import type { BoardCell, GameConfig } from '../utils/gameLogic'
 import { getGameConfig, createEmptyBoard, generatePlayBoard, Difficulty } from '../utils/gameLogic'
 import { solveBoardProbabilities, calculateUnknownIndicesCount } from '../utils/solver'
@@ -82,10 +83,12 @@ const initialGameState = (difficulty: Difficulty): GameState => {
   }
 }
 
-export const useGameStore = create<GameStore>((set, get) => ({
-  ...initialGameState(Difficulty.Beginner),
+export const useGameStore = create<GameStore>(
+  devtools(
+    (set, get) => ({
+      ...initialGameState(Difficulty.Beginner),
 
-  newGame: (difficulty: Difficulty, mode: GameMode) => {
+      newGame: (difficulty: Difficulty, mode: GameMode) => {
     const config = getGameConfig(difficulty)
     const board = mode === GameMode.Play 
       ? generatePlayBoard(config.width, config.height, config.bombCount, config.rupoorCount)
@@ -232,4 +235,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       })
     }
   },
-}))
+    }),
+    { name: 'thrill-digger' }
+  )
+)

@@ -5,24 +5,42 @@ import bombImg from '../assets/minigame/bomb.png'
 
 export default function HazardStats({ boardTotal }: { boardTotal: number }) {
   const board = useGameStore(state => state.board)
+  const revealed = useGameStore(state => state.revealed)
   const solvedBoard = useGameStore(state => state.solvedBoard)
   const difficulty = useGameStore(state => state.difficulty)
   const config = useGameStore(state => state.config)
+  const mode = useGameStore(state => state.mode)
 
   const rupoorIcon = getImageForItem('rupoor')
   const greenIcon = getImageForItem('green rupee')
 
   const { remainingRupoors, remainingHazards } = useMemo(() => {
     const flat = board.flat()
-    const rupoorsFound = flat.reduce((acc, cell) => (
-      cell === -10 || cell === -2 ? acc + 1 : acc
-    ), 0)
-
+    
+    let rupoorsFound = 0
     let guaranteedHazardsFound = 0
-    if (solvedBoard && solvedBoard.length === flat.length) {
-      for (let i = 0; i < solvedBoard.length; i++) {
-        if (flat[i] === 0 && solvedBoard[i] === 1) {
-          guaranteedHazardsFound++
+    
+    if (mode === 1) {
+      // Play mode: count revealed rupoors
+      for (let i = 0; i < flat.length; i++) {
+        const row = Math.floor(i / config.width)
+        const col = i % config.width
+        if ((flat[i] === -10 || flat[i] === -2) && revealed[row][col]) {
+          rupoorsFound++
+        }
+      }
+    } else {
+      // Solve mode: count placed rupoors
+      rupoorsFound = flat.reduce((acc, cell) => (
+        cell === -10 || cell === -2 ? acc + 1 : acc
+      ), 0)
+      
+      // Count guaranteed hazards (100% probability squares)
+      if (solvedBoard && solvedBoard.length === flat.length) {
+        for (let i = 0; i < solvedBoard.length; i++) {
+          if (flat[i] === 0 && solvedBoard[i] === 1) {
+            guaranteedHazardsFound++
+          }
         }
       }
     }
@@ -33,7 +51,7 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
     const remainingRupoors = Math.max(0, config.rupoorCount - rupoorsFound)
 
     return { remainingRupoors, remainingHazards }
-  }, [board, solvedBoard, config.bombCount, config.rupoorCount])
+  }, [board, revealed, solvedBoard, config.bombCount, config.rupoorCount, config.width, mode])
 
   const showRupoors = difficulty !== 1
 

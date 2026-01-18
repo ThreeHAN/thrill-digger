@@ -1,12 +1,18 @@
 import { useState } from 'react'
+import type { Level } from '../constants/levels'
+import { LEVELS } from '../constants/levels'
+import type { GameMode } from '../stores/gameStore'
 
 type HamburgerMenuProps = {
   onNewGame: () => void
   onInfo: () => void
-  onSettings: () => void
+  level: Level
+  setLevel: (l: Level) => void
+  gameMode: GameMode
+  setGameMode: (mode: GameMode) => void
 }
 
-export default function HamburgerMenu({ onNewGame, onInfo, onSettings }: HamburgerMenuProps) {
+export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, gameMode, setGameMode }: HamburgerMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleMenuClick = (callback: () => void) => {
@@ -35,9 +41,44 @@ export default function HamburgerMenu({ onNewGame, onInfo, onSettings }: Hamburg
             <button className="hamburger-menu-item" onClick={() => handleMenuClick(onInfo)}>
               Info
             </button>
-            <button className="hamburger-menu-item" onClick={() => handleMenuClick(onSettings)}>
-              Settings
-            </button>
+            
+            <div className="hamburger-menu-section">
+              <h3 className="hamburger-menu-label">Game Mode</h3>
+              <button
+                className={`hamburger-menu-subitem ${gameMode === 2 ? 'active' : ''}`}
+                onClick={() => {
+                  setGameMode(2)
+                  setIsOpen(false)
+                }}
+              >
+                Solve
+              </button>
+              <button
+                className={`hamburger-menu-subitem ${gameMode === 1 ? 'active' : ''}`}
+                onClick={() => {
+                  setGameMode(1)
+                  setIsOpen(false)
+                }}
+              >
+                Play
+              </button>
+            </div>
+
+            <div className="hamburger-menu-section">
+              <h3 className="hamburger-menu-label">Difficulty</h3>
+              {LEVELS.map((l) => (
+                <button
+                  key={l}
+                  className={`hamburger-menu-subitem ${level === l ? 'active' : ''}`}
+                  onClick={() => {
+                    setLevel(l)
+                    setIsOpen(false)
+                  }}
+                >
+                  {l[0].toUpperCase() + l.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

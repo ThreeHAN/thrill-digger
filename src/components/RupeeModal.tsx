@@ -1,7 +1,7 @@
 import React from 'react'
 import { createPortal } from 'react-dom'
 import { getImageForItem } from '../utils/imageMap'
-import { getItemName } from '../utils/gameLogic'
+import { getItemName, Difficulty } from '../utils/gameLogic'
 
 type RupeeOption = {
   value: number
@@ -24,10 +24,16 @@ type RupeeModalProps = {
   onSelect: (value: number) => void
   currentValue: number
   container?: React.RefObject<HTMLDivElement | null>
+  difficulty: Difficulty
 }
 
-export default function RupeeModal({ isOpen, onClose, onSelect, currentValue, container }: RupeeModalProps) {
+export default function RupeeModal({ isOpen, onClose, onSelect, currentValue, container, difficulty }: RupeeModalProps) {
   if (!isOpen) return null
+
+  // Filter options based on difficulty - beginner mode excludes rupoors, gold, and silver
+  const filteredOptions = difficulty === Difficulty.Beginner
+    ? rupeeOptions.filter(option => option.value !== -10 && option.value !== 100 && option.value !== 300)
+    : rupeeOptions
 
   const handleSelect = (value: number, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -55,8 +61,8 @@ export default function RupeeModal({ isOpen, onClose, onSelect, currentValue, co
           <button className="wheel-cancel" onClick={handleCloseClick}>
             Cancel
           </button>
-          {rupeeOptions.map((option, index) => {
-            const angle = (index / rupeeOptions.length) * 360
+          {filteredOptions.map((option, index) => {
+            const angle = (index / filteredOptions.length) * 360
             return (
               <button
                 key={option.value}

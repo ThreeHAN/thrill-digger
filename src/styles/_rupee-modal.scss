@@ -1,5 +1,19 @@
 @use './variables' as *;
 
+// Shared mixin for circular button sizing
+@mixin circular-button {
+  width: clamp(70px, 20%, 120px);
+  height: clamp(70px, 20%, 120px);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all $transition-normal;
+  color: $color-white;
+  position: absolute;
+}
+
 // Modal container positioned relative to gameboard
 .modal-container {
   position: absolute;
@@ -17,10 +31,7 @@
 .rupee-backdrop {
   background: $bg-overlay-medium;
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   pointer-events: all;
@@ -58,21 +69,12 @@
 }
 
 .wheel-cancel {
-  position: absolute;
-  width: clamp(70px, 20%, 120px);
-  height: clamp(70px, 20%, 120px);
-  border-radius: 50%;
+  @include circular-button;
+  z-index: $z-wheel-center;
   background: rgba(90, 78, 66, 0.9);
   border: 3px solid $primary-text;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: $z-wheel-center;
-  color: $primary-text;
   font-weight: bold;
   font-size: clamp(0.8rem, 3vw, 1rem);
-  cursor: pointer;
-  transition: all $transition-normal;
   padding: 0;
 
   &:hover {
@@ -88,29 +90,18 @@
 }
 
 .rupee-option-circular {
-  position: absolute;
-  width: clamp(70px, 20%, 120px);
-  height: clamp(70px, 20%, 120px);
-  border-radius: 50%;
+  @include circular-button;
+  flex-direction: column;
+  gap: 4px;
   background: rgba(90, 78, 66, 0.85);
   border: 3px solid #d4a574;
   padding: 8px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 4px;
-  transition: all $transition-normal;
-  color: $color-white;
   box-sizing: border-box;
-  transform: rotate(var(--angle))
-    translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1));
+  --wheel-transform: rotate(var(--angle)) translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1));
+  transform: var(--wheel-transform);
 
   &:hover {
-    transform: rotate(var(--angle))
-      translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1))
-      scale($transform-scale-hover);
+    transform: var(--wheel-transform) scale($transform-scale-hover);
     background: rgba(122, 109, 95, 0.95);
     border-color: $primary-text;
     box-shadow: $shadow-glow;
@@ -120,9 +111,7 @@
     border-color: $tile-safe;
     background: rgba(78, 125, 91, 0.9);
     box-shadow: 0 0 20px rgba(78, 125, 91, 0.6);
-    transform: rotate(var(--angle))
-      translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1))
-      scale(1.15);
+    transform: var(--wheel-transform) scale(1.15);
   }
 
   &.disabled {
@@ -131,8 +120,7 @@
     background-color: rgba(61, 61, 61, 0.7);
 
     &:hover {
-      transform: rotate(var(--angle))
-        translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1));
+      transform: var(--wheel-transform);
       background-color: rgba(61, 61, 61, 0.7);
       border-color: $wood-dark;
       box-shadow: none;
@@ -140,20 +128,13 @@
   }
 }
 
-// Rupee Grid
-.rupee-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 15px;
-}
-
-// Difficulty Selection
+// Grid layout
+.rupee-grid,
 .difficulty-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 15px;
 }
-
 .difficulty-option {
   background: var(--tile-undug);
   border: 2px solid $wood-dark;
@@ -181,3 +162,4 @@
     background: $tile-safe;
   }
 }
+
