@@ -21,6 +21,7 @@ export interface GameState {
   currentRupees: number
   totalRupeesAllTime: number
   isGameOver: boolean
+  isWon: boolean
   rupoorCount: number
   solvedBoard: SolvedBoard | null
   lastChangedIndex?: number
@@ -36,6 +37,7 @@ interface GameActions {
   updateCell: (row: number, col: number, value: BoardCell) => void
   setCurrentRupees: (rupees: number) => void
   setGameOver: (isGameOver: boolean) => void
+  setIsWon: (isWon: boolean) => void
   setRupoorCount: (count: number) => void
   addTotalRupees: (amount: number) => void
   setGameConfig: (config: GameConfig) => void
@@ -69,6 +71,7 @@ const initialGameState = (difficulty: Difficulty): GameState => {
     currentRupees: 0,
     totalRupeesAllTime: 0,
     isGameOver: false,
+    isWon: false,
     rupoorCount: config.rupoorCount,
     solvedBoard: null,
     lastChangedIndex: undefined,
@@ -99,6 +102,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       revealed: createEmptyRevealedBoard(config.width, config.height),
       currentRupees: 0,
       isGameOver: false,
+      isWon: false,
       rupoorCount: config.rupoorCount,
       solvedBoard: null,
       lastChangedIndex: undefined,
@@ -149,6 +153,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setGameOver: (isGameOver: boolean) => {
     set({ isGameOver })
+  },
+
+  setIsWon: (isWon: boolean) => {
+    set({ isWon })
   },
 
   setRupoorCount: (count: number) => {

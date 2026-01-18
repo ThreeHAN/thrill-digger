@@ -1,5 +1,6 @@
 import Hole from './Hole'
 import ErrorModal from './ErrorModal'
+import VictoryModal from './VictoryModal'
 import { useGameStore } from '../stores/gameStore'
 import React, { useEffect, useState } from 'react'
 
@@ -10,6 +11,10 @@ export default function GameBoard() {
   const solvedBoard = useGameStore(state => state.solvedBoard)
   const showInvalidBoardError = useGameStore(state => state.showInvalidBoardError)
   const setShowInvalidBoardError = useGameStore(state => state.setShowInvalidBoardError)
+  const isWon = useGameStore(state => state.isWon)
+  const currentRupees = useGameStore(state => state.currentRupees)
+  const difficulty = useGameStore(state => state.difficulty)
+  const newGame = useGameStore(state => state.newGame)
   
   const [tileSize, setTileSize] = useState<number>(64)
 
@@ -127,6 +132,11 @@ export default function GameBoard() {
         isOpen={showInvalidBoardError}
         onClose={() => setShowInvalidBoardError(false)}
         message="Not a valid board!"
+      />
+      <VictoryModal
+        isOpen={isWon}
+        totalRupees={currentRupees}
+        onPlayAgain={() => newGame(difficulty, mode)}
       />
     </div>
   )

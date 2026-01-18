@@ -22,9 +22,11 @@ export default function Hole({
   const solvedBoard = useGameStore(state => state.solvedBoard)
   const config = useGameStore(state => state.config)
   const isGameOver = useGameStore(state => state.isGameOver)
+  const isWon = useGameStore(state => state.isWon)
   const currentRupees = useGameStore(state => state.currentRupees)
   const revealCell = useGameStore(state => state.revealCell)
   const setGameOver = useGameStore(state => state.setGameOver)
+  const setIsWon = useGameStore(state => state.setIsWon)
   const addTotalRupees = useGameStore(state => state.addTotalRupees)
   const setCurrentRupees = useGameStore(state => state.setCurrentRupees)
   const updateCell = useGameStore(state => state.updateCell)
@@ -66,7 +68,7 @@ export default function Hole({
       // In solve mode, open the modal
       setShowModal(true)
     } else if (mode === 1) {
-      if (isRevealed || isGameOver) return
+      if (isRevealed || isGameOver || isWon) return
       revealCell(row, col)
 
       if (cellValue === -1) {
@@ -74,11 +76,41 @@ export default function Hole({
         console.log('Hit bomb!')
         setGameOver(true)
         addTotalRupees(currentRupees - config.houseFee)
-      } else if (cellValue > 0) {
-        // Safe dig - add rupees
-        console.log('Found rupee:', cellValue)
-        setCurrentRupees(currentRupees + cellValue)
-        addTotalRupees(cellValue)
+      } else if (cellValue > 0 || cellValue === -10) {
+        // Safe dig - add rupees (or rupoor)
+        if (cellValue > 0) {
+          console.log('Found rupee:', cellValue)
+          setCurrentRupees(currentRupees + cellValue)
+          addTotalRupees(cellValue)
+        } else {
+          // Rupoor - deduct from current rupees
+          console.log('Found rupoor!')
+          setCurrentRupees(Math.max(0, currentRupees - 10))
+        }
+        
+        // Check win condition: only bombs left unrevealed
+        const state = useGameStore.getState()
+        const updatedRevealed = state.revealed
+        let allNonBombsRevealed = true
+        
+        for (let r = 0; r < config.height; r++) {
+          for (let c = 0; c < config.width; c++) {
+            const cell = board[r][c]
+            const isRev = (r === row && c === col) || updatedRevealed[r][c]
+            
+            // If it's not a bomb and not revealed, we haven't won yet
+            if (cell !== -1 && !isRev) {
+              allNonBombsRevealed = false
+              break
+            }
+          }
+          if (!allNonBombsRevealed) break
+        }
+        
+        if (allNonBombsRevealed) {
+          console.log('All non-bomb squares revealed! You won!')
+          setIsWon(true)
+        }
       }
     }
   }
