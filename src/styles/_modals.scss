@@ -1,3 +1,5 @@
+@use './variables' as *;
+
 // Modal Base Styles
 .modal-backdrop {
   position: fixed;
@@ -5,7 +7,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: $bg-overlay-darkest;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -46,7 +48,7 @@
   line-height: 1;
 
   &:hover {
-    color: #fff;
+    color: $color-white;
   }
 }
 
@@ -81,7 +83,7 @@
 }
 
 .warning-details {
-  background: rgba(0, 0, 0, 0.3);
+  background: $bg-overlay-medium;
   padding: 15px;
   border-radius: $border-radius-md;
   margin-top: 15px;

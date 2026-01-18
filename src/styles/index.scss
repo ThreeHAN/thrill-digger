@@ -5,31 +5,31 @@
 // Individual styles are organized into logical modules for better maintainability.
 
 // 1. Variables and Configuration
-@import './variables';
+@use './variables' as *;
 
 // 2. Global Styles (fonts, body, typography)
-@import './global';
+@use './global' as *;
 
 // 3. Layout Components
-@import './layout';
+@use './layout' as *;
 
 // 3. Navigation Components
-@import './hamburger';
+@use './hamburger' as *;
 
 // 4. Game Stats Display
-@import './hazard-stats';
+@use './hazard-stats' as *;
 
 // 5. Rupee Display
-@import './buttons';
+@use './buttons' as *;
 
 // 6. Game Board and Tiles
-@import './tiles';
+@use './tiles' as *;
 
 // 7. Modal Components
-@import './modals';
-@import './info-modal';
-@import './rupee-modal';
-@import './victory-modal';
+@use './modals' as *;
+@use './info-modal' as *;
+@use './rupee-modal' as *;
+@use './victory-modal' as *;
 
 // 8. Responsive Design
-@import './responsive';
+@use './responsive' as *;

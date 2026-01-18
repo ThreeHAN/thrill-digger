@@ -1,3 +1,5 @@
+@use './variables' as *;
+
 // Circular Modal for Rupee Selection
 .circular-modal-content {
   background: transparent;
@@ -44,13 +46,13 @@
 
   &:hover {
     background: rgba(122, 109, 95, 0.95);
-    border-color: #fff;
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(243, 229, 171, 0.4);
+    border-color: $color-white;
+    transform: scale($transform-scale-hover);
+    box-shadow: $shadow-glow;
   }
 
   &:active {
-    transform: scale(0.95);
+    transform: scale($transform-scale-active);
   }
 }
 
@@ -69,7 +71,7 @@
   align-items: center;
   gap: 4px;
   transition: all $transition-normal;
-  color: white;
+  color: $color-white;
   box-sizing: border-box;
   transform: rotate(var(--angle))
     translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1));
@@ -77,10 +79,10 @@
   &:hover {
     transform: rotate(var(--angle))
       translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1))
-      scale(1.1);
+      scale($transform-scale-hover);
     background: rgba(122, 109, 95, 0.95);
     border-color: $primary-text;
-    box-shadow: 0 0 15px rgba(243, 229, 171, 0.4);
+    box-shadow: $shadow-glow;
   }
 
   &.selected {
@@ -132,7 +134,7 @@
   align-items: center;
   gap: 8px;
   transition: all $transition-normal;
-  color: white;
+  color: $color-white;
   font-weight: bold;
   font-size: 1rem;
 

@@ -1,3 +1,5 @@
+@use './variables' as *;
+
 // Rupee Total Display
 .rupee-total {
   display: flex;
@@ -6,7 +8,7 @@
   font-size: clamp(0.9rem, 2vw, 1.2rem);
   font-weight: bold;
   color: $primary-text;
-  background: rgba(0, 0, 0, 0.3);
+  background: $bg-overlay-medium;
   padding: clamp(6px, 1vw, 12px) clamp(10px, 2vw, 16px);
   border-radius: $border-radius-md;
   border: 2px solid $border-light;
@@ -26,8 +28,8 @@
 }
 
 .hazard-card {
-  background: rgba(0, 0, 0, 0.35);
-  border: 2px solid rgba(243, 229, 171, 0.28);
+  background: $bg-overlay-dark;
+  border: 2px solid $border-card;
   color: $primary-text;
   padding: clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 14px);
   border-radius: $border-radius-md;

@@ -1,8 +1,10 @@
+@use './variables' as *;
+
 // Responsive Grid Board
 .grid-board {
   display: grid;
   gap: $base-gap;
-  background: rgba(0, 0, 0, 0.2);
+  background: $bg-overlay-light;
   padding: 10px;
   border-radius: $border-radius-lg;
   box-sizing: border-box;
@@ -16,7 +18,7 @@
   aspect-ratio: 1 / 1;
   border: none;
   border-radius: 1px;
-  color: white;
+  color: $color-white;
   font-weight: bold;
   font-size: clamp(0.8rem, calc(var(--tile-size) * 0.18), 1.2rem);
   cursor: pointer;
@@ -26,6 +28,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  // Leather texture on all tiles
+  background-image: url('../assets/minigame/leather.jpg');
+  background-blend-mode: overlay;
 
   // The Secret Sauce: Layered Shadows
   box-shadow:
@@ -39,11 +45,9 @@
   }
 }
 
-// Undug tile with leather texture
+// Undug tile
 .undug {
   background-color: $tile-undug;
-  background-image: url('assets/minigame/leather.jpg');
-  background-blend-mode: overlay;
 }
 
 // Safe tile
@@ -71,6 +75,8 @@
 
 .tile-bomb {
   background-color: $tile-bomb;
+  background-image: url('assets/minigame/leather.jpg');
+  background-blend-mode: overlay;
 }
 
 .tile-rupee {
@@ -111,9 +117,5 @@
   color: $primary-text;
   margin: 0;
   letter-spacing: 0.05em;
-  text-shadow:
-    1px 1px 2px rgba(0, 0, 0, 0.8),
-    -1px -1px 2px rgba(0, 0, 0, 0.8),
-    1px -1px 2px rgba(0, 0, 0, 0.8),
-    -1px 1px 2px rgba(0, 0, 0, 0.8);
+  text-shadow: $text-shadow-outline;
 }

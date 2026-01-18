@@ -1,22 +1,19 @@
+@use './variables' as *;
+
 // Wood Button Style
 .wood-btn {
   background: $wood-medium;
   border: 2px solid $wood-dark;
-  color: white;
+  color: $color-white;
   padding: 5px 15px;
   border-radius: $border-radius-sm;
   cursor: pointer;
 }
 
-// Pulse color variable (default: teal)
-:root {
-  --pulse-color: #34d1bf;
-}
-
 // Safest hole pulse animation
 @keyframes safest-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+    box-shadow: 0 0 0 0 $color-blue-pulse;
   }
   70% {
     box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
@@ -28,7 +25,7 @@
 
 .safest-hole-pulse {
   animation: safest-pulse 1.5s infinite;
-  border: 3px solid blue;
+  border: 3px solid $color-blue;
 }
 
 // Lowest probability pulse animation
