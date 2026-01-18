@@ -56,7 +56,10 @@
 }
 
 .hazard-value {
-  display: block;
+  display: inline-block;
   font-size: clamp(1.1rem, 2.5vw, 1.4rem);
   font-weight: 700;
+  min-width: 2.5ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }

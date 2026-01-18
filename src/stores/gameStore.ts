@@ -83,7 +83,7 @@ const initialGameState = (difficulty: Difficulty): GameState => {
   }
 }
 
-export const useGameStore = create<GameStore>(
+export const useGameStore = create<GameStore>()(
   devtools(
     (set, get) => ({
       ...initialGameState(Difficulty.Beginner),

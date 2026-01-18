@@ -19,6 +19,7 @@ function App() {
   const [level, setLevel] = useState<Level>('beginner')
   const [gameMode, setGameMode] = useState<GameMode>(GameMode.Solve)
   const [showInfo, setShowInfo] = useState(false)
+  const [showGameOverModal, setShowGameOverModal] = useState(false)
   
   const difficulty = levelToDifficulty[level]
   const newGame = useGameStore(state => state.newGame)
@@ -32,6 +33,18 @@ function App() {
   useEffect(() => {
     newGame(difficulty, gameMode)
   }, [newGame, difficulty, gameMode])
+
+  // Show game over modal with 1 second delay
+  useEffect(() => {
+    if (isGameOver && mode === GameMode.Play) {
+      const timer = setTimeout(() => {
+        setShowGameOverModal(true)
+      }, 1000)
+      return () => clearTimeout(timer)
+    } else {
+      setShowGameOverModal(false)
+    }
+  }, [isGameOver, mode])
 
   const handleDifficultyChange = (newLevel: Level) => {
     setLevel(newLevel)
@@ -85,7 +98,7 @@ function App() {
       />
 
       <GameOverModal
-        isOpen={isGameOver && mode === GameMode.Play}
+        isOpen={showGameOverModal}
         totalRupees={currentRupees}
         onPlayAgain={handleReset}
       />

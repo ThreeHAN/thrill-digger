@@ -17,6 +17,7 @@
   box-sizing: border-box;
   width: fit-content;
   margin: 0 auto;
+  overflow: visible;
 }
 
 // Tile Base Styles
@@ -35,6 +36,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: visible;
 
   // Leather texture on all tiles
   background-image: url('../assets/minigame/leather.jpg');
@@ -125,4 +127,140 @@
   margin: 0;
   letter-spacing: 0.05em;
   text-shadow: $text-shadow-outline;
+}
+// Starburst explosion effect
+@keyframes starburst-expand {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 300%;
+    height: 300%;
+    opacity: 0;
+  }
+}
+
+@keyframes starburst-expand-long {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 400%;
+    height: 400%;
+    opacity: 0;
+  }
+}
+
+@keyframes starburst-pulse {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.starburst-ray {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform-origin: center center;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.starburst-large {
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: linear-gradient(to top, rgba(255, 50, 0, 0.9), rgba(255, 150, 0, 0.8), rgba(255, 220, 0, 0.7));
+    transform: translate(-50%, -50%) rotate(-90deg);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+
+  &::before {
+    width: 30px;
+    height: 80%;
+  }
+
+  &::after {
+    width: 20px;
+    height: 100%;
+    background: linear-gradient(to top, rgba(255, 100, 0, 0.8), rgba(255, 200, 0, 0.6), rgba(255, 255, 0, 0.4));
+  }
+
+  animation: starburst-expand-long 1.5s ease-out forwards;
+  animation-delay: calc(var(--ray-index) * 0.02s);
+}
+
+.starburst-medium {
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 25px;
+    height: 60%;
+    background: linear-gradient(to top, rgba(220, 20, 0, 0.7), rgba(255, 120, 0, 0.6), rgba(255, 200, 0, 0.5));
+    transform: translate(-50%, -50%) rotate(-90deg);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+
+  animation: starburst-expand-long 1.3s ease-out 0.1s forwards;
+  animation-delay: calc(var(--ray-index) * 0.025s + 0.1s);
+}
+
+.starburst-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1000;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: -40%;
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(circle at center, 
+      rgba(255, 255, 0, 0.95), 
+      rgba(255, 150, 0, 0.8) 30%, 
+      rgba(255, 50, 0, 0.6) 60%,
+      rgba(200, 0, 0, 0.3) 80%, 
+      transparent);
+    border-radius: 50%;
+    box-shadow: 
+      0 0 40px rgba(255, 100, 0, 0.8),
+      0 0 20px rgba(255, 200, 0, 0.9) inset;
+  }
+
+  animation: starburst-pulse 1.2s ease-out forwards;
+}
+
+@for $i from 0 through 11 {
+  .starburst-large:nth-child(#{$i + 1}) {
+    --angle: calc(#{$i} * 30deg);
+    transform: translate(-50%, -50%) rotate(var(--angle));
+  }
+
+  .starburst-medium:nth-child(#{$i + 13}) {
+    --angle: calc(#{$i} * 30deg + 15deg);
+    transform: translate(-50%, -50%) rotate(var(--angle));
+  }
 }

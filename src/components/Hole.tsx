@@ -36,6 +36,7 @@ export default function Hole({
   const difficulty = useGameStore(state => state.difficulty)
   
   const [showModal, setShowModal] = useState(false)
+  const [isExploding, setIsExploding] = useState(false)
   const holeId = `hole_${col}_${row}`
   
   // Get cell data from game state
@@ -69,18 +70,29 @@ export default function Hole({
   const displayProbability = canDisplayProbability(cellValue, solverProbability, mode)
 
   const handleClick = () => {
+    // Don't allow clicks if game is over or won
+    if (isGameOver || isWon) return
+    
     if (mode === 2) {
   
       // In solve mode, open the modal
       setShowModal(true)
     } else if (mode === 1) {
-      if (isRevealed || isGameOver || isWon) return
+      if (isRevealed) return
+      
+      if (cellValue === -1) {
+        // Bomb - set game over IMMEDIATELY to prevent other clicks
+        setGameOver(true)
+        console.log('Hit bomb!')
+        setIsExploding(true)
+      }
+      
       revealCell(row, col)
 
       if (cellValue === -1) {
-        // Bomb - game over
-        console.log('Hit bomb!')
-        setGameOver(true)
+        // Delay modal by 1 second to show explosion
+        setTimeout(() => {
+        }, 1000)
         addTotalRupees(currentRupees - config.houseFee)
       } else if (cellValue > 0 || cellValue === -10) {
         // Safe dig - add rupees (or rupoor)
@@ -160,6 +172,32 @@ export default function Hole({
       id={holeId}
       onClick={handleClick}
     >
+      {isExploding && mode === 1 && (
+        <>
+          {/* Outer large rays */}
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div
+              key={`starburst-large-${i}`}
+              className="starburst-ray starburst-large"
+              style={{
+                '--ray-index': i,
+              } as React.CSSProperties & { '--ray-index': number }}
+            />
+          ))}
+          {/* Middle rays offset */}
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div
+              key={`starburst-medium-${i}`}
+              className="starburst-ray starburst-medium"
+              style={{
+                '--ray-index': i,
+              } as React.CSSProperties & { '--ray-index': number }}
+            />
+          ))}
+          {/* Core burst */}
+          <div className="starburst-core" />
+        </>
+      )}
       {mode === 1 ? (
         <>
           {isRevealed && (
