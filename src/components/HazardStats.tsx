@@ -64,7 +64,6 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
           {showRupoors && (
             <>
               <img src={rupoorIcon} alt="Rupoor" />
-              <span className="hazard-separator">&</span>
               <img src={bombImg} alt="Bomb" />
               <span className="hazard-value">{remainingHazards}</span>
             </>

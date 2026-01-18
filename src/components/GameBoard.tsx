@@ -99,6 +99,8 @@ export default function GameBoard() {
     }
   }
 
+  const modalContainerRef = React.useRef<HTMLDivElement>(null)
+
   const holes: React.ReactNode[] = []
   for (let row = 0; row < config.height; row++) {
     for (let col = 0; col < config.width; col++) {
@@ -110,6 +112,7 @@ export default function GameBoard() {
           row={row} 
           col={col} 
           isLowestProbability={index === lowestProbabilityIndex}
+          modalContainer={modalContainerRef}
         />
       )
     }
@@ -127,6 +130,7 @@ export default function GameBoard() {
         >
           {holes}
         </div>
+        <div ref={modalContainerRef} className="modal-container" />
       </div>
       <ErrorModal
         isOpen={showInvalidBoardError}

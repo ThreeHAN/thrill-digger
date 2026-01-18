@@ -23,9 +23,10 @@ type RupeeModalProps = {
   onClose: () => void
   onSelect: (value: number) => void
   currentValue: number
+  container?: React.RefObject<HTMLDivElement | null>
 }
 
-export default function RupeeModal({ isOpen, onClose, onSelect, currentValue }: RupeeModalProps) {
+export default function RupeeModal({ isOpen, onClose, onSelect, currentValue, container }: RupeeModalProps) {
   if (!isOpen) return null
 
   const handleSelect = (value: number, e: React.MouseEvent) => {
@@ -47,8 +48,8 @@ export default function RupeeModal({ isOpen, onClose, onSelect, currentValue }: 
     onClose()
   }
 
-  return createPortal(
-    <div className="modal-backdrop" onClick={handleBackdropClick}>
+  const portal = (
+    <div className="modal-backdrop rupee-backdrop" onClick={handleBackdropClick}>
       <div className="circular-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="rupee-wheel">
           <button className="wheel-cancel" onClick={handleCloseClick}>
@@ -75,7 +76,9 @@ export default function RupeeModal({ isOpen, onClose, onSelect, currentValue }: 
           })}
         </div>
       </div>
-    </div>,
-    document.body
+    </div>
   )
-}
+
+  // If a container ref is provided, use it; otherwise portal to body
+  const targetContainer = container?.current || document.body
+  return createPortal(portal, targetContainer)}

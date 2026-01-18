@@ -1,5 +1,31 @@
 @use './variables' as *;
 
+// Modal container positioned relative to gameboard
+.modal-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: $z-modal;
+}
+
+// Transparent backdrop for rupee modal
+.rupee-backdrop {
+  background: $bg-overlay-medium;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: all;
+}
+
 // Circular Modal for Rupee Selection
 .circular-modal-content {
   background: transparent;
@@ -13,17 +39,22 @@
   justify-content: center;
   align-items: center;
   box-shadow: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .rupee-wheel {
   position: relative;
   width: 80%;
   height: 80%;
-  max-width: 500px;
-  max-height: 500px;
   display: flex;
   justify-content: center;
   align-items: center;
+  background: radial-gradient(circle, tan 0%, transparent 63%);
+  border-radius: 50%;
+  padding: 10px;
 }
 
 .wheel-cancel {

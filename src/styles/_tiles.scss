@@ -1,5 +1,12 @@
 @use './variables' as *;
 
+// Digger area container
+.diggerarea {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+}
+
 // Responsive Grid Board
 .grid-board {
   display: grid;

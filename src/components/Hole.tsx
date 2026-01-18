@@ -4,17 +4,20 @@ import { getImageForItem } from '../utils/imageMap'
 import { getProbabilityColor } from '../utils/solver'
 import { useGameStore } from '../stores/gameStore'
 import RupeeModal from './RupeeModal'
+import React from 'react'
 
 type HoleProps = {
   row: number
   col: number
   isLowestProbability?: boolean
+  modalContainer?: React.RefObject<HTMLDivElement | null>
 }
 
 export default function Hole({ 
   row, 
   col, 
-  isLowestProbability
+  isLowestProbability,
+  modalContainer
 }: HoleProps) {
   const board = useGameStore(state => state.board)
   const revealed = useGameStore(state => state.revealed)
@@ -183,6 +186,7 @@ export default function Hole({
             onClose={() => setShowModal(false)}
             onSelect={handleModalSelect}
             currentValue={cellValue}
+            container={modalContainer}
           />
         </>
       )}
