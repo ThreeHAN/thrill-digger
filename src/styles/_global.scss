@@ -1,21 +1,25 @@
+// Global Font Face
 @font-face {
   font-family: 'Breath of the Wild';
-  src: url('./assets/TheWildBreathOfZelda-15Lv.ttf') format('truetype');
+  src: url('../assets/TheWildBreathOfZelda-15Lv.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
+// Root CSS Variables
 :root {
-  --bg-color: #4a3f35;
-  --tile-undug: #6b5e4f;
-  --tile-safe: #4e7d5b;
+  --bg-color: $page-bg;
+  --tile-undug: $tile-undug;
+  --tile-safe: $tile-safe;
   --tile-low: #b8b058;
   --tile-mid: #d47a4a;
   --tile-high: #9e3a33;
+  --pulse-color: #34d1bf;
 }
 
+// Body Styles
 body {
-  background-color: var(--bg-color);
+  background-color: $page-bg;
   font-family: 'Breath of the Wild', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   justify-content: center;
@@ -24,7 +28,9 @@ body {
   letter-spacing: 0.05em;
 }
 
-h1, h2 {
+// Typography
+h1,
+h2 {
   font-family: 'Breath of the Wild', serif;
   letter-spacing: 0.08em;
 }
@@ -34,8 +40,9 @@ h1 {
   line-height: 1.1;
 }
 
+// Global Button Styles
 button {
-  border-radius: 8px;
+  border-radius: $border-radius-md;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
@@ -43,25 +50,9 @@ button {
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+  transition: border-color $transition-normal;
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+  &:hover {
+    border-color: #646cff;
   }
 }

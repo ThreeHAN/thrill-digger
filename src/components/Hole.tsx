@@ -55,7 +55,9 @@ export default function Hole({
       return undefined
     }
     if (gameMode === 2) {
-      return Math.floor(prob * 100)
+      // Round up non-zero probabilities so 0.5% shows as 1% instead of 0%
+      const percent = prob * 100
+      return percent === 0 ? 0 : Math.ceil(percent)
     }
     return undefined
   }

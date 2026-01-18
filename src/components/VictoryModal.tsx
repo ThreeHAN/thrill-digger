@@ -21,45 +21,26 @@ export default function VictoryModal({ isOpen, totalRupees, onPlayAgain }: Victo
       }
     }}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header" style={{ display: 'block', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '3.5rem', margin: 0, color: '#ffd700' }}>Congrats Hero!</h2>
-          <p style={{ fontSize: '1.5rem', marginTop: '10px', color: '#90EE90' }}>
+        <div className="modal-header victory-modal-header">
+          <h2 className="victory-modal-title">Congrats Hero!</h2>
+          <p className="victory-modal-subtitle">
             You avoided all the bombs!
           </p>
         </div>
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center',
-          gap: '20px',
-          padding: '20px 0'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            fontSize: '2.5rem',
-            fontWeight: 'bold',
-            color: '#ffd700'
-          }}>
+        <div className="victory-modal-body">
+          <div className="victory-rupee-display">
             <img 
               src={greenrupee} 
               alt="Rupee"
-              style={{ width: '60px', height: '60px', objectFit: 'contain' }}
+              className="victory-rupee-icon"
             />
             <span>{totalRupees}</span>
           </div>
         </div>
-        <div style={{ 
-          display: 'flex', 
-          gap: '12px', 
-          justifyContent: 'center',
-          paddingTop: '20px'
-        }}>
+        <div className="victory-modal-footer">
           <button 
-            className="wood-btn"
+            className="wood-btn victory-play-again-btn"
             onClick={handlePlayAgain}
-            style={{ padding: '10px 20px' }}
           >
             Play Again
           </button>

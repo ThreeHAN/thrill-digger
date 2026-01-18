@@ -1,0 +1,65 @@
+// Rupee Total Display
+.rupee-total {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  font-weight: bold;
+  color: $primary-text;
+  background: rgba(0, 0, 0, 0.3);
+  padding: clamp(6px, 1vw, 12px) clamp(10px, 2vw, 16px);
+  border-radius: $border-radius-md;
+  border: 2px solid $border-light;
+}
+
+.rupee-icon {
+  font-size: 1.3em;
+}
+
+// Hazard Stats Container
+.hazard-stats {
+  display: flex;
+  gap: clamp(8px, 2vw, 12px);
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+  justify-content: center;
+}
+
+.hazard-card {
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(243, 229, 171, 0.28);
+  color: $primary-text;
+  padding: clamp(6px, 1.5vw, 10px) clamp(8px, 2vw, 14px);
+  border-radius: $border-radius-md;
+  min-width: auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.hazard-row {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(4px, 1vw, 8px);
+  font-size: clamp(0.85rem, 2vw, 1.1rem);
+
+  img {
+    width: clamp(18px, 3vw, 22px);
+    height: clamp(18px, 3vw, 22px);
+    object-fit: contain;
+    display: block;
+  }
+}
+
+.hazard-emoji {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+}
+
+.hazard-separator {
+  font-size: clamp(0.8rem, 1.5vw, 1rem);
+  opacity: 0.7;
+}
+
+.hazard-value {
+  display: block;
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  font-weight: 700;
+}

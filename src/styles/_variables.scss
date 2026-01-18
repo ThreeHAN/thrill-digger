@@ -1,0 +1,59 @@
+// Color Variables
+$primary-bg: #5a4e42;
+$page-bg: #4a3f35;
+$primary-text: #f3e5ab;
+$secondary-text: #d4a574;
+$tertiary-text: #d4af99;
+$border-light: rgba(243, 229, 171, 0.3);
+$border-lighter: rgba(243, 229, 171, 0.15);
+$border-lightest: rgba(243, 229, 171, 0.2);
+
+// Wood Button Colors
+$wood-dark: #5d3a1a;
+$wood-medium: #8b5a2b;
+$wood-light: #7a6d5f;
+
+// Tile Colors
+$tile-undug: #6b5d52;
+$tile-safe: #4e7d5b;
+$tile-bomb: #a84432;
+$tile-rupee: #f5f5dc;
+
+// Probability Colors
+$prob-colors: (
+  0: #3d5a3d,      // Dark green
+  10: #4e7d5b,     // Forest green
+  20: #6b9b6b,     // Light green
+  30: #8bb58b,     // Pale green
+  40: #b8b058,     // Yellow-green
+  50: #c9a84a,     // Sandy yellow
+  60: #d89847,     // Orange-yellow
+  70: #d47a4a,     // Burnt orange
+  80: #c55a3d,     // Red-orange
+  90: #a84535,     // Deep red
+  100: #9e3a33,    // Dark red
+);
+
+// Sizing Variables
+$base-gap: 10px;
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+
+// Z-index Variables
+$z-modal: 1000;
+$z-modal-backdrop: 1000;
+$z-hamburger: 1000;
+$z-hamburger-backdrop: 999;
+$z-header: 10;
+$z-wheel-center: 10;
+
+// Shadow Variables
+$shadow-small: 0 4px 6px rgba(0, 0, 0, 0.4);
+$shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.5);
+$shadow-large: -4px 0 6px rgba(0, 0, 0, 0.3);
+
+// Transition Variables
+$transition-fast: 0.1s;
+$transition-normal: 0.2s;
+$transition-slow: 0.3s;

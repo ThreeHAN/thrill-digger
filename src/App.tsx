@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import './App.css'
 import GameBoard from './components/GameBoard'
 import SettingsModal from './components/SettingsModal'
 import InfoModal from './components/InfoModal'

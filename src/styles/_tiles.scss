@@ -1,0 +1,119 @@
+// Responsive Grid Board
+.grid-board {
+  display: grid;
+  gap: $base-gap;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: $border-radius-lg;
+  box-sizing: border-box;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+// Tile Base Styles
+.tile {
+  width: var(--tile-size);
+  aspect-ratio: 1 / 1;
+  border: none;
+  border-radius: 1px;
+  color: white;
+  font-weight: bold;
+  font-size: clamp(0.8rem, calc(var(--tile-size) * 0.18), 1.2rem);
+  cursor: pointer;
+  transition: transform $transition-fast, box-shadow $transition-fast;
+  position: relative;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // The Secret Sauce: Layered Shadows
+  box-shadow:
+    inset 0 4px 4px rgba(255, 255, 255, 0.2),  // Top highlight
+    inset 0 -4px 4px rgba(0, 0, 0, 0.3),       // Bottom shadow
+    $shadow-small;                              // Outer shadow
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+}
+
+// Undug tile with leather texture
+.undug {
+  background-color: $tile-undug;
+  background-image: url('assets/minigame/leather.jpg');
+  background-blend-mode: overlay;
+}
+
+// Safe tile
+.safe {
+  background-color: var(--tile-safe);
+}
+
+// Risk level tiles
+.low-risk {
+  background-color: var(--tile-low);
+}
+
+.mid-risk {
+  background-color: var(--tile-mid);
+}
+
+.high-risk {
+  background-color: var(--tile-high);
+}
+
+// Tile content color classes
+.tile-safe {
+  background-color: $tile-safe;
+}
+
+.tile-bomb {
+  background-color: $tile-bomb;
+}
+
+.tile-rupee {
+  background-color: $tile-rupee;
+}
+
+// Probability color classes
+@each $prob, $color in $prob-colors {
+  .prob-#{$prob} {
+    background-color: $color;
+  }
+}
+
+// Image sizing for tile contents
+.solverimg {
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Hole tile button styles
+.hole-tile {
+  width: var(--tile-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+// Probability text styling
+.probability-text {
+  font-size: clamp(1rem, calc(var(--tile-size) * 0.2), 5rem);
+  font-weight: bold;
+  color: $primary-text;
+  margin: 0;
+  letter-spacing: 0.05em;
+  text-shadow:
+    1px 1px 2px rgba(0, 0, 0, 0.8),
+    -1px -1px 2px rgba(0, 0, 0, 0.8),
+    1px -1px 2px rgba(0, 0, 0, 0.8),
+    -1px 1px 2px rgba(0, 0, 0, 0.8);
+}

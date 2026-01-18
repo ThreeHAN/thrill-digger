@@ -1,0 +1,35 @@
+// ============================================================================
+// Main Stylesheet
+// ============================================================================
+// This file imports all partial stylesheets in the correct order.
+// Individual styles are organized into logical modules for better maintainability.
+
+// 1. Variables and Configuration
+@import './variables';
+
+// 2. Global Styles (fonts, body, typography)
+@import './global';
+
+// 3. Layout Components
+@import './layout';
+
+// 3. Navigation Components
+@import './hamburger';
+
+// 4. Game Stats Display
+@import './hazard-stats';
+
+// 5. Rupee Display
+@import './buttons';
+
+// 6. Game Board and Tiles
+@import './tiles';
+
+// 7. Modal Components
+@import './modals';
+@import './info-modal';
+@import './rupee-modal';
+@import './victory-modal';
+
+// 8. Responsive Design
+@import './responsive';

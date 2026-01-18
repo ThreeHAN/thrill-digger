@@ -1,0 +1,51 @@
+// Victory Modal Styles
+.victory-modal-header {
+  display: block;
+  text-align: center;
+}
+
+.victory-modal-title {
+  font-size: 3.5rem;
+  margin: 0;
+  color: #ffd700;
+}
+
+.victory-modal-subtitle {
+  font-size: 1.5rem;
+  margin-top: 10px;
+  color: #90ee90;
+}
+
+.victory-modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.victory-rupee-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.victory-rupee-icon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.victory-modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.victory-play-again-btn {
+  padding: 10px 20px;
+}

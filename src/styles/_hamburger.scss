@@ -1,0 +1,81 @@
+// Hamburger Menu Button
+.hamburger-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  align-self: flex-start;
+
+  span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: $primary-text;
+    border-radius: 2px;
+    transition: all $transition-slow;
+  }
+
+  &.active {
+    span:nth-child(1) {
+      transform: rotate(45deg) translate(8px, 8px);
+    }
+
+    span:nth-child(2) {
+      opacity: 0;
+    }
+
+    span:nth-child(3) {
+      transform: rotate(-45deg) translate(8px, -8px);
+    }
+  }
+}
+
+// Hamburger Menu Container
+.hamburger-menu {
+  position: absolute;
+  right: 0;
+}
+
+.hamburger-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: $z-hamburger-backdrop;
+}
+
+.hamburger-menu-content {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 250px;
+  background-color: $wood-dark;
+  border-left: 3px solid $wood-medium;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  z-index: $z-hamburger;
+  box-shadow: $shadow-large;
+}
+
+.hamburger-menu-item {
+  background: none;
+  border: none;
+  color: $primary-text;
+  padding: 16px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: left;
+  border-bottom: 1px solid $border-lightest;
+  transition: background-color $transition-normal;
+
+  &:hover {
+    background-color: rgba(243, 229, 171, 0.1);
+  }
+}

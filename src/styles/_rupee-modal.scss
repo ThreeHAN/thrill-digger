@@ -1,0 +1,150 @@
+// Circular Modal for Rupee Selection
+.circular-modal-content {
+  background: transparent;
+  border-radius: $border-radius-lg;
+  padding: 0;
+  width: min(600px, 90vw);
+  height: min(600px, 90vh);
+  max-width: 600px;
+  max-height: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: none;
+}
+
+.rupee-wheel {
+  position: relative;
+  width: 80%;
+  height: 80%;
+  max-width: 500px;
+  max-height: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wheel-cancel {
+  position: absolute;
+  width: clamp(70px, 20%, 120px);
+  height: clamp(70px, 20%, 120px);
+  border-radius: 50%;
+  background: rgba(90, 78, 66, 0.9);
+  border: 3px solid $primary-text;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: $z-wheel-center;
+  color: $primary-text;
+  font-weight: bold;
+  font-size: clamp(0.8rem, 3vw, 1rem);
+  cursor: pointer;
+  transition: all $transition-normal;
+  padding: 0;
+
+  &:hover {
+    background: rgba(122, 109, 95, 0.95);
+    border-color: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(243, 229, 171, 0.4);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.rupee-option-circular {
+  position: absolute;
+  width: clamp(70px, 20%, 120px);
+  height: clamp(70px, 20%, 120px);
+  border-radius: 50%;
+  background: rgba(90, 78, 66, 0.85);
+  border: 3px solid #d4a574;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  transition: all $transition-normal;
+  color: white;
+  box-sizing: border-box;
+  transform: rotate(var(--angle))
+    translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1));
+
+  &:hover {
+    transform: rotate(var(--angle))
+      translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1))
+      scale(1.1);
+    background: rgba(122, 109, 95, 0.95);
+    border-color: $primary-text;
+    box-shadow: 0 0 15px rgba(243, 229, 171, 0.4);
+  }
+
+  &.selected {
+    border-color: $tile-safe;
+    background: rgba(78, 125, 91, 0.9);
+    box-shadow: 0 0 20px rgba(78, 125, 91, 0.6);
+    transform: rotate(var(--angle))
+      translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1))
+      scale(1.15);
+  }
+
+  &.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background-color: rgba(61, 61, 61, 0.7);
+
+    &:hover {
+      transform: rotate(var(--angle))
+        translateY(calc(clamp(70px, 20%, 120px) * -2.3)) rotate(calc(var(--angle) * -1));
+      background-color: rgba(61, 61, 61, 0.7);
+      border-color: $wood-dark;
+      box-shadow: none;
+    }
+  }
+}
+
+// Rupee Grid
+.rupee-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 15px;
+}
+
+// Difficulty Selection
+.difficulty-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 15px;
+}
+
+.difficulty-option {
+  background: var(--tile-undug);
+  border: 2px solid $wood-dark;
+  border-radius: $border-radius-lg;
+  padding: 20px 15px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: all $transition-normal;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+
+  &:hover {
+    transform: scale(1.05);
+    background: $wood-light;
+    border-color: #8b7355;
+  }
+
+  &.selected {
+    border-color: $tile-safe;
+    border-width: 3px;
+    background: $tile-safe;
+  }
+}
