@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useCallback, useState } from 'react'
 import { getItemName } from '../utils/gameLogic'
 import { getImageForItem } from '../utils/imageMap'
-import { getProbabilityColor } from '../utils/solver'
 import { useGameStore } from '../stores/gameStore'
 import RupeeModal from './RupeeModal'
+import Starburst from './Starburst'
 import React from 'react'
+import { GameMode } from '../stores/gameStore'
+import { computeTileClass, getDisplayProbability, formatHoleId } from '../utils/tileUtils'
+
+const MemoizedRupeeModal = React.memo(RupeeModal)
 
 type HoleProps = {
   row: number
@@ -13,158 +17,72 @@ type HoleProps = {
   modalContainer?: React.RefObject<HTMLDivElement | null>
 }
 
-export default function Hole({ 
+export default React.memo(function Hole({ 
   row, 
   col, 
   isLowestProbability,
   modalContainer
 }: HoleProps) {
-  const board = useGameStore(state => state.board)
-  const revealed = useGameStore(state => state.revealed)
+  const cellValue = useGameStore(state => state.board[row][col])
+  const isRevealed = useGameStore(state => state.revealed[row][col])
   const mode = useGameStore(state => state.mode)
-  const solvedBoard = useGameStore(state => state.solvedBoard)
-  const config = useGameStore(state => state.config)
+  const solverProbability = useGameStore(state => 
+    state.mode === GameMode.Solve && state.solvedBoard
+      ? state.solvedBoard[row * state.config.width + col]
+      : undefined
+  )
   const isGameOver = useGameStore(state => state.isGameOver)
   const isWon = useGameStore(state => state.isWon)
-  const currentRupees = useGameStore(state => state.currentRupees)
-  const revealCell = useGameStore(state => state.revealCell)
-  const setGameOver = useGameStore(state => state.setGameOver)
-  const setIsWon = useGameStore(state => state.setIsWon)
-  const addTotalRupees = useGameStore(state => state.addTotalRupees)
-  const setCurrentRupees = useGameStore(state => state.setCurrentRupees)
   const updateCell = useGameStore(state => state.updateCell)
   const difficulty = useGameStore(state => state.difficulty)
+  const digCell = useGameStore(state => state.digCell)
   
   const [showModal, setShowModal] = useState(false)
   const [isExploding, setIsExploding] = useState(false)
-  const holeId = `hole_${col}_${row}`
   
-  // Get cell data from game state
-  const cellValue = board[row][col]
-  const isRevealed = revealed[row][col]
+  const holeId = formatHoleId(row, col)
   
-  const itemName = getItemName(cellValue)
-  
-  // Get solver probability only in solve mode
-  const solverProbability = mode === 2 && solvedBoard 
-    ? solvedBoard[row * config.width + col]
-    : undefined
+  const itemName = useMemo(() => getItemName(cellValue), [cellValue])
   
   // Helper function to determine if we should display probability and return formatted value
-  const canDisplayProbability = (
-    cellVal: number,
-    prob: number | undefined,
-    gameMode: number
-  ): number | undefined => {
-    if (cellVal !== 0 || prob === undefined || prob === -2) {
-      return undefined
-    }
-    if (gameMode === 2) {
-      // Round up non-zero probabilities so 0.5% shows as 1% instead of 0%
-      const percent = prob * 100
-      return percent === 0 ? 0 : Math.ceil(percent)
-    }
-    return undefined
-  }
-  
-  const displayProbability = canDisplayProbability(cellValue, solverProbability, mode)
+  const displayProbability = useMemo(() => (
+    getDisplayProbability(cellValue, solverProbability, mode as GameMode)
+  ), [cellValue, solverProbability, mode])
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     // Don't allow clicks if game is over or won
     if (isGameOver || isWon) return
     
-    if (mode === 2) {
+    if (mode === GameMode.Solve) {
   
       // In solve mode, open the modal
       setShowModal(true)
-    } else if (mode === 1) {
+    } else if (mode === GameMode.Play) {
       if (isRevealed) return
       
       if (cellValue === -1) {
         // Bomb - set game over IMMEDIATELY to prevent other clicks
-        setGameOver(true)
         console.log('Hit bomb!')
         setIsExploding(true)
       }
-      
-      revealCell(row, col)
-
-      if (cellValue === -1) {
-        // Delay modal by 1 second to show explosion
-        setTimeout(() => {
-        }, 1000)
-        addTotalRupees(currentRupees - config.houseFee)
-      } else if (cellValue > 0 || cellValue === -10) {
-        // Safe dig - add rupees (or rupoor)
-        if (cellValue > 0) {
-          console.log('Found rupee:', cellValue)
-          setCurrentRupees(currentRupees + cellValue)
-          addTotalRupees(cellValue)
-        } else {
-          // Rupoor - deduct from current rupees
-          console.log('Found rupoor!')
-          setCurrentRupees(Math.max(0, currentRupees - 10))
-        }
-        
-        // Check win condition: only bombs left unrevealed
-        const state = useGameStore.getState()
-        const updatedRevealed = state.revealed
-        let allNonBombsRevealed = true
-        
-        for (let r = 0; r < config.height; r++) {
-          for (let c = 0; c < config.width; c++) {
-            const cell = board[r][c]
-            const isRev = (r === row && c === col) || updatedRevealed[r][c]
-            
-            // If it's not a bomb and not revealed, we haven't won yet
-            if (cell !== -1 && !isRev) {
-              allNonBombsRevealed = false
-              break
-            }
-          }
-          if (!allNonBombsRevealed) break
-        }
-        
-        if (allNonBombsRevealed) {
-          console.log('All non-bomb squares revealed! You won!')
-          setIsWon(true)
-        }
-      }
+      // Delegate the rest of the play logic to the store
+      digCell(row, col)
     }
-  }
+  }, [isGameOver, isWon, mode, isRevealed, cellValue, digCell, row, col])
 
-  const handleModalSelect = (value: number) => {
+  const handleModalSelect = useCallback((value: number) => {
     if (mode !== 2) return
     
     console.log('Solve mode: placing', value, 'at', row, col)
 
     updateCell(row, col, value)
-  }
+    setShowModal(false)
+  }, [mode, row, col, updateCell])
 
   // Determine tile styling based on game mode and cell state
-  let tileClass = 'tile undug'
-
-  if (mode === 2) {
-    // In solve mode, use getProbabilityColor for gradient coloring
-    if (cellValue > 0) {
-      // Known rupee - show as cream white
-      tileClass += ' tile-rupee'
-    } else if (solverProbability !== undefined && solverProbability !== -2) {
-      // Unknown cell - color based on probability using getProbabilityColor
-      tileClass += ' ' + getProbabilityColor(solverProbability)
-    }
-  } else if (mode === 1) {
-    // In play mode, show as safe if revealed
-    if (isRevealed && cellValue > 0) {
-      tileClass += ' tile-safe'
-    } else if (isRevealed && cellValue === -1) {
-      tileClass += ' tile-bomb'
-    }
-  }
-
-  if (isLowestProbability && mode === 2) {
-    tileClass += ' lowest-hole-pulse'
-  }
+  const tileClass = useMemo(() => (
+    computeTileClass(mode as GameMode, cellValue, isRevealed, solverProbability, isLowestProbability)
+  ), [mode, cellValue, isRevealed, solverProbability, isLowestProbability])
 
   return (
     <button 
@@ -172,33 +90,8 @@ export default function Hole({
       id={holeId}
       onClick={handleClick}
     >
-      {isExploding && mode === 1 && (
-        <>
-          {/* Outer large rays */}
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div
-              key={`starburst-large-${i}`}
-              className="starburst-ray starburst-large"
-              style={{
-                '--ray-index': i,
-              } as React.CSSProperties & { '--ray-index': number }}
-            />
-          ))}
-          {/* Middle rays offset */}
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div
-              key={`starburst-medium-${i}`}
-              className="starburst-ray starburst-medium"
-              style={{
-                '--ray-index': i,
-              } as React.CSSProperties & { '--ray-index': number }}
-            />
-          ))}
-          {/* Core burst */}
-          <div className="starburst-core" />
-        </>
-      )}
-      {mode === 1 ? (
+      {isExploding && mode === GameMode.Play && <Starburst />}
+      {mode === GameMode.Play ? (
         <>
           {isRevealed && (
             <img 
@@ -220,7 +113,7 @@ export default function Hole({
               src={getImageForItem(itemName)} 
             />
           )}
-          <RupeeModal 
+          <MemoizedRupeeModal 
             isOpen={showModal}
             onClose={() => setShowModal(false)}
             onSelect={handleModalSelect}
@@ -232,4 +125,4 @@ export default function Hole({
       )}
     </button>
   )
-}
+})

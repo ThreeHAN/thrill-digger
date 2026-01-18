@@ -45,6 +45,7 @@ interface GameActions {
   resetGame: (difficulty: Difficulty, mode: GameMode) => void
   setShowInvalidBoardError: (show: boolean) => void
   solveBoardInternal: () => void
+  digCell: (row: number, col: number) => void
 }
 
 type GameStore = GameState & GameActions
@@ -233,6 +234,62 @@ export const useGameStore = create<GameStore>()(
         solvedBoard: result,
         showInvalidBoardError: result === null,
       })
+    }
+  },
+  
+  digCell: (row: number, col: number) => {
+    const state = get()
+    if (state.mode !== GameMode.Play || state.isGameOver || state.isWon) return
+    if (state.revealed[row][col]) return
+
+    const cellValue = state.board[row][col]
+
+    // Reveal the cell
+    const newRevealed = state.revealed.map(r => [...r])
+    newRevealed[row][col] = true
+    const idx = row * state.config.width + col
+
+    // Handle outcomes
+    if (cellValue === -1) {
+      // Bomb: game over and settle house fee
+      const settleAmount = Math.max(0, state.currentRupees - state.config.houseFee)
+      set({ revealed: newRevealed, lastChangedIndex: idx, isGameOver: true })
+      // Update total after game ends
+      const newTotal = state.totalRupeesAllTime + settleAmount
+      set({ totalRupeesAllTime: newTotal })
+      return
+    }
+
+    if (cellValue > 0) {
+      // Rupee found
+      const newCurrent = state.currentRupees + cellValue
+      const newTotal = state.totalRupeesAllTime + cellValue
+      set({ revealed: newRevealed, lastChangedIndex: idx, currentRupees: newCurrent, totalRupeesAllTime: newTotal })
+    } else if (cellValue === -10) {
+      // Rupoor found
+      const newCurrent = Math.max(0, state.currentRupees - 10)
+      set({ revealed: newRevealed, lastChangedIndex: idx, currentRupees: newCurrent })
+    } else {
+      // Empty/other values just reveal
+      set({ revealed: newRevealed, lastChangedIndex: idx })
+    }
+
+    // Check win: all non-bomb cells revealed
+    const checkState = get()
+    let allNonBombsRevealed = true
+    for (let r = 0; r < checkState.config.height; r++) {
+      for (let c = 0; c < checkState.config.width; c++) {
+        const cell = checkState.board[r][c]
+        if (cell !== -1 && !newRevealed[r][c]) {
+          allNonBombsRevealed = false
+          break
+        }
+      }
+      if (!allNonBombsRevealed) break
+    }
+
+    if (allNonBombsRevealed) {
+      set({ isWon: true })
     }
   },
     }),

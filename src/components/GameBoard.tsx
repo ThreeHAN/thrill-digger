@@ -2,13 +2,12 @@ import Hole from './Hole'
 import ErrorModal from './ErrorModal'
 import VictoryModal from './VictoryModal'
 import { useGameStore } from '../stores/gameStore'
-import React, { useEffect, useState } from 'react'
+import { useLowestProbabilityIndex } from '../hooks/useLowestProbabilityIndex'
+import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 
 export default function GameBoard() {
   const config = useGameStore(state => state.config)
-  const board = useGameStore(state => state.board)
   const mode = useGameStore(state => state.mode)
-  const solvedBoard = useGameStore(state => state.solvedBoard)
   const showInvalidBoardError = useGameStore(state => state.showInvalidBoardError)
   const setShowInvalidBoardError = useGameStore(state => state.setShowInvalidBoardError)
   const isWon = useGameStore(state => state.isWon)
@@ -17,6 +16,7 @@ export default function GameBoard() {
   const newGame = useGameStore(state => state.newGame)
   
   const [tileSize, setTileSize] = useState<number>(64)
+  const lowestProbabilityIndex = useLowestProbabilityIndex()
 
   useEffect(() => {
     const GAP = 10 // matches .grid-board gap in CSS
@@ -46,77 +46,35 @@ export default function GameBoard() {
     return () => window.removeEventListener('resize', computeSize)
   }, [config.width, config.height])
 
-  // Find lowest probability hole for highlighting
-  let lowestProbabilityIndex = -1
-  if (mode === 2 && solvedBoard) {
-    const flatBoard = board.flat()
-    let minProbability = Infinity
-    let maxProbability = -Infinity
-    
-    // First pass: find minimum and maximum probability
-    for (let i = 0; i < solvedBoard.length; i++) {
-      const boardCell = flatBoard[i]
-      const prob = solvedBoard[i]
-      if (boardCell === 0 && typeof prob === 'number' && prob >= 0 && prob < Infinity) {
-        minProbability = Math.min(minProbability, prob)
-        maxProbability = Math.max(maxProbability, prob)
+  const modalContainerRef = useRef<HTMLDivElement>(null)
+
+  const holes = useMemo(() => {
+    const result: React.ReactNode[] = []
+    for (let row = 0; row < config.height; row++) {
+      for (let col = 0; col < config.width; col++) {
+        const index = row * config.width + col
+
+        result.push(
+          <Hole 
+            key={`${col}-${row}`} 
+            row={row} 
+            col={col} 
+            isLowestProbability={index === lowestProbabilityIndex}
+            modalContainer={modalContainerRef}
+          />
+        )
       }
     }
-    
-    // Only show highlight if there's a difference in probabilities
-    if (minProbability < maxProbability) {
-      // Collect all candidate indices with the minimum probability
-      const candidates: number[] = []
-      for (let i = 0; i < solvedBoard.length; i++) {
-        const boardCell = flatBoard[i]
-        const prob = solvedBoard[i]
-        if (boardCell === 0 && typeof prob === 'number' && Math.abs(prob - minProbability) < 0.0001) {
-          candidates.push(i)
-        }
-      }
+    return result
+  }, [config.width, config.height, lowestProbabilityIndex])
 
-      const lastIdx = useGameStore.getState().lastChangedIndex
-      if (typeof lastIdx === 'number' && candidates.length > 0) {
-        const w = config.width
-        const lastRow = Math.floor(lastIdx / w)
-        const lastCol = lastIdx % w
-        let bestIdx = candidates[0]
-        let bestDist = Infinity
-        for (const i of candidates) {
-          const r = Math.floor(i / w)
-          const c = i % w
-          const dist = Math.abs(r - lastRow) + Math.abs(c - lastCol)
-          if (dist < bestDist) {
-            bestDist = dist
-            bestIdx = i
-          }
-        }
-        lowestProbabilityIndex = bestIdx
-      } else {
-        // Fallback: first candidate
-        lowestProbabilityIndex = candidates[0]
-      }
-    }
-  }
+  const handleCloseError = useCallback(() => {
+    setShowInvalidBoardError(false)
+  }, [setShowInvalidBoardError])
 
-  const modalContainerRef = React.useRef<HTMLDivElement>(null)
-
-  const holes: React.ReactNode[] = []
-  for (let row = 0; row < config.height; row++) {
-    for (let col = 0; col < config.width; col++) {
-      const index = row * config.width + col
-
-      holes.push(
-        <Hole 
-          key={`${col}-${row}`} 
-          row={row} 
-          col={col} 
-          isLowestProbability={index === lowestProbabilityIndex}
-          modalContainer={modalContainerRef}
-        />
-      )
-    }
-  }
+  const handlePlayAgain = useCallback(() => {
+    newGame(difficulty, mode)
+  }, [newGame, difficulty, mode])
 
   return (
     <div id="gamearea" className="m-auto">
@@ -134,13 +92,13 @@ export default function GameBoard() {
       </div>
       <ErrorModal
         isOpen={showInvalidBoardError}
-        onClose={() => setShowInvalidBoardError(false)}
+        onClose={handleCloseError}
         message="Not a valid board!"
       />
       <VictoryModal
         isOpen={isWon}
         totalRupees={currentRupees}
-        onPlayAgain={() => newGame(difficulty, mode)}
+        onPlayAgain={handlePlayAgain}
       />
     </div>
   )
