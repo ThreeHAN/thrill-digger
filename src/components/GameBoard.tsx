@@ -19,44 +19,61 @@ export default function GameBoard() {
   const lowestProbabilityIndex = useLowestProbabilityIndex()
 
   useEffect(() => {
-    const CONTAINER_PADDING = 0 // body/container padding (we use 0 now)
-    const MAX_TILE = 120 // cap tile size to avoid oversized tiles on small boards
+    const CONTAINER_PADDING = 0
+    const MAX_TILE = 120
+    const LANDSCAPE_SAFETY_FACTOR = 0.985
+    const PORTRAIT_SHRINK_FACTOR = 0.92
+    const PORTRAIT_EXTRA_BUFFER = 18
+    const LANDSCAPE_EXTRA_BUFFER = 12
+    const MIN_TILE_SIZE = 20
+    const SMALL_PORTRAIT_WIDTH = 600
+    const DEBOUNCE_MS = 150
+
+    // Cache element references to avoid repeated DOM queries
+    let cachedElements = {
+      header: null as HTMLElement | null,
+      footer: null as HTMLElement | null,
+      main: null as HTMLElement | null,
+      hazardStats: null as HTMLElement | null,
+      grid: null as HTMLElement | null,
+    }
+
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
     const computeSize = () => {
       const vw = window.innerWidth
       const vh = window.visualViewport?.height ?? window.innerHeight
       const isPortrait = vh > vw
 
-      const headerEl = document.querySelector('.game-header') as HTMLElement | null
-      const footerEl = document.querySelector('.app-footer') as HTMLElement | null
-      const mainEl = document.querySelector('main') as HTMLElement | null
-      const hazardStatsEl = document.querySelector('.hazard-stats') as HTMLElement | null
-      const gridEl = document.querySelector('.grid-board') as HTMLElement | null
-      const headerH = headerEl?.offsetHeight ?? 0
-      const footerH = footerEl?.offsetHeight ?? 0
-      const mainStyles = mainEl ? window.getComputedStyle(mainEl) : null
-      const mainMarginTop = mainStyles ? parseFloat(mainStyles.marginTop || '0') : 0
+      // Query elements on first run or cache miss
+      cachedElements.header = cachedElements.header || document.querySelector('.game-header') as HTMLElement | null
+      cachedElements.footer = cachedElements.footer || document.querySelector('.app-footer') as HTMLElement | null
+      cachedElements.main = cachedElements.main || document.querySelector('main') as HTMLElement | null
+      cachedElements.hazardStats = cachedElements.hazardStats || document.querySelector('.hazard-stats') as HTMLElement | null
+      cachedElements.grid = cachedElements.grid || document.querySelector('.grid-board') as HTMLElement | null
 
-      // Keep a small extra buffer. Include main's margin-top to avoid overflow.
-      const extra = isPortrait ? 18 : 12
+      const headerH = cachedElements.header?.offsetHeight ?? 0
+      const footerH = cachedElements.footer?.offsetHeight ?? 0
+
+      // Get main's styles once for both margin-top and flex gap
+      const mainStyles = cachedElements.main ? window.getComputedStyle(cachedElements.main) : null
+      const mainMarginTop = mainStyles ? parseFloat(mainStyles.marginTop || '0') : 0
+      const flexGap = mainStyles ? parseFloat(mainStyles.gap || '0') : 0
+
+      const extra = isPortrait ? PORTRAIT_EXTRA_BUFFER : LANDSCAPE_EXTRA_BUFFER
       const reservedH = headerH + footerH + mainMarginTop + extra
 
-      // In landscape, subtract the hazard stats column and the gap between flex items
-      const mainComputed = mainEl ? window.getComputedStyle(mainEl) : null
-      const flexGap = mainComputed ? parseFloat(mainComputed.gap || '0') : 0
-      const hazardW = !isPortrait ? (hazardStatsEl?.offsetWidth ?? 0) : 0
+      const hazardW = !isPortrait ? (cachedElements.hazardStats?.offsetWidth ?? 0) : 0
 
-      // Read actual grid gap and padding so math matches responsive CSS
-      const gridStyles = gridEl ? window.getComputedStyle(gridEl) : null
+      // Read actual grid gap and padding to match responsive CSS rules
+      const gridStyles = cachedElements.grid ? window.getComputedStyle(cachedElements.grid) : null
       const gridGap = gridStyles
         ? parseFloat(gridStyles.gap || gridStyles.rowGap || '10')
         : 10
-      const padL = gridStyles ? parseFloat(gridStyles.paddingLeft || '0') : 0
-      const padR = gridStyles ? parseFloat(gridStyles.paddingRight || '0') : 0
-      const padT = gridStyles ? parseFloat(gridStyles.paddingTop || '0') : 0
-      const padB = gridStyles ? parseFloat(gridStyles.paddingBottom || '0') : 0
-      const boardPadX = padL + padR
-      const boardPadY = padT + padB
+      const boardPadX = (gridStyles ? parseFloat(gridStyles.paddingLeft || '0') : 0) + 
+                        (gridStyles ? parseFloat(gridStyles.paddingRight || '0') : 0)
+      const boardPadY = (gridStyles ? parseFloat(gridStyles.paddingTop || '0') : 0) + 
+                        (gridStyles ? parseFloat(gridStyles.paddingBottom || '0') : 0)
 
       const availW = vw - hazardW - (!isPortrait ? flexGap : 0) - CONTAINER_PADDING * 2 - boardPadX - gridGap * (config.width - 1)
       const availH = vh - reservedH - boardPadY - gridGap * (config.height - 1)
@@ -64,26 +81,33 @@ export default function GameBoard() {
       const sizeW = Math.floor(availW / config.width)
       const sizeH = Math.floor(availH / config.height)
 
-      // Always respect the smaller of width/height to prevent overflow.
       let size = Math.min(sizeW, sizeH)
 
-      // Add a slight safety reduction in landscape to account for borders/shadows.
+      // Safety reduction in landscape to account for borders/shadows
       if (!isPortrait) {
-        size = Math.floor(size * 0.985)
+        size = Math.floor(size * LANDSCAPE_SAFETY_FACTOR)
       }
 
-      // On small portrait screens, nudge down slightly to ensure fit
-      if (isPortrait && vw < 600) {
-        size = Math.max(20, Math.floor(size * 0.92))
+      // Shrink slightly on small portrait screens for better fit
+      if (isPortrait && vw < SMALL_PORTRAIT_WIDTH) {
+        size = Math.max(MIN_TILE_SIZE, Math.floor(size * PORTRAIT_SHRINK_FACTOR))
       }
 
-      size = Math.max(20, Math.min(MAX_TILE, size))
+      size = Math.max(MIN_TILE_SIZE, Math.min(MAX_TILE, size))
       setTileSize(size)
     }
 
+    const handleResize = () => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(computeSize, DEBOUNCE_MS)
+    }
+
     computeSize()
-    window.addEventListener('resize', computeSize)
-    return () => window.removeEventListener('resize', computeSize)
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (debounceTimer) clearTimeout(debounceTimer)
+    }
   }, [config.width, config.height])
 
   const modalContainerRef = useRef<HTMLDivElement>(null)
