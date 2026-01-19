@@ -19,6 +19,7 @@ export interface GameState {
   config: GameConfig
   board: BoardCell[][]
   revealed: boolean[][]
+  autoRevealed: boolean[][]
   currentRupees: number
   totalRupeesAllTime: number
   isGameOver: boolean
@@ -51,6 +52,7 @@ interface GameActions {
   confirmComputation: () => void
   cancelComputation: () => void
   triggerCloseRupeeModals: () => void
+  revealAllCells: () => void
 }
 
 type GameStore = GameState & GameActions
@@ -75,6 +77,7 @@ const initialGameState = (difficulty: Difficulty): GameState => {
     config,
     board: createEmptyBoard(config.width, config.height),
     revealed: createEmptyRevealedBoard(config.width, config.height),
+    autoRevealed: createEmptyRevealedBoard(config.width, config.height),
     currentRupees: 0,
     totalRupeesAllTime: 0,
     isGameOver: false,
@@ -111,6 +114,7 @@ export const useGameStore = create<GameStore>()(
       config,
       board,
       revealed: createEmptyRevealedBoard(config.width, config.height),
+      autoRevealed: createEmptyRevealedBoard(config.width, config.height),
       currentRupees: 0,
       isGameOver: false,
       isWon: false,
@@ -288,6 +292,24 @@ export const useGameStore = create<GameStore>()(
     const state = get()
     set({ closeRupeeModals: state.closeRupeeModals + 1 })
   },
+
+  revealAllCells: () => {
+    const state = get()
+    const newRevealed = state.revealed.map(r => [...r])
+    const newAutoRevealed = state.autoRevealed.map(r => [...r])
+    
+    // Reveal all cells and mark which ones were auto-revealed
+    for (let row = 0; row < state.config.height; row++) {
+      for (let col = 0; col < state.config.width; col++) {
+        if (!newRevealed[row][col]) {
+          newRevealed[row][col] = true
+          newAutoRevealed[row][col] = true
+        }
+      }
+    }
+    
+    set({ revealed: newRevealed, autoRevealed: newAutoRevealed })
+  },
   
   digCell: (row: number, col: number) => {
     const state = get()
@@ -312,35 +334,37 @@ export const useGameStore = create<GameStore>()(
       return
     }
 
+    let updatedRupoorCount = state.rupoorCount
+
     if (cellValue > 0) {
       // Rupee found
       const newCurrent = state.currentRupees + cellValue
       const newTotal = state.totalRupeesAllTime + cellValue
       set({ revealed: newRevealed, lastChangedIndex: idx, currentRupees: newCurrent, totalRupeesAllTime: newTotal })
     } else if (cellValue === -10) {
-      // Rupoor found
+      // Rupoor found - decrement remaining rupoor count
       const newCurrent = Math.max(0, state.currentRupees - 10)
-      set({ revealed: newRevealed, lastChangedIndex: idx, currentRupees: newCurrent })
+      updatedRupoorCount = Math.max(0, state.rupoorCount - 1)
+      set({ revealed: newRevealed, lastChangedIndex: idx, currentRupees: newCurrent, rupoorCount: updatedRupoorCount })
     } else {
       // Empty/other values just reveal
       set({ revealed: newRevealed, lastChangedIndex: idx })
     }
 
-    // Check win: all non-bomb cells revealed
+    // Check win: all non-hazard cells revealed
+    // Victory when unrevealed cells = bomb count + remaining rupoor count (only hazards remain)
     const checkState = get()
-    let allNonBombsRevealed = true
+    let unreveledCount = 0
     for (let r = 0; r < checkState.config.height; r++) {
       for (let c = 0; c < checkState.config.width; c++) {
-        const cell = checkState.board[r][c]
-        if (cell !== -1 && !newRevealed[r][c]) {
-          allNonBombsRevealed = false
-          break
+        if (!newRevealed[r][c]) {
+          unreveledCount++
         }
       }
-      if (!allNonBombsRevealed) break
     }
 
-    if (allNonBombsRevealed) {
+    const hazardCount = checkState.config.bombCount + updatedRupoorCount
+    if (unreveledCount === hazardCount) {
       set({ isWon: true })
     }
   },

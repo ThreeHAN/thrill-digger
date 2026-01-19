@@ -33,6 +33,7 @@ function App() {
   const requiresConfirmation = useGameStore(state => state.requiresConfirmation)
   const confirmComputation = useGameStore(state => state.confirmComputation)
   const cancelComputation = useGameStore(state => state.cancelComputation)
+  const revealAllCells = useGameStore(state => state.revealAllCells)
 
   useEffect(() => {
     newGame(difficulty, gameMode)
@@ -62,6 +63,11 @@ function App() {
 
   const handleReset = () => {
     resetGame(difficulty, gameMode)
+  }
+
+  const handleRevealBoard = () => {
+    revealAllCells()
+    setShowGameOverModal(false)
   }
 
   const handleInfoOpen = () => setShowInfo(true)
@@ -110,6 +116,7 @@ function App() {
         isOpen={showGameOverModal}
         totalRupees={currentRupees}
         onPlayAgain={handleReset}
+        onRevealBoard={handleRevealBoard}
       />
     </div>
   )

@@ -8,6 +8,8 @@ import React from 'react'
 import { GameMode } from '../stores/gameStore'
 import { computeTileClass, getDisplayProbability, formatHoleId } from '../utils/tileUtils'
 
+const DEBUG_MODE = false;
+
 const MemoizedRupeeModal = React.memo(RupeeModal)
 
 type HoleProps = {
@@ -25,6 +27,7 @@ export default React.memo(function Hole({
 }: HoleProps) {
   const cellValue = useGameStore(state => state.board[row][col])
   const isRevealed = useGameStore(state => state.revealed[row][col])
+  const isAutoRevealed = useGameStore(state => state.autoRevealed[row][col])
   const mode = useGameStore(state => state.mode)
   const solverProbability = useGameStore(state => 
     state.mode === GameMode.Solve && state.solvedBoard
@@ -89,8 +92,8 @@ export default React.memo(function Hole({
 
   // Determine tile styling based on game mode and cell state
   const tileClass = useMemo(() => (
-    computeTileClass(mode as GameMode, cellValue, isRevealed, solverProbability, isLowestProbability)
-  ), [mode, cellValue, isRevealed, solverProbability, isLowestProbability])
+    computeTileClass(mode as GameMode, cellValue, isRevealed, solverProbability, isLowestProbability, isAutoRevealed)
+  ), [mode, cellValue, isRevealed, solverProbability, isLowestProbability, isAutoRevealed])
 
   return (
     <button 
@@ -107,6 +110,9 @@ export default React.memo(function Hole({
               alt={itemName} 
               src={getImageForItem(itemName)} 
             />
+          )}
+          {!isRevealed && DEBUG_MODE && (
+            <p style={{ fontSize: '0.7em', color: 'rgba(255,255,255,1)', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>{itemName}</p>
           )}
         </>
       ) : (

@@ -45,11 +45,9 @@ function forEachNeighbor(cellIdx: number, width: number, height: number, callbac
 /**
  * Solve the board and return probabilities
  */
-export function (board: BoardCell[][], width: number, height: number, bombCount: number, rupoorCount: number): SolvedBoard | null {
-  const DEBUG = false
-  
+function normalizeBoard(board: BoardCell[][]): BoardCell[] {
   const flat1D = board.flat()
-  let solvedBoard = flat1D.slice(0)
+  const solvedBoard = flat1D.slice(0)
   // Convert empty cells (0) to unknown (-1) for solving
   for (let i = 0; i < solvedBoard.length; i++) {
     if (solvedBoard[i] === 0) {
@@ -57,9 +55,12 @@ export function (board: BoardCell[][], width: number, height: number, bombCount:
     }
   }
 
-  // Precompute neighbors for all cells to avoid repeated bounds checks
-  const neighborsByCell: number[][] = new Array(solvedBoard.length)
-  for (let i = 0; i < solvedBoard.length; i++) {
+  return solvedBoard
+}
+
+function buildNeighborsByCell(totalCells: number, width: number, height: number): number[][] {
+  const neighborsByCell: number[][] = new Array(totalCells)
+  for (let i = 0; i < totalCells; i++) {
     const neighbors: number[] = []
     forEachNeighbor(i, width, height, (neighborIdx) => {
       neighbors.push(neighborIdx)
@@ -67,9 +68,10 @@ export function (board: BoardCell[][], width: number, height: number, bombCount:
     neighborsByCell[i] = neighbors
   }
 
-  // Vanilla parity: if a revealed green (1) or rupoor (-2) is on the board, clear nearby unknowns
-  // (vanilla marks adjacent -1 to 0 for green cells, effectively removing those
-  // neighbors from constraint consideration).
+  return neighborsByCell
+}
+
+function applyVanillaParity(solvedBoard: BoardCell[], neighborsByCell: number[][]): void {
   for (let i = 0; i < solvedBoard.length; i++) {
     if (solvedBoard[i] === 1 || solvedBoard[i] === -2) {
       const neighbors = neighborsByCell[i]
@@ -81,68 +83,71 @@ export function (board: BoardCell[][], width: number, height: number, bombCount:
       }
     }
   }
+}
 
-  // Track already-known hazards so remaining counts reflect placed rupoors
-  const knownRupoorCount = solvedBoard.reduce((count, cell) => (
-    cell === -10 || cell === -2 ? count + 1 : count
-  ), 0)
-
-  let safeCount = solvedBoard.length
+function buildConstraints(
+  solvedBoard: BoardCell[],
+  neighborsByCell: number[][],
+  width: number,
+  debug: boolean
+): { constraints: number[][]; unknownIndices: number[] } {
   const constraints: number[][] = []
-  const unknownSet = new Set<number>() // Use Set for O(1) membership testing
-  
-  // Build constraints from numbered cells (rupee values)
-  if (DEBUG) console.log('Building constraints from board...')
+  const unknownSet = new Set<number>()
+
+  if (debug) console.log('Building constraints from board...')
   for (let i = 0; i < solvedBoard.length; i++) {
     const cell = solvedBoard[i]
-    // Vanilla parity: only treat values > 1 as constraint sources (greens are skipped)
     if (cell > 1) {
       const unknownNeighbors: number[] = []
       let expectedBombs = getExpectedBombCount(cell)
-      if (DEBUG) {
+      if (debug) {
         const colIndex = i % width
         const rowIndex = Math.floor(i / width)
         console.log(`Cell at [${rowIndex},${colIndex}] value=${cell} expects ${expectedBombs} bombs`)
       }
-      
-      // Count adjacent bombs and rupoors
+
       const neighbors = neighborsByCell[i]
       for (let n = 0; n < neighbors.length; n++) {
         const neighborIdx = neighbors[n]
         const neighborCell = solvedBoard[neighborIdx]
-        
+
         if (neighborCell === -1) {
           unknownNeighbors.push(neighborIdx)
           unknownSet.add(neighborIdx)
         } else if (neighborCell === -10 || neighborCell === -2) {
-          // Rupoors decrement expected bombs (vanilla uses -2 as rupoor marker)
           expectedBombs--
         }
       }
-      
-      // Only add constraint if there are unknown neighbors
+
       if (unknownNeighbors.length > 0) {
-        if (DEBUG) console.log(`  -> Constraint: ${unknownNeighbors.length} unknowns, expecting ${expectedBombs} bombs`)
+        if (debug) console.log(`  -> Constraint: ${unknownNeighbors.length} unknowns, expecting ${expectedBombs} bombs`)
         unknownNeighbors.push(expectedBombs)
         constraints.push(unknownNeighbors)
       } else {
-        if (DEBUG) console.log(`  -> No unknown neighbors, constraint skipped`)
+        if (debug) console.log('  -> No unknown neighbors, constraint skipped')
       }
     }
   }
-  if (DEBUG) console.log(`Total constraints: ${constraints.length}`)
+  if (debug) console.log(`Total constraints: ${constraints.length}`)
 
-  // Convert Set to array and create index map for O(1) lookup
-  const unknownIndices = Array.from(unknownSet)
-  const unknownCount = unknownIndices.length
-  const indexByCell = new Int32Array(solvedBoard.length)
+  return { constraints, unknownIndices: Array.from(unknownSet) }
+}
+
+function buildIndexByCell(totalCells: number, unknownIndices: number[]): Int32Array {
+  const indexByCell = new Int32Array(totalCells)
   indexByCell.fill(-1)
-  for (let i = 0; i < unknownCount; i++) {
+  for (let i = 0; i < unknownIndices.length; i++) {
     indexByCell[unknownIndices[i]] = i
   }
 
-  // Convert constraints to use unknown indices directly for faster lookup
-  const compactConstraints: { cells: number[]; expected: number }[] = []
+  return indexByCell
+}
+
+function buildCompactConstraints(
+  constraints: number[][],
+  indexByCell: Int32Array
+): { cells: number[]; expected: number }[] {
+  const compact: { cells: number[]; expected: number }[] = []
   for (let c = 0; c < constraints.length; c++) {
     const constraint = constraints[c]
     const expectedValue = constraint[constraint.length - 1]
@@ -154,18 +159,41 @@ export function (board: BoardCell[][], width: number, height: number, bombCount:
       }
     }
     if (cellPositions.length > 0) {
-      compactConstraints.push({ cells: cellPositions, expected: expectedValue })
+      compact.push({ cells: cellPositions, expected: expectedValue })
     }
   }
 
-  // Count safeCount (cells that are not already known)
+  return compact
+}
+
+function countSafeCells(solvedBoard: BoardCell[], unknownIndices: number[]): number {
+  let safeCount = solvedBoard.length
   for (let i = 0; i < solvedBoard.length; i++) {
     if (solvedBoard[i] !== -1) {
       safeCount--
     }
   }
 
-  safeCount -= unknownIndices.length
+  return safeCount - unknownIndices.length
+}
+
+export function solveBoardProbabilities(board: BoardCell[][], width: number, height: number, bombCount: number, rupoorCount: number): SolvedBoard | null {
+  const DEBUG = false
+  
+  const solvedBoard = normalizeBoard(board)
+  const neighborsByCell = buildNeighborsByCell(solvedBoard.length, width, height)
+  applyVanillaParity(solvedBoard, neighborsByCell)
+
+  // Track already-known hazards so remaining counts reflect placed rupoors
+  const knownRupoorCount = solvedBoard.reduce((count, cell) => (
+    cell === -10 || cell === -2 ? count + 1 : count
+  ), 0)
+
+  const { constraints, unknownIndices } = buildConstraints(solvedBoard, neighborsByCell, width, DEBUG)
+  const unknownCount = unknownIndices.length
+  const indexByCell = buildIndexByCell(solvedBoard.length, unknownIndices)
+  const compactConstraints = buildCompactConstraints(constraints, indexByCell)
+  const safeCount = countSafeCells(solvedBoard, unknownIndices)
   let computationLimitReached = false
   const totalCombinations = unknownCount <= 30 ? (1 << unknownCount) : Math.round(Math.pow(2, unknownCount))
   const remainingHazards = Math.max(0, bombCount + rupoorCount - knownRupoorCount)

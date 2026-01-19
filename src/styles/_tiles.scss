@@ -94,6 +94,13 @@
   background-color: $tile-rupee;
 }
 
+// Auto-revealed tile (shown after game over)
+.tile-auto-revealed {
+  background-color: $tile-auto-revealed !important;  // Yellow background
+  background-image: url('../assets/minigame/leather.jpg');
+  background-blend-mode: overlay;
+}
+
 // Probability color classes
 @each $prob, $color in $prob-colors {
   .prob-#{$prob} {

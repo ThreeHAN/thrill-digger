@@ -73,3 +73,20 @@ The game is similar to Minesweeper. When you dig up a rupee:
 - **Gold Rupee** (+300): 7-8 nearby hazards
 
 Hitting a bomb or rupoor ends the game immediately. Your final score is the total rupees collected minus the house fee.
+
+## Solver Performance Notes
+
+The constraint satisfaction solver uses exhaustive search, which can be computationally intensive. Performance scales with unknown cell count and constraint distribution, not linearly. Example on an 8×5 board:
+
+**No computation warning** - Sparse constraints:
+- Blue Rupee (5) at row 1, col 4
+- Gold Rupee (300) at row 2, col 1
+- Gold Rupee (300) at row 2, col 6
+
+**Triggers computation warning** - Same board with additional Blue Rupee (5) at row 3, col 4:
+- Blue Rupee (5) at row 1, col 4
+- Gold Rupee (300) at row 2, col 1
+- Gold Rupee (300) at row 2, col 6
+- Blue Rupee (5) at row 3, col 4
+
+The additional constraint creates exponentially more valid bomb placement configurations that the solver must evaluate, even though only one rupee was added.

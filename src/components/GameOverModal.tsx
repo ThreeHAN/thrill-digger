@@ -6,13 +6,18 @@ type GameOverModalProps = {
   isOpen: boolean
   totalRupees: number
   onPlayAgain: () => void
+  onRevealBoard: () => void
 }
 
-export default function GameOverModal({ isOpen, totalRupees, onPlayAgain }: GameOverModalProps) {
+export default function GameOverModal({ isOpen, totalRupees, onPlayAgain, onRevealBoard }: GameOverModalProps) {
   if (!isOpen) return null
 
   const handlePlayAgain = () => {
     onPlayAgain()
+  }
+
+  const handleRevealBoard = () => {
+    onRevealBoard()
   }
 
   return createPortal(
@@ -36,6 +41,12 @@ export default function GameOverModal({ isOpen, totalRupees, onPlayAgain }: Game
           </div>
         </div>
         <div className="game-over-actions">
+          <button 
+            className="wood-btn game-over-button"
+            onClick={handleRevealBoard}
+          >
+            Reveal Board
+          </button>
           <button 
             className="wood-btn game-over-button"
             onClick={handlePlayAgain}

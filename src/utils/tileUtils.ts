@@ -31,7 +31,8 @@ export function computeTileClass(
   cellValue: BoardCell,
   isRevealed: boolean,
   solverProbability: number | undefined,
-  isLowestProbability?: boolean
+  isLowestProbability?: boolean,
+  isAutoRevealed?: boolean
 ): string {
   let tileClass = 'tile undug'
 
@@ -46,6 +47,10 @@ export function computeTileClass(
       tileClass += ' tile-safe'
     } else if (isRevealed && cellValue === -1) {
       tileClass += ' tile-bomb'
+    }
+    // Add yellow background for auto-revealed tiles
+    if (isAutoRevealed) {
+      tileClass += ' tile-auto-revealed'
     }
   }
 
