@@ -63,6 +63,7 @@ main {
   font-size: 0.85rem;
   color: rgba(243, 229, 171, 0.7);
   border-top: 1px solid $border-lighter;
+  flex-shrink: 0;
 
   p {
     margin: 0;

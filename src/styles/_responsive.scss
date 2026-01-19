@@ -3,7 +3,7 @@
 // Landscape Mode Optimizations
 @media (orientation: landscape) {
   .game-container {
-    min-height: auto;
+    min-height: 100vh;
     justify-content: flex-start;
     padding-top: 8px;
   }
@@ -11,6 +11,7 @@
   .game-header {
     margin: 0;
     z-index: $z-header;
+    flex-shrink: 0;
   }
 
   main {
@@ -20,7 +21,8 @@
     align-items: flex-start;
     justify-content: center;
     gap: 12px;
-    height: 100vh;
+    flex: 1;
+    overflow-y: auto;
   }
 
   .board-area {
