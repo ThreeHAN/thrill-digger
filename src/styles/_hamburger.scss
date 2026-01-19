@@ -77,9 +77,33 @@
   padding: 20px 0;
   z-index: $z-hamburger;
   box-shadow: $shadow-large;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  overscroll-behavior: contain;
 
   @media (min-width: 1200px) {
     right: calc((100vw - 1200px) / 2);
+  }
+}
+
+@media (max-height: 600px) {
+  .hamburger-menu-content {
+    padding: 12px 0;
+  }
+
+  .hamburger-menu-item {
+    padding: 12px 16px;
+  }
+
+  .hamburger-menu-section {
+    padding: 8px 0;
+  }
+
+  .hamburger-menu-subitem {
+    padding: 8px 16px 8px 26px;
   }
 }
 
