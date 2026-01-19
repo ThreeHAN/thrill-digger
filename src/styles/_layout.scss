@@ -9,6 +9,7 @@
   height: 100%;
   width: 100%;
   padding: 8px;
+  padding-bottom: calc(40px + 16px);
   box-sizing: border-box;
 }
 
@@ -58,14 +59,18 @@ main {
 
 // Footer
 .app-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   width: 100%;
   text-align: center;
   padding: 6px 8px;
-  margin-top: auto;
   font-size: 0.85rem;
   color: rgba(243, 229, 171, 0.7);
   border-top: 1px solid $border-lighter;
-  flex-shrink: 0;
+  background-color: $page-bg;
+  z-index: 100;
 
   p {
     margin: 0;
