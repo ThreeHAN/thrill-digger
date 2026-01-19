@@ -37,8 +37,19 @@
 
 // Hamburger Menu Container
 .hamburger-menu {
-  position: absolute;
+  position: fixed;
+  top: 0;
+  left: 0;
   right: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  pointer-events: none;
+
+  .hamburger-btn {
+    position: absolute;
+    right: 0;
+    pointer-events: auto;
+  }
 }
 
 .hamburger-backdrop {
@@ -49,6 +60,7 @@
   bottom: 0;
   background: $bg-overlay-darker;
   z-index: $z-hamburger-backdrop;
+  pointer-events: auto;
 }
 
 .hamburger-menu-content {
@@ -61,9 +73,14 @@
   border-left: 3px solid $wood-medium;
   display: flex;
   flex-direction: column;
+  padding-events: auto;
   padding: 20px 0;
   z-index: $z-hamburger;
   box-shadow: $shadow-large;
+
+  @media (min-width: 1200px) {
+    right: calc((100vw - 1200px) / 2);
+  }
 }
 
 .hamburger-menu-item {
