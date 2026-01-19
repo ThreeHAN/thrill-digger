@@ -45,10 +45,7 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
             <button className="hamburger-menu-item" onClick={() => handleMenuClick(onNewGame)}>
               New Game
             </button>
-            <button className="hamburger-menu-item" onClick={() => handleMenuClick(onInfo)}>
-              Info
-            </button>
-            
+        
             <div className="hamburger-menu-section">
               <h3 className="hamburger-menu-label">Game Mode</h3>
               <button
@@ -86,6 +83,10 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
                 </button>
               ))}
             </div>
+
+            <button className="hamburger-menu-item" onClick={() => handleMenuClick(onInfo)}>
+              Info
+            </button>
           </div>
         </div>
       )}
