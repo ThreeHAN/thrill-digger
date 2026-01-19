@@ -46,6 +46,8 @@ main {
   align-items: center;
   width: 100%;
   margin-top: 0px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .board-area {
