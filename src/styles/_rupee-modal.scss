@@ -16,7 +16,7 @@
 
 // Modal container positioned relative to gameboard
 .modal-container {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -30,7 +30,7 @@
 // Transparent backdrop for rupee modal
 .rupee-backdrop {
   background: $bg-overlay-medium;
-  position: absolute;
+  position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;

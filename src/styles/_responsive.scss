@@ -106,10 +106,10 @@
   }
 
   .circular-modal-content {
-    width: min(350px, 85vw);
-    height: min(350px, 85vw);
-    max-width: 350px;
-    max-height: 350px;
+    width: min(220px, 70vw);
+    height: min(220px, 70vw);
+    max-width: 220px;
+    max-height: 220px;
   }
 
   .rupee-wheel {
@@ -271,13 +271,12 @@
   }
 }
 
-// Portrait mode - ensure hamburger menu button is always visible on top
-@media (orientation: portrait) {
-  .hamburger-menu {
-    z-index: $z-hamburger;
-  }
-
-  .hamburger-btn {
-    z-index: $z-hamburger;
+// Mobile landscape adjustments for rupee modal
+@media (max-width: 900px) and (orientation: landscape) {
+  .circular-modal-content {
+    width: min(200px, 60vw);
+    height: min(200px, 60vh);
+    max-width: 200px;
+    max-height: 200px;
   }
 }
