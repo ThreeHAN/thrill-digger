@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Level } from '../constants/levels'
 import { LEVELS } from '../constants/levels'
 import type { GameMode } from '../stores/gameStore'
+import { useGameStore } from '../stores/gameStore'
 
 type HamburgerMenuProps = {
   onNewGame: () => void
@@ -14,6 +15,7 @@ type HamburgerMenuProps = {
 
 export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, gameMode, setGameMode }: HamburgerMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const triggerCloseRupeeModals = useGameStore(state => state.triggerCloseRupeeModals)
 
   const handleMenuClick = (callback: () => void) => {
     callback()
@@ -24,7 +26,12 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
     <div className="hamburger-menu">
       <button
         className={`hamburger-btn ${isOpen ? 'active' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (!isOpen) {
+            triggerCloseRupeeModals()
+          }
+          setIsOpen(!isOpen)
+        }}
         aria-label="Menu"
       >
         <span></span>

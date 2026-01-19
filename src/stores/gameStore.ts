@@ -30,6 +30,8 @@ export interface GameState {
   computationWarning: { time: number; combinations: number }
   boardTotal: number
   showInvalidBoardError: boolean
+  requiresConfirmation: boolean
+  closeRupeeModals: number
 }
 
 interface GameActions {
@@ -46,6 +48,9 @@ interface GameActions {
   setShowInvalidBoardError: (show: boolean) => void
   solveBoardInternal: () => void
   digCell: (row: number, col: number) => void
+  confirmComputation: () => void
+  cancelComputation: () => void
+  triggerCloseRupeeModals: () => void
 }
 
 type GameStore = GameState & GameActions
@@ -81,6 +86,8 @@ const initialGameState = (difficulty: Difficulty): GameState => {
     computationWarning: { time: 0, combinations: 0 },
     boardTotal: 0,
     showInvalidBoardError: false,
+    requiresConfirmation: false,
+    closeRupeeModals: 0,
   }
 }
 
@@ -200,27 +207,39 @@ export const useGameStore = create<GameStore>()(
     // Show warning if computation will be heavy
     if (unknownIndicesCount >= 22) {
       const estimatedTime = Math.floor(totalCombinations / 1111111)
-      set({
-        showComputationWarning: true,
-        computationWarning: { time: estimatedTime, combinations: totalCombinations },
-      })
-
-      // Defer computation to allow UI to update
-      setTimeout(() => {
-        const state = get()
-        const result = solveBoardProbabilities(
-          state.board,
-          state.config.width,
-          state.config.height,
-          state.config.bombCount,
-          state.rupoorCount
-        )
+      
+      // If time > 30 seconds, require confirmation
+      if (estimatedTime > 30) {
         set({
-          solvedBoard: result,
-          showComputationWarning: false,
-          showInvalidBoardError: result === null,
+          showComputationWarning: true,
+          computationWarning: { time: estimatedTime, combinations: totalCombinations },
+          requiresConfirmation: true,
         })
-      }, 100)
+      } else {
+        // Show warning but auto-proceed
+        set({
+          showComputationWarning: true,
+          computationWarning: { time: estimatedTime, combinations: totalCombinations },
+          requiresConfirmation: false,
+        })
+
+        // Defer computation to allow UI to update
+        setTimeout(() => {
+          const state = get()
+          const result = solveBoardProbabilities(
+            state.board,
+            state.config.width,
+            state.config.height,
+            state.config.bombCount,
+            state.rupoorCount
+          )
+          set({
+            solvedBoard: result,
+            showComputationWarning: false,
+            showInvalidBoardError: result === null,
+          })
+        }, 100)
+      }
     } else {
       // Compute immediately
       const result = solveBoardProbabilities(
@@ -235,6 +254,40 @@ export const useGameStore = create<GameStore>()(
         showInvalidBoardError: result === null,
       })
     }
+  },
+
+  confirmComputation: () => {
+    const state = get()
+    set({ requiresConfirmation: false })
+    
+    // Start computation
+    setTimeout(() => {
+      const state = get()
+      const result = solveBoardProbabilities(
+        state.board,
+        state.config.width,
+        state.config.height,
+        state.config.bombCount,
+        state.rupoorCount
+      )
+      set({
+        solvedBoard: result,
+        showComputationWarning: false,
+        showInvalidBoardError: result === null,
+      })
+    }, 100)
+  },
+
+  cancelComputation: () => {
+    set({
+      showComputationWarning: false,
+      requiresConfirmation: false,
+    })
+  },
+
+  triggerCloseRupeeModals: () => {
+    const state = get()
+    set({ closeRupeeModals: state.closeRupeeModals + 1 })
   },
   
   digCell: (row: number, col: number) => {

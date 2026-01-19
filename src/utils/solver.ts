@@ -23,6 +23,26 @@ function getExpectedBombCount(rupeeValue: number): number {
 }
 
 /**
+ * Helper to iterate over 8 neighbors of a cell
+ */
+function forEachNeighbor(cellIdx: number, width: number, height: number, callback: (neighborIdx: number) => void) {
+  const colIndex = cellIdx % width
+  const rowIndex = Math.floor(cellIdx / width)
+  
+  for (let colOffset = -1; colOffset <= 1; colOffset++) {
+    for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
+      if (colOffset !== 0 || rowOffset !== 0) {
+        const ncol = colIndex + colOffset
+        const nrow = rowIndex + rowOffset
+        if (ncol >= 0 && ncol < width && nrow >= 0 && nrow < height) {
+          callback(ncol + nrow * width)
+        }
+      }
+    }
+  }
+}
+
+/**
  * Solve the board and return probabilities
  */
 export function solveBoardProbabilities(board: BoardCell[][], width: number, height: number, bombCount: number, rupoorCount: number): SolvedBoard | null {
@@ -42,24 +62,11 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   // neighbors from constraint consideration).
   for (let i = 0; i < solvedBoard.length; i++) {
     if (solvedBoard[i] === 1 || solvedBoard[i] === -2) {
-      const colIndex = i % width
-      const rowIndex = Math.floor(i / width)
-      
-      // Check all 8 neighbors
-      for (let colOffset = -1; colOffset <= 1; colOffset++) {
-        for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
-          if (colOffset !== 0 || rowOffset !== 0) {
-            const ncol = colIndex + colOffset
-            const nrow = rowIndex + rowOffset
-            if (ncol >= 0 && ncol < width && nrow >= 0 && nrow < height) {
-              const neighborIdx = ncol + nrow * width
-              if (solvedBoard[neighborIdx] === -1) {
-                solvedBoard[neighborIdx] = 0
-              }
-            }
-          }
+      forEachNeighbor(i, width, height, (neighborIdx) => {
+        if (solvedBoard[neighborIdx] === -1) {
+          solvedBoard[neighborIdx] = 0
         }
-      }
+      })
     }
   }
 
@@ -70,9 +77,8 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
 
   let safeCount = solvedBoard.length
   const constraints: number[][] = []
-  const unknownIndices: number[] = []
-
-  // Build constraints from numbered cells (rupee values)
+  const unknownSet = new Set<number>() // Use Set for O(1) membership testing
+  
   // Build constraints from numbered cells (rupee values)
   console.log('Building constraints from board...')
   for (let i = 0; i < solvedBoard.length; i++) {
@@ -86,27 +92,17 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
       console.log(`Cell at [${rowIndex},${colIndex}] value=${cell} expects ${expectedBombs} bombs`)
       
       // Count adjacent bombs and rupoors
-      for (let colOffset = -1; colOffset <= 1; colOffset++) {
-        for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
-          if (colIndex + colOffset >= 0 && colIndex + colOffset < width &&
-            rowIndex + rowOffset >= 0 && rowIndex + rowOffset < height) {
-            if (colOffset !== 0 || rowOffset !== 0) {
-              const neighborIdx = colIndex + colOffset + (rowIndex + rowOffset) * width
-              const neighborCell = solvedBoard[neighborIdx]
-              
-              if (neighborCell === -1) {
-                unknownNeighbors.push(neighborIdx)
-                if (!unknownIndices.includes(neighborIdx)) {
-                  unknownIndices.push(neighborIdx)
-                }
-              } else if (neighborCell === -10 || neighborCell === -2) {
-                // Rupoors decrement expected bombs (vanilla uses -2 as rupoor marker)
-                expectedBombs--
-              }
-            }
-          }
+      forEachNeighbor(i, width, height, (neighborIdx) => {
+        const neighborCell = solvedBoard[neighborIdx]
+        
+        if (neighborCell === -1) {
+          unknownNeighbors.push(neighborIdx)
+          unknownSet.add(neighborIdx)
+        } else if (neighborCell === -10 || neighborCell === -2) {
+          // Rupoors decrement expected bombs (vanilla uses -2 as rupoor marker)
+          expectedBombs--
         }
-      }
+      })
       
       // Only add constraint if there are unknown neighbors
       if (unknownNeighbors.length > 0) {
@@ -119,6 +115,13 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
     }
   }
   console.log(`Total constraints: ${constraints.length}`)
+
+  // Convert Set to array and create index map for O(1) lookup
+  const unknownIndices = Array.from(unknownSet)
+  const unknownIndexMap = new Map<number, number>()
+  for (let i = 0; i < unknownIndices.length; i++) {
+    unknownIndexMap.set(unknownIndices[i], i)
+  }
 
   // Count safeCount (cells that are not already known)
   for (let i = 0; i < solvedBoard.length; i++) {
@@ -134,6 +137,11 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   const totalCombinations = Math.round(Math.pow(2, unknownCount))
   const remainingHazards = Math.max(0, bombCount + rupoorCount - knownRupoorCount)
 
+  // Reuse placement array to avoid allocations
+  const placement: number[] = new Array(unknownCount)
+  const maxBombsNeeded = remainingHazards + safeCount
+  const minBombsNeeded = Math.max(0, remainingHazards - safeCount)
+
   // Test all possible bomb placements
   for (let combo = 0; combo < totalCombinations; ++combo) {
     if (combo > 1e8) {
@@ -141,39 +149,41 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
       break
     }
 
-    const placement: number[] = []
+    // Use bitwise operations for faster bit extraction
     let bombsPlaced = 0
+    for (let bit = 0; bit < unknownCount; ++bit) {
+      const isBomb = (combo >> bit) & 1
+      placement[bit] = isBomb
+      bombsPlaced += isBomb
+    }
 
-    for (let bit = 0, remaining = combo; bit < unknownCount; ++bit, remaining = Math.floor(remaining / 2)) {
-      placement.push(remaining % 2)
-      if (remaining % 2 === 1) {
-        bombsPlaced++
+    // Early termination: check bomb count bounds first before constraint checking
+    if (bombsPlaced > maxBombsNeeded || bombsPlaced < minBombsNeeded) {
+      continue
+    }
+
+    let constraintsSatisfied = 0
+
+    for (let c = 0; c < constraints.length; c++) {
+      const constraint = constraints[c]
+      let bombsNearCell = 0
+
+      for (let pos = 0; pos < constraint.length - 1; pos++) {
+        const unknownCellIdx = constraint[pos]
+        const posInPlacement = unknownIndexMap.get(unknownCellIdx)
+        if (posInPlacement !== undefined) {
+          bombsNearCell += placement[posInPlacement]
+        }
+      }
+
+      const expectedValue = constraint[constraint.length - 1]
+      if (bombsNearCell === expectedValue || bombsNearCell === expectedValue - 1) {
+        constraintsSatisfied++
       }
     }
 
-    if (bombsPlaced <= remainingHazards && bombsPlaced >= remainingHazards - safeCount) {
-      let constraintsSatisfied = 0
-
-      for (let c = 0; c < constraints.length; c++) {
-        const constraint = constraints[c]
-        let bombsNearCell = 0
-
-        for (let pos = 0; pos < constraint.length - 1; pos++) {
-          const unknownIndex = unknownIndices.indexOf(constraint[pos])
-          if (unknownIndex !== -1) {
-            bombsNearCell += placement[unknownIndex]
-          }
-        }
-
-        const expectedValue = constraint[constraint.length - 1]
-        if (bombsNearCell === expectedValue || bombsNearCell === expectedValue - 1) {
-          constraintsSatisfied++
-        }
-      }
-
-      if (constraintsSatisfied === constraints.length) {
-        validSolutions.push(placement)
-      }
+    if (constraintsSatisfied === constraints.length) {
+      validSolutions.push([...placement])
     }
   }
 

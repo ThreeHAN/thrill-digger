@@ -29,6 +29,10 @@ function App() {
   const currentRupees = useGameStore(state => state.currentRupees)
   const boardTotal = useGameStore(state => state.boardTotal)
   const showComputationWarning = useGameStore(state => state.showComputationWarning)
+  const computationWarning = useGameStore(state => state.computationWarning)
+  const requiresConfirmation = useGameStore(state => state.requiresConfirmation)
+  const confirmComputation = useGameStore(state => state.confirmComputation)
+  const cancelComputation = useGameStore(state => state.cancelComputation)
 
   useEffect(() => {
     newGame(difficulty, gameMode)
@@ -95,6 +99,11 @@ function App() {
 
       <ComputationWarningModal
         isOpen={showComputationWarning}
+        estimatedTime={computationWarning.time}
+        combinations={computationWarning.combinations}
+        requiresConfirmation={requiresConfirmation}
+        onConfirm={confirmComputation}
+        onCancel={cancelComputation}
       />
 
       <GameOverModal

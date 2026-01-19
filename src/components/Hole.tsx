@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState } from 'react'
+import { useMemo, useCallback, useState, useEffect } from 'react'
 import { getItemName } from '../utils/gameLogic'
 import { getImageForItem } from '../utils/imageMap'
 import { useGameStore } from '../stores/gameStore'
@@ -36,9 +36,17 @@ export default React.memo(function Hole({
   const updateCell = useGameStore(state => state.updateCell)
   const difficulty = useGameStore(state => state.difficulty)
   const digCell = useGameStore(state => state.digCell)
+  const closeRupeeModals = useGameStore(state => state.closeRupeeModals)
   
   const [showModal, setShowModal] = useState(false)
   const [isExploding, setIsExploding] = useState(false)
+  
+  // Close modal when global close signal is triggered
+  useEffect(() => {
+    if (closeRupeeModals > 0) {
+      setShowModal(false)
+    }
+  }, [closeRupeeModals])
   
   const holeId = formatHoleId(row, col)
   

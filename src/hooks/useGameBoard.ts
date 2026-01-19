@@ -68,6 +68,7 @@ export function useGameBoard(initialDifficulty: Difficulty = Difficulty.Beginner
   const [isComputing, setIsComputing] = useState(false)
   const [boardTotal, setBoardTotal] = useState(0)
   const [showInvalidBoardError, setShowInvalidBoardError] = useState(false)
+  const [pendingComputation, setPendingComputation] = useState<{ board: BoardCell[][], width: number, height: number, bombCount: number, rupoorCount: number } | null>(null)
 
   // Detect heavy computation and show warning first
   useEffect(() => {
@@ -80,26 +81,37 @@ export function useGameBoard(initialDifficulty: Difficulty = Difficulty.Beginner
         setIsComputing(true)
         const estimatedTime = Math.floor(totalCombinations / 1111111)
         setComputationWarning({ time: estimatedTime, combinations: totalCombinations })
-        setShowComputationWarning(true)
         
-        // Defer the actual computation so the modal shows first
-        const timer = setTimeout(() => {
-          const result = solveBoardProbabilities(
-            gameState.board,
-            gameState.config.width,
-            gameState.config.height,
-            gameState.config.bombCount,
-            gameState.rupoorCount
-          )
-          setSolvedBoard(result)
-          if (result === null) {
-            setShowInvalidBoardError(true)
-          }
-          // Close the modal after computation finishes
-          setShowComputationWarning(false)
+        // If time > 30 seconds, require confirmation
+        if (estimatedTime > 30) {
+          setShowComputationWarning(true)
+          setPendingComputation({
+            board: gameState.board,
+            width: gameState.config.width,
+            height: gameState.config.height,
+            bombCount: gameState.config.bombCount,
+            rupoorCount: gameState.rupoorCount
+          })
           setIsComputing(false)
-        }, 100)
-        return () => clearTimeout(timer)
+        } else {
+          // Auto-proceed with computation
+          const timer = setTimeout(() => {
+            const result = solveBoardProbabilities(
+              gameState.board,
+              gameState.config.width,
+              gameState.config.height,
+              gameState.config.bombCount,
+              gameState.rupoorCount
+            )
+            setSolvedBoard(result)
+            if (result === null) {
+              setShowInvalidBoardError(true)
+            }
+            setShowComputationWarning(false)
+            setIsComputing(false)
+          }, 100)
+          return () => clearTimeout(timer)
+        }
       } else {
         // No warning needed, compute immediately
         setIsComputing(true)
@@ -203,6 +215,34 @@ export function useGameBoard(initialDifficulty: Difficulty = Difficulty.Beginner
     newGame(difficulty, mode)
   }, [newGame])
 
+  const handleComputationConfirm = useCallback(() => {
+    if (pendingComputation) {
+      setIsComputing(true)
+      const timer = setTimeout(() => {
+        const result = solveBoardProbabilities(
+          pendingComputation.board,
+          pendingComputation.width,
+          pendingComputation.height,
+          pendingComputation.bombCount,
+          pendingComputation.rupoorCount
+        )
+        setSolvedBoard(result)
+        if (result === null) {
+          setShowInvalidBoardError(true)
+        }
+        setShowComputationWarning(false)
+        setIsComputing(false)
+        setPendingComputation(null)
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [pendingComputation])
+
+  const handleComputationCancel = useCallback(() => {
+    setShowComputationWarning(false)
+    setPendingComputation(null)
+  }, [])
+
   return {
     gameState: { ...gameState, solvedBoard },
     newGame,
@@ -220,5 +260,7 @@ export function useGameBoard(initialDifficulty: Difficulty = Difficulty.Beginner
     boardTotal,
     showInvalidBoardError,
     setShowInvalidBoardError,
+    handleComputationConfirm,
+    handleComputationCancel,
   }
 }
