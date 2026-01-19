@@ -109,6 +109,23 @@ Images imported via [assets/images.ts](src/assets/images.ts) barrel file, then m
 #### Solver Performance Gotchas
 Performance doesn't scale linearly with unknown cell count - constraint overlap matters significantly. Example: an 8×5 board with sparse high-value constraints (300 rupees at opposite corners, 5 rupees in middle) can trigger warnings even with only 3-4 visible constraints, because the solver exhaustively searches all valid bomb placements across the entire board. Boards with tightly clustered constraints or large empty zones are slower than evenly distributed ones.
 
+## Solver Performance Notes
+
+The constraint satisfaction solver uses exhaustive search, which can be computationally intensive. Performance scales with unknown cell count and constraint distribution, not linearly. Example on an 8×5 board:
+
+**No computation warning** - Sparse constraints:
+- Blue Rupee (5) at row 1, col 4
+- Gold Rupee (300) at row 2, col 1
+- Gold Rupee (300) at row 2, col 6
+
+**Triggers computation warning** - Same board with additional Blue Rupee (5) at row 3, col 4:
+- Blue Rupee (5) at row 1, col 4
+- Gold Rupee (300) at row 2, col 1
+- Gold Rupee (300) at row 2, col 6
+- Blue Rupee (5) at row 3, col 4
+
+The additional constraint creates exponentially more valid bomb placement configurations that the solver must evaluate, even though only one rupee was added.
+
 **When implementing solver optimizations or board validation**: Test with sparse, high-value constraint layouts (see `Solve Mode` example above) as they represent worst-case performance scenarios.
 
 ### UI Theming

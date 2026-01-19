@@ -43,6 +43,17 @@ export default React.memo(function Hole({
   
   const [showModal, setShowModal] = useState(false)
   const [isExploding, setIsExploding] = useState(false)
+
+  // Reset explosion visual when a new game starts or the underlying cell changes
+  useEffect(() => {
+    if (!isGameOver) {
+      setIsExploding(false)
+    }
+  }, [isGameOver])
+
+  useEffect(() => {
+    setIsExploding(false)
+  }, [cellValue])
   
   // Close modal when global close signal is triggered
   useEffect(() => {
