@@ -1,3 +1,5 @@
+@use './variables' as *;
+
 .game-over-header {
   display: block;
   text-align: center;
@@ -5,6 +7,7 @@
   h2 {
     font-size: clamp(2rem, 8vw, 4rem);
     margin: 0;
+    color: $primary-text;
   }
 }
 
@@ -22,7 +25,7 @@
   gap: clamp(8px, 3vw, 12px);
   font-size: clamp(1.5rem, 6vw, 2.5rem);
   font-weight: bold;
-  color: #ffd700;
+  color: $primary-text;
 }
 
 .game-over-rupee-image {
