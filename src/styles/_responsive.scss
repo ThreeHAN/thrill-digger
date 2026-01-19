@@ -23,6 +23,11 @@
     height: 100vh;
   }
 
+  .board-area {
+    width: auto;
+    flex: 0 0 auto;
+  }
+
   .hazard-stats {
     flex-direction: column;
     margin: 0;
