@@ -257,7 +257,6 @@ export const useGameStore = create<GameStore>()(
   },
 
   confirmComputation: () => {
-    const state = get()
     set({ requiresConfirmation: false })
     
     // Start computation
