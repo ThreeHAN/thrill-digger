@@ -270,3 +270,14 @@
     --tile-size: clamp(22px, 5vh, 32px);
   }
 }
+
+// Portrait mode - ensure hamburger menu button is always visible on top
+@media (orientation: portrait) {
+  .hamburger-menu {
+    z-index: $z-hamburger;
+  }
+
+  .hamburger-btn {
+    z-index: $z-hamburger;
+  }
+}
