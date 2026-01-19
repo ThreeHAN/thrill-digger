@@ -45,8 +45,8 @@ function forEachNeighbor(cellIdx: number, width: number, height: number, callbac
 /**
  * Solve the board and return probabilities
  */
-export function solveBoardProbabilities(board: BoardCell[][], width: number, height: number, bombCount: number, rupoorCount: number): SolvedBoard | null {
-  
+export function (board: BoardCell[][], width: number, height: number, bombCount: number, rupoorCount: number): SolvedBoard | null {
+  const DEBUG = false
   
   const flat1D = board.flat()
   let solvedBoard = flat1D.slice(0)
@@ -57,16 +57,28 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
     }
   }
 
+  // Precompute neighbors for all cells to avoid repeated bounds checks
+  const neighborsByCell: number[][] = new Array(solvedBoard.length)
+  for (let i = 0; i < solvedBoard.length; i++) {
+    const neighbors: number[] = []
+    forEachNeighbor(i, width, height, (neighborIdx) => {
+      neighbors.push(neighborIdx)
+    })
+    neighborsByCell[i] = neighbors
+  }
+
   // Vanilla parity: if a revealed green (1) or rupoor (-2) is on the board, clear nearby unknowns
   // (vanilla marks adjacent -1 to 0 for green cells, effectively removing those
   // neighbors from constraint consideration).
   for (let i = 0; i < solvedBoard.length; i++) {
     if (solvedBoard[i] === 1 || solvedBoard[i] === -2) {
-      forEachNeighbor(i, width, height, (neighborIdx) => {
+      const neighbors = neighborsByCell[i]
+      for (let n = 0; n < neighbors.length; n++) {
+        const neighborIdx = neighbors[n]
         if (solvedBoard[neighborIdx] === -1) {
           solvedBoard[neighborIdx] = 0
         }
-      })
+      }
     }
   }
 
@@ -80,19 +92,23 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   const unknownSet = new Set<number>() // Use Set for O(1) membership testing
   
   // Build constraints from numbered cells (rupee values)
-  console.log('Building constraints from board...')
+  if (DEBUG) console.log('Building constraints from board...')
   for (let i = 0; i < solvedBoard.length; i++) {
     const cell = solvedBoard[i]
     // Vanilla parity: only treat values > 1 as constraint sources (greens are skipped)
     if (cell > 1) {
       const unknownNeighbors: number[] = []
       let expectedBombs = getExpectedBombCount(cell)
-      const colIndex = i % width
-      const rowIndex = Math.floor(i / width)
-      console.log(`Cell at [${rowIndex},${colIndex}] value=${cell} expects ${expectedBombs} bombs`)
+      if (DEBUG) {
+        const colIndex = i % width
+        const rowIndex = Math.floor(i / width)
+        console.log(`Cell at [${rowIndex},${colIndex}] value=${cell} expects ${expectedBombs} bombs`)
+      }
       
       // Count adjacent bombs and rupoors
-      forEachNeighbor(i, width, height, (neighborIdx) => {
+      const neighbors = neighborsByCell[i]
+      for (let n = 0; n < neighbors.length; n++) {
+        const neighborIdx = neighbors[n]
         const neighborCell = solvedBoard[neighborIdx]
         
         if (neighborCell === -1) {
@@ -102,25 +118,44 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
           // Rupoors decrement expected bombs (vanilla uses -2 as rupoor marker)
           expectedBombs--
         }
-      })
+      }
       
       // Only add constraint if there are unknown neighbors
       if (unknownNeighbors.length > 0) {
-        console.log(`  -> Constraint: ${unknownNeighbors.length} unknowns, expecting ${expectedBombs} bombs`)
+        if (DEBUG) console.log(`  -> Constraint: ${unknownNeighbors.length} unknowns, expecting ${expectedBombs} bombs`)
         unknownNeighbors.push(expectedBombs)
         constraints.push(unknownNeighbors)
       } else {
-        console.log(`  -> No unknown neighbors, constraint skipped`)
+        if (DEBUG) console.log(`  -> No unknown neighbors, constraint skipped`)
       }
     }
   }
-  console.log(`Total constraints: ${constraints.length}`)
+  if (DEBUG) console.log(`Total constraints: ${constraints.length}`)
 
   // Convert Set to array and create index map for O(1) lookup
   const unknownIndices = Array.from(unknownSet)
-  const unknownIndexMap = new Map<number, number>()
-  for (let i = 0; i < unknownIndices.length; i++) {
-    unknownIndexMap.set(unknownIndices[i], i)
+  const unknownCount = unknownIndices.length
+  const indexByCell = new Int32Array(solvedBoard.length)
+  indexByCell.fill(-1)
+  for (let i = 0; i < unknownCount; i++) {
+    indexByCell[unknownIndices[i]] = i
+  }
+
+  // Convert constraints to use unknown indices directly for faster lookup
+  const compactConstraints: { cells: number[]; expected: number }[] = []
+  for (let c = 0; c < constraints.length; c++) {
+    const constraint = constraints[c]
+    const expectedValue = constraint[constraint.length - 1]
+    const cellPositions: number[] = []
+    for (let pos = 0; pos < constraint.length - 1; pos++) {
+      const idx = indexByCell[constraint[pos]]
+      if (idx !== -1) {
+        cellPositions.push(idx)
+      }
+    }
+    if (cellPositions.length > 0) {
+      compactConstraints.push({ cells: cellPositions, expected: expectedValue })
+    }
   }
 
   // Count safeCount (cells that are not already known)
@@ -131,14 +166,14 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   }
 
   safeCount -= unknownIndices.length
-  const validSolutions: number[][] = []
   let computationLimitReached = false
-  const unknownCount = unknownIndices.length
-  const totalCombinations = Math.round(Math.pow(2, unknownCount))
+  const totalCombinations = unknownCount <= 30 ? (1 << unknownCount) : Math.round(Math.pow(2, unknownCount))
   const remainingHazards = Math.max(0, bombCount + rupoorCount - knownRupoorCount)
 
   // Reuse placement array to avoid allocations
   const placement: number[] = new Array(unknownCount)
+  const bombOccurrencesPerUnknown: number[] = new Array(unknownCount).fill(0)
+  let validSolutionCount = 0
   const maxBombsNeeded = remainingHazards + safeCount
   const minBombsNeeded = Math.max(0, remainingHazards - safeCount)
 
@@ -164,26 +199,33 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
 
     let constraintsSatisfied = 0
 
-    for (let c = 0; c < constraints.length; c++) {
-      const constraint = constraints[c]
+    for (let c = 0; c < compactConstraints.length; c++) {
+      const { cells, expected } = compactConstraints[c]
       let bombsNearCell = 0
 
-      for (let pos = 0; pos < constraint.length - 1; pos++) {
-        const unknownCellIdx = constraint[pos]
-        const posInPlacement = unknownIndexMap.get(unknownCellIdx)
-        if (posInPlacement !== undefined) {
-          bombsNearCell += placement[posInPlacement]
+      for (let pos = 0; pos < cells.length; pos++) {
+        bombsNearCell += placement[cells[pos]]
+
+        if (bombsNearCell > expected) {
+          break
+        }
+
+        const remaining = cells.length - pos - 1
+        if (bombsNearCell + remaining < expected - 1) {
+          break
         }
       }
 
-      const expectedValue = constraint[constraint.length - 1]
-      if (bombsNearCell === expectedValue || bombsNearCell === expectedValue - 1) {
+      if (bombsNearCell === expected || bombsNearCell === expected - 1) {
         constraintsSatisfied++
       }
     }
 
-    if (constraintsSatisfied === constraints.length) {
-      validSolutions.push([...placement])
+    if (constraintsSatisfied === compactConstraints.length) {
+      validSolutionCount++
+      for (let i = 0; i < unknownCount; i++) {
+        bombOccurrencesPerUnknown[i] += placement[i]
+      }
     }
   }
 
@@ -192,12 +234,14 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   }
 
   // Validate board
-  console.log('=== Validation Results ===')
-  console.log('Constraints:', constraints.length, 'Unknown indices:', unknownIndices.length)
-  console.log('Valid solutions found:', validSolutions.length)
-  console.log('Total combinations tested:', totalCombinations)
+  if (DEBUG) {
+    console.log('=== Validation Results ===')
+    console.log('Constraints:', compactConstraints.length, 'Unknown indices:', unknownIndices.length)
+    console.log('Valid solutions found:', validSolutionCount)
+    console.log('Total combinations tested:', totalCombinations)
+  }
   
-  if (constraints.length > 0 && validSolutions.length === 0) {
+  if (compactConstraints.length > 0 && validSolutionCount === 0) {
     console.log('❌ BOARD INVALID: No valid solutions found for constraints')
     console.log('Constraints were:', constraints)
     return null
@@ -209,14 +253,12 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   for (let unknownPos = 0; unknownPos < unknownIndices.length; unknownPos++) {
     let bombOccurrences = 0
 
-    for (let solutionIdx = 0; solutionIdx < validSolutions.length; solutionIdx++) {
-      bombOccurrences += validSolutions[solutionIdx][unknownPos]
-    }
+    bombOccurrences = bombOccurrencesPerUnknown[unknownPos]
 
     if (computationLimitReached && bombOccurrences === 0) {
       solvedBoard[unknownIndices[unknownPos]] = -2 // Unknown
     } else {
-      const probability = bombOccurrences / validSolutions.length
+      const probability = bombOccurrences / validSolutionCount
       remainingExpected -= probability
       solvedBoard[unknownIndices[unknownPos]] = probability
     }
