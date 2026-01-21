@@ -167,14 +167,16 @@ function buildCompactConstraints(
 }
 
 function countSafeCells(solvedBoard: BoardCell[], unknownIndices: number[]): number {
+  // Count unknown cells (-1) that are NOT part of the constraint system
+  // These are "free" cells where we distribute remaining probability
   let safeCount = solvedBoard.length
   for (let i = 0; i < solvedBoard.length; i++) {
     if (solvedBoard[i] !== -1) {
       safeCount--
     }
   }
-
-  return safeCount - unknownIndices.length
+  safeCount -= unknownIndices.length
+  return safeCount
 }
 
 export function solveBoardProbabilities(board: BoardCell[][], width: number, height: number, bombCount: number, rupoorCount: number): SolvedBoard | null {
@@ -277,6 +279,13 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
 
   let remainingExpected = remainingHazards
 
+  if (DEBUG) {
+    console.log('=== Probability Calculation ===')
+    console.log('Starting remainingHazards:', remainingHazards)
+    console.log('safeCount:', safeCount)
+    console.log('unknownIndices:', unknownIndices.length)
+  }
+
   // Calculate probability for each unknown cell
   for (let unknownPos = 0; unknownPos < unknownIndices.length; unknownPos++) {
     let bombOccurrences = 0
@@ -289,15 +298,29 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
       const probability = bombOccurrences / validSolutionCount
       remainingExpected -= probability
       solvedBoard[unknownIndices[unknownPos]] = probability
+      if (DEBUG) {
+        const cellIdx = unknownIndices[unknownPos]
+        const row = Math.floor(cellIdx / width)
+        const col = cellIdx % width
+        console.log(`  Cell [${row},${col}]: ${bombOccurrences}/${validSolutionCount} = ${probability.toFixed(3)}, remaining: ${remainingExpected.toFixed(3)}`)
+      }
     }
   }
 
-  if (Math.round(remainingExpected * 100) < 0) {
-   console.log('❌ BOARD INVALID: Remaining expected bombs is negative:', remainingExpected)
-   return null
+  if (DEBUG) {
+    console.log('Final remainingExpected:', remainingExpected)
   }
 
-  const defaultProbability = remainingExpected / safeCount
+  // Handle remaining probability distribution to unconstrained cells
+  // Negative remainingExpected means constraints are underconstrained (incomplete board)
+  // Just clamp to 0 instead of treating as invalid
+  const clampedRemaining = Math.max(0, remainingExpected)
+  const defaultProbability = safeCount > 0 ? clampedRemaining / safeCount : 0
+
+  if (DEBUG && remainingExpected < 0) {
+    console.log('⚠️ Underconstrained: probabilities exceed bomb count by', Math.abs(remainingExpected))
+    console.log('   Setting default probability to 0 for unconstrained cells')
+  }
 
   for (let cellIdx = 0; cellIdx < solvedBoard.length; cellIdx++) {
     // Only set default probability for truly unknown cells

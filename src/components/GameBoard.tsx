@@ -11,6 +11,7 @@ export default function GameBoard() {
   const showInvalidBoardError = useGameStore(state => state.showInvalidBoardError)
   const setShowInvalidBoardError = useGameStore(state => state.setShowInvalidBoardError)
   const isWon = useGameStore(state => state.isWon)
+  const isGameOver = useGameStore(state => state.isGameOver)
   const currentRupees = useGameStore(state => state.currentRupees)
   const difficulty = useGameStore(state => state.difficulty)
   const newGame = useGameStore(state => state.newGame)
@@ -160,7 +161,7 @@ export default function GameBoard() {
         </div>
         <div ref={modalContainerRef} className="modal-container" />
       </div>
-      {mode === 1 && (
+      {mode === 1 && !isGameOver && (
         <div className="probability-toggle-container">
           <button 
             className="btn probability-toggle-btn" 
