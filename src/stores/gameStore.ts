@@ -33,6 +33,7 @@ export interface GameState {
   showInvalidBoardError: boolean
   requiresConfirmation: boolean
   closeRupeeModals: number
+  showProbabilitiesInPlayMode: boolean
 }
 
 interface GameActions {
@@ -53,6 +54,7 @@ interface GameActions {
   cancelComputation: () => void
   triggerCloseRupeeModals: () => void
   revealAllCells: () => void
+  toggleProbabilitiesInPlayMode: () => void
 }
 
 type GameStore = GameState & GameActions
@@ -91,6 +93,7 @@ const initialGameState = (difficulty: Difficulty): GameState => {
     showInvalidBoardError: false,
     requiresConfirmation: false,
     closeRupeeModals: 0,
+    showProbabilitiesInPlayMode: false,
   }
 }
 
@@ -123,6 +126,7 @@ export const useGameStore = create<GameStore>()(
       lastChangedIndex: undefined,
       boardTotal: totalRupees,
       showInvalidBoardError: false,
+      showProbabilitiesInPlayMode: false,
     })
 
     // Trigger solver if in solve mode
@@ -310,6 +314,42 @@ export const useGameStore = create<GameStore>()(
     
     set({ revealed: newRevealed, autoRevealed: newAutoRevealed })
   },
+
+  toggleProbabilitiesInPlayMode: () => {
+    const state = get()
+    if (state.mode !== GameMode.Play) return
+    
+    const newShowProbabilities = !state.showProbabilitiesInPlayMode
+    
+    if (newShowProbabilities) {
+      // Create a solver board where unrevealed cells are 0 (unknown)
+      // and revealed cells show their actual values
+      const solverBoard = state.board.map((row, rowIdx) => 
+        row.map((cell, colIdx) => 
+          state.revealed[rowIdx][colIdx] ? cell : 0
+        )
+      )
+      
+      // Calculate probabilities using revealed cells as constraints
+      const result = solveBoardProbabilities(
+        solverBoard,
+        state.config.width,
+        state.config.height,
+        state.config.bombCount,
+        state.rupoorCount
+      )
+      set({ 
+        showProbabilitiesInPlayMode: true,
+        solvedBoard: result 
+      })
+    } else {
+      // Hide probabilities
+      set({ 
+        showProbabilitiesInPlayMode: false,
+        solvedBoard: null 
+      })
+    }
+  },
   
   digCell: (row: number, col: number) => {
     const state = get()
@@ -366,6 +406,25 @@ export const useGameStore = create<GameStore>()(
     const hazardCount = checkState.config.bombCount + updatedRupoorCount
     if (unreveledCount === hazardCount) {
       set({ isWon: true })
+    }
+
+    // Recalculate probabilities if they are being shown in Play Mode
+    if (checkState.showProbabilitiesInPlayMode && !checkState.isWon) {
+      // Create solver board with unrevealed cells as 0
+      const solverBoard = checkState.board.map((row, rowIdx) => 
+        row.map((cell, colIdx) => 
+          newRevealed[rowIdx][colIdx] ? cell : 0
+        )
+      )
+      
+      const result = solveBoardProbabilities(
+        solverBoard,
+        checkState.config.width,
+        checkState.config.height,
+        checkState.config.bombCount,
+        updatedRupoorCount
+      )
+      set({ solvedBoard: result })
     }
   },
     }),

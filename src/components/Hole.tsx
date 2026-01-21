@@ -29,11 +29,17 @@ export default React.memo(function Hole({
   const isRevealed = useGameStore(state => state.revealed[row][col])
   const isAutoRevealed = useGameStore(state => state.autoRevealed[row][col])
   const mode = useGameStore(state => state.mode)
-  const solverProbability = useGameStore(state => 
-    state.mode === GameMode.Solve && state.solvedBoard
-      ? state.solvedBoard[row * state.config.width + col]
-      : undefined
-  )
+  const showProbabilitiesInPlayMode = useGameStore(state => state.showProbabilitiesInPlayMode)
+  const solverProbability = useGameStore(state => {
+    // Show probabilities in Solve Mode OR in Play Mode when enabled
+    if (state.mode === GameMode.Solve && state.solvedBoard) {
+      return state.solvedBoard[row * state.config.width + col]
+    }
+    if (state.mode === GameMode.Play && state.showProbabilitiesInPlayMode && state.solvedBoard) {
+      return state.solvedBoard[row * state.config.width + col]
+    }
+    return undefined
+  })
   const isGameOver = useGameStore(state => state.isGameOver)
   const isWon = useGameStore(state => state.isWon)
   const updateCell = useGameStore(state => state.updateCell)
@@ -121,6 +127,9 @@ export default React.memo(function Hole({
               alt={itemName} 
               src={getImageForItem(itemName)} 
             />
+          )}
+          {!isRevealed && showProbabilitiesInPlayMode && displayProbability !== undefined && (
+            <p className="probability-text">{displayProbability}%</p>
           )}
           {!isRevealed && DEBUG_MODE && (
             <p style={{ fontSize: '0.7em', color: 'rgba(255,255,255,1)', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>{itemName}</p>

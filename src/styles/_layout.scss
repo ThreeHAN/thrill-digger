@@ -57,6 +57,26 @@ main {
   justify-content: center;
 }
 
+.probability-toggle-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  width: 100%;
+
+  .probability-toggle-btn {
+    font-size: 0.95rem;
+    padding: 8px 20px;
+    min-width: 180px;
+    color: $primary-text;
+    background: $bg-overlay-dark;
+    border: 2px solid $border-card;
+    padding: clamp(10px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
+    border-radius: $border-radius-md;
+    min-width: auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  }
+}
+
 // Footer
 .app-footer {
   position: fixed;

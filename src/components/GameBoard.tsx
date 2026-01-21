@@ -14,6 +14,8 @@ export default function GameBoard() {
   const currentRupees = useGameStore(state => state.currentRupees)
   const difficulty = useGameStore(state => state.difficulty)
   const newGame = useGameStore(state => state.newGame)
+  const toggleProbabilitiesInPlayMode = useGameStore(state => state.toggleProbabilitiesInPlayMode)
+  const showProbabilitiesInPlayMode = useGameStore(state => state.showProbabilitiesInPlayMode)
   
   const [tileSize, setTileSize] = useState<number>(64)
   const lowestProbabilityIndex = useLowestProbabilityIndex()
@@ -140,6 +142,10 @@ export default function GameBoard() {
     newGame(difficulty, mode)
   }, [newGame, difficulty, mode])
 
+  const handleToggleProbabilities = useCallback(() => {
+    toggleProbabilitiesInPlayMode()
+  }, [toggleProbabilitiesInPlayMode])
+
   return (
     <div id="gamearea" className="m-auto">
       <div id="diggerarea" className="diggerarea">
@@ -154,6 +160,16 @@ export default function GameBoard() {
         </div>
         <div ref={modalContainerRef} className="modal-container" />
       </div>
+      {mode === 1 && (
+        <div className="probability-toggle-container">
+          <button 
+            className="btn probability-toggle-btn" 
+            onClick={handleToggleProbabilities}
+          >
+            {showProbabilitiesInPlayMode ? 'Hide Probabilities' : 'Show Probabilities'}
+          </button>
+        </div>
+      )}
       <ErrorModal
         isOpen={showInvalidBoardError}
         onClose={handleCloseError}

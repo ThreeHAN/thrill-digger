@@ -4,7 +4,7 @@ import { GameMode } from '../stores/gameStore'
 
 /**
  * Returns a percentage to display for a probability cell.
- * - Only for empty cells (`cellVal === 0`) in Solve mode
+ * - Only for empty cells (`cellVal === 0`) in Solve mode or unrevealed cells in Play mode
  * - Hides when probability is undefined or sentinel (-2)
  * - Rounds up non-zero probabilities so 0.5% shows as 1%
  */
@@ -13,14 +13,16 @@ export function getDisplayProbability(
   prob: number | undefined,
   gameMode: GameMode
 ): number | undefined {
-  if (cellVal !== 0 || prob === undefined || prob === -2) {
+  if (prob === undefined || prob === -2) {
     return undefined
   }
-  if (gameMode === GameMode.Solve) {
-    const percent = prob * 100
-    return percent === 0 ? 0 : Math.ceil(percent)
+  // In Solve mode, only show on empty cells (cellVal === 0)
+  // In Play mode, show on any unrevealed cell (cellVal will be -1 for undug)
+  if (gameMode === GameMode.Solve && cellVal !== 0) {
+    return undefined
   }
-  return undefined
+  const percent = prob * 100
+  return percent === 0 ? 0 : Math.ceil(percent)
 }
 
 /**
@@ -47,6 +49,10 @@ export function computeTileClass(
       tileClass += ' tile-safe'
     } else if (isRevealed && cellValue === -1) {
       tileClass += ' tile-bomb'
+    }
+    // Show probability colors on unrevealed tiles when probabilities are shown
+    if (!isRevealed && solverProbability !== undefined && solverProbability !== -2) {
+      tileClass += ' ' + getProbabilityColor(solverProbability)
     }
     // Add yellow background for auto-revealed tiles
     if (isAutoRevealed) {
