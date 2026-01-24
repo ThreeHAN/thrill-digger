@@ -53,17 +53,13 @@ export default function GameBoard() {
       cachedElements.hazardStats = cachedElements.hazardStats || document.querySelector('.hazard-stats') as HTMLElement | null
       cachedElements.grid = cachedElements.grid || document.querySelector('.grid-board') as HTMLElement | null
 
-      const headerH = cachedElements.header?.offsetHeight ?? 0
-      const footerH = cachedElements.footer?.offsetHeight ?? 0
 
       // Get main's styles once for both margin-top and flex gap
       const mainStyles = cachedElements.main ? window.getComputedStyle(cachedElements.main) : null
-      const mainMarginTop = mainStyles ? parseFloat(mainStyles.marginTop || '0') : 0
       const flexGap = mainStyles ? parseFloat(mainStyles.gap || '0') : 0
       const mainClientHeight = cachedElements.main?.clientHeight ?? 0
 
       const extra = isPortrait ? PORTRAIT_EXTRA_BUFFER : LANDSCAPE_EXTRA_BUFFER
-      const reservedH = headerH + footerH + mainMarginTop
 
       const hazardW = !isPortrait ? (cachedElements.hazardStats?.offsetWidth ?? 0) : 0
 
