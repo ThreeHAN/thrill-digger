@@ -307,8 +307,51 @@ export const useGameStore = create<GameStore>()(
     // Start computation
     setTimeout(() => {
       const state = get()
+      
+      let solverBoard = state.board
+      
+      // If in Play Mode, convert the board format for solving
+      if (state.mode === GameMode.Play) {
+        solverBoard = state.board.map((row, rowIdx) => 
+          row.map((cell, colIdx) => {
+            if (!state.revealed[rowIdx][colIdx]) {
+              return 0 // Unrevealed -> unknown
+            }
+            // Convert revealed Play Mode values to Solve Mode format
+            if (cell === -1) {
+              return -2 // Bomb -> hazard marker
+            }
+            if (cell === -10) {
+              return -2 // Rupoor -> hazard marker (marks adjacent cells as safe)
+            }
+            // In Play Mode, rupee values are rewards, not bomb counts
+            // We need to count actual adjacent hazards for the solver
+            let adjacentHazards = 0
+            for (let dr = -1; dr <= 1; dr++) {
+              for (let dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue
+                const nr = rowIdx + dr
+                const nc = colIdx + dc
+                if (nr >= 0 && nr < state.config.height && nc >= 0 && nc < state.config.width) {
+                  const neighborCell = state.board[nr][nc]
+                  if (neighborCell === -1 || neighborCell === -10) {
+                    adjacentHazards++
+                  }
+                }
+              }
+            }
+            // Map to Solve mode values: Green=1 (0 bombs), Blue=2 (1-2), Red=4 (3-4), Silver=6 (5-6), Gold=8 (7-8)
+            if (adjacentHazards <= 0) return 1
+            if (adjacentHazards <= 2) return 2
+            if (adjacentHazards <= 4) return 4
+            if (adjacentHazards <= 6) return 6
+            return 8
+          })
+        )
+      }
+      
       const result = solveBoardProbabilities(
-        state.board,
+        solverBoard,
         state.config.width,
         state.config.height,
         state.config.bombCount,
@@ -317,6 +360,7 @@ export const useGameStore = create<GameStore>()(
       set({
         solvedBoard: result,
         showComputationWarning: false,
+        showProbabilitiesInPlayMode: state.mode === GameMode.Play ? true : state.showProbabilitiesInPlayMode,
         showInvalidBoardError: result === null,
         invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
       })
@@ -401,20 +445,67 @@ export const useGameStore = create<GameStore>()(
         })
       )
       
-      // Calculate probabilities using revealed cells as constraints
-      const result = solveBoardProbabilities(
+      // Calculate unknown indices count for warning
+      const unknownIndicesCount = calculateUnknownIndicesCount(
         solverBoard,
         state.config.width,
-        state.config.height,
-        state.config.bombCount,
-        state.rupoorCount
+        state.config.height
       )
-      
-      set({ 
-        showProbabilitiesInPlayMode: true,
-        solvedBoard: result,
-        invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
-      })
+      const totalCombinations = Math.round(Math.pow(2, unknownIndicesCount))
+
+      // Show warning if computation will be heavy
+      if (unknownIndicesCount >= 22) {
+        const estimatedTime = Math.floor(totalCombinations / 1111111)
+        
+        // If time > 30 seconds, require confirmation
+        if (estimatedTime > 30) {
+          set({
+            showComputationWarning: true,
+            computationWarning: { time: estimatedTime, combinations: totalCombinations },
+            requiresConfirmation: true,
+          })
+        } else {
+          // Show warning but auto-proceed
+          set({
+            showComputationWarning: true,
+            computationWarning: { time: estimatedTime, combinations: totalCombinations },
+            requiresConfirmation: false,
+          })
+
+          // Defer computation to allow UI to update
+          setTimeout(() => {
+            const state = get()
+            const result = solveBoardProbabilities(
+              solverBoard,
+              state.config.width,
+              state.config.height,
+              state.config.bombCount,
+              state.rupoorCount
+            )
+            set({
+              showProbabilitiesInPlayMode: true,
+              solvedBoard: result,
+              showComputationWarning: false,
+              invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
+            })
+          }, 100)
+        }
+      } else {
+        // Compute immediately
+        const result = solveBoardProbabilities(
+          solverBoard,
+          state.config.width,
+          state.config.height,
+          state.config.bombCount,
+          state.rupoorCount
+        )
+        
+        set({ 
+          showProbabilitiesInPlayMode: true,
+          solvedBoard: result,
+          invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
+        })
+      }
     } else {
       // Hide probabilities
       set({ 
@@ -522,14 +613,60 @@ export const useGameStore = create<GameStore>()(
         })
       )
       
-      const result = solveBoardProbabilities(
+      // Calculate unknown indices count for warning
+      const unknownIndicesCount = calculateUnknownIndicesCount(
         solverBoard,
         checkState.config.width,
-        checkState.config.height,
-        checkState.config.bombCount,
-        updatedRupoorCount
+        checkState.config.height
       )
-      set({ solvedBoard: result })
+      const totalCombinations = Math.round(Math.pow(2, unknownIndicesCount))
+
+      // Show warning if computation will be heavy
+      if (unknownIndicesCount >= 22) {
+        const estimatedTime = Math.floor(totalCombinations / 1111111)
+        
+        // If time > 30 seconds, require confirmation
+        if (estimatedTime > 30) {
+          set({
+            showComputationWarning: true,
+            computationWarning: { time: estimatedTime, combinations: totalCombinations },
+            requiresConfirmation: true,
+          })
+        } else {
+          // Show warning but auto-proceed
+          set({
+            showComputationWarning: true,
+            computationWarning: { time: estimatedTime, combinations: totalCombinations },
+            requiresConfirmation: false,
+          })
+
+          // Defer computation to allow UI to update
+          setTimeout(() => {
+            const state = get()
+            const result = solveBoardProbabilities(
+              solverBoard,
+              state.config.width,
+              state.config.height,
+              state.config.bombCount,
+              updatedRupoorCount
+            )
+            set({
+              solvedBoard: result,
+              showComputationWarning: false,
+            })
+          }, 100)
+        }
+      } else {
+        // Compute immediately
+        const result = solveBoardProbabilities(
+          solverBoard,
+          checkState.config.width,
+          checkState.config.height,
+          checkState.config.bombCount,
+          updatedRupoorCount
+        )
+        set({ solvedBoard: result })
+      }
     }
   },
     }),

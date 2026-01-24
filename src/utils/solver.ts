@@ -136,7 +136,7 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
 
   // Test all possible bomb placements
   for (let combo = 0; combo < totalCombinations; ++combo) {
-    if (combo > 1e8) {
+    if (combo > 4e8) {
       computationLimitReached = true
       break
     }
