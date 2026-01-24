@@ -40,22 +40,22 @@
   }
 
   .hazard-card {
-    padding: clamp(6px, 1.5vw, 12px) clamp(10px, 2vw, 16px);
+    padding: 10px 14px;
     width: auto;
   }
 
   .hazard-row {
-    gap: clamp(4px, 1.2vw, 6px);
-    font-size: clamp(1rem, 1.8vw, 1.3rem);
+    gap: 6px;
+    font-size: 1.2rem;
 
     img {
-      width: clamp(24px, 3.5vw, 36px);
-      height: clamp(24px, 3.5vw, 36px);
+      width: 32px;
+      height: 32px;
     }
   }
 
   .hazard-value {
-    font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+    font-size: 1.4rem;
   }
 
   .grid-board {
