@@ -92,14 +92,19 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
           )}
         </span>
       </div>
-      {shouldShowProbabilityToggle && (
-          <button
-            className="btn probability-toggle-btn"
-            onClick={toggleProbabilitiesInPlayMode}
-          >
-            {showProbabilitiesInPlayMode ? 'Hide Probabilities' : 'Show Probabilities'}
-          </button>
-      )}
+        {shouldShowProbabilityToggle && (
+          <div className="probability-toggle-row">
+            <button
+              className={`probability-pill ${showProbabilitiesInPlayMode ? 'is-active' : ''}`}
+              onClick={toggleProbabilitiesInPlayMode}
+              aria-pressed={showProbabilitiesInPlayMode}
+              aria-label={`Probabilities ${showProbabilitiesInPlayMode ? 'on' : 'off'}`}
+            >
+              <span className="pill-label">Probabilities</span>
+              <span className="pill-state">{showProbabilitiesInPlayMode ? 'On' : 'Off'}</span>
+            </button>
+          </div>
+        )}
     </div>
   )
 }

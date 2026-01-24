@@ -27,6 +27,60 @@
   justify-content: center;
 }
 
+.probability-toggle-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.probability-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 2px solid $border-card;
+  background: $bg-overlay-dark;
+  color: $primary-text;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: background-color $transition-normal, border-color $transition-normal, transform $transition-fast;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  align-self: center;
+  outline: none;
+  justify-content: center;
+  width: auto;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: rgba(243, 229, 171, 0.5);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(243, 229, 171, 0.35);
+  }
+
+  &.is-active {
+    background: linear-gradient(135deg, rgba(139, 90, 43, 0.9), rgba(93, 58, 26, 0.95));
+    border-color: rgba(243, 229, 171, 0.5);
+  }
+}
+
+.pill-label {
+  white-space: nowrap;
+}
+
+.pill-state {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  width: 36px;
+  text-align: center;
+}
+
 .hazard-card {
   background: $bg-overlay-dark;
   border: 2px solid $border-card;
