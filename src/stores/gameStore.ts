@@ -370,11 +370,34 @@ export const useGameStore = create<GameStore>()(
             return 0 // Unrevealed -> unknown
           }
           // Convert revealed Play Mode values to Solve Mode format
-          if (cell === -1 || cell === -10) {
-            return -2 // Bomb or rupoor -> hazard marker
+          if (cell === -1) {
+            return -2 // Bomb -> hazard marker
           }
-          // Convert rupee value to bomb count for solver
-          return convertRupeeValueToBombCount(cell)
+          if (cell === -10) {
+            return -2 // Rupoor -> hazard marker (marks adjacent cells as safe)
+          }
+          // In Play Mode, rupee values are rewards, not bomb counts
+          // We need to count actual adjacent hazards for the solver
+          let adjacentHazards = 0
+          for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+              if (dr === 0 && dc === 0) continue
+              const nr = rowIdx + dr
+              const nc = colIdx + dc
+              if (nr >= 0 && nr < state.config.height && nc >= 0 && nc < state.config.width) {
+                const neighborCell = state.board[nr][nc]
+                if (neighborCell === -1 || neighborCell === -10) {
+                  adjacentHazards++
+                }
+              }
+            }
+          }
+          // Map to Solve mode values: Green=1 (0 bombs), Blue=2 (1-2), Red=4 (3-4), Silver=6 (5-6), Gold=8 (7-8)
+          if (adjacentHazards <= 0) return 1
+          if (adjacentHazards <= 2) return 2
+          if (adjacentHazards <= 4) return 4
+          if (adjacentHazards <= 6) return 6
+          return 8
         })
       )
       
@@ -461,18 +484,41 @@ export const useGameStore = create<GameStore>()(
 
     // Recalculate probabilities if they are being shown in Play Mode
     if (checkState.showProbabilitiesInPlayMode && !checkState.isWon) {
-      // Create solver board: revealed cells convert to bomb counts, unrevealed cells are 0
+      // Create solver board: revealed cells show actual bomb counts, unrevealed cells are 0
       const solverBoard = checkState.board.map((row, rowIdx) => 
         row.map((cell, colIdx) => {
           if (!newRevealed[rowIdx][colIdx]) {
             return 0 // Unrevealed -> unknown
           }
           // Convert revealed Play Mode values to Solve Mode format
-          if (cell === -1 || cell === -10) {
-            return -2 // Bomb or rupoor -> hazard marker
+          if (cell === -1) {
+            return -2 // Bomb -> hazard marker
           }
-          // Convert rupee value to bomb count for solver
-          return convertRupeeValueToBombCount(cell)
+          if (cell === -10) {
+            return -2 // Rupoor -> hazard marker (marks adjacent cells as safe)
+          }
+          // In Play Mode, rupee values are rewards, not bomb counts
+          // We need to count actual adjacent hazards for the solver
+          let adjacentHazards = 0
+          for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+              if (dr === 0 && dc === 0) continue
+              const nr = rowIdx + dr
+              const nc = colIdx + dc
+              if (nr >= 0 && nr < checkState.config.height && nc >= 0 && nc < checkState.config.width) {
+                const neighborCell = checkState.board[nr][nc]
+                if (neighborCell === -1 || neighborCell === -10) {
+                  adjacentHazards++
+                }
+              }
+            }
+          }
+          // Map to Solve mode values: Green=1 (0 bombs), Blue=2 (1-2), Red=4 (3-4), Silver=6 (5-6), Gold=8 (7-8)
+          if (adjacentHazards <= 0) return 1
+          if (adjacentHazards <= 2) return 2
+          if (adjacentHazards <= 4) return 4
+          if (adjacentHazards <= 6) return 6
+          return 8
         })
       )
       
