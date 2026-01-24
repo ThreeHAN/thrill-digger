@@ -361,10 +361,9 @@ export const useGameStore = create<GameStore>()(
     
     if (newShowProbabilities) {
       // Create a solver board where unrevealed cells are 0 (unknown)
-      // and revealed cells show their actual values
       // Convert Play Mode format to Solve Mode format:
-      // Play: -1=bomb, -10=rupoor, 0+=rupee
-      // Solve: -2=bomb/rupoor, -1=unknown, 0+=rupee
+      // Play: -1=bomb, -10=rupoor, 1/5/20/100/300=rupee values
+      // Solve: -2=bomb/rupoor, -1=unknown, 1/2/4/6/8=bomb counts
       const solverBoard = state.board.map((row, rowIdx) => 
         row.map((cell, colIdx) => {
           if (!state.revealed[rowIdx][colIdx]) {
@@ -374,7 +373,8 @@ export const useGameStore = create<GameStore>()(
           if (cell === -1 || cell === -10) {
             return -2 // Bomb or rupoor -> hazard marker
           }
-          return cell // Rupees stay the same
+          // Convert rupee value to bomb count for solver
+          return convertRupeeValueToBombCount(cell)
         })
       )
       
@@ -461,11 +461,19 @@ export const useGameStore = create<GameStore>()(
 
     // Recalculate probabilities if they are being shown in Play Mode
     if (checkState.showProbabilitiesInPlayMode && !checkState.isWon) {
-      // Create solver board with unrevealed cells as 0
+      // Create solver board: revealed cells convert to bomb counts, unrevealed cells are 0
       const solverBoard = checkState.board.map((row, rowIdx) => 
-        row.map((cell, colIdx) => 
-          newRevealed[rowIdx][colIdx] ? cell : 0
-        )
+        row.map((cell, colIdx) => {
+          if (!newRevealed[rowIdx][colIdx]) {
+            return 0 // Unrevealed -> unknown
+          }
+          // Convert revealed Play Mode values to Solve Mode format
+          if (cell === -1 || cell === -10) {
+            return -2 // Bomb or rupoor -> hazard marker
+          }
+          // Convert rupee value to bomb count for solver
+          return convertRupeeValueToBombCount(cell)
+        })
       )
       
       const result = solveBoardProbabilities(
