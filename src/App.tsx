@@ -76,7 +76,7 @@ function App() {
   return (
     <div className="game-container">
       <header className="game-header">
-        <h1>Thrill Digger</h1>
+        <h1>Thrill Diggers</h1>
         <HamburgerMenu
           onNewGame={handleReset}
           onInfo={handleInfoOpen}
