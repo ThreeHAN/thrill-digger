@@ -71,7 +71,7 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   const unknownSet = new Set<number>() // Use Set for O(1) membership testing
   
   // Build constraints from numbered cells (bomb count values)
-  console.log('Building constraints from board...')
+  // console.log('Building constraints from board...')
   for (let i = 0; i < solvedBoard.length; i++) {
     const cell = solvedBoard[i]
     // Vanilla parity: only treat values > 1 as constraint sources (greens are skipped)
@@ -80,7 +80,7 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
       let expectedBombs = cell  // Value is already the bomb count
       const colIndex = i % width
       const rowIndex = Math.floor(i / width)
-      console.log(`Cell at [${rowIndex},${colIndex}] value=${cell} expects ${expectedBombs} bombs`)
+      // console.log(`Cell at [${rowIndex},${colIndex}] value=${cell} expects ${expectedBombs} bombs`)
       
       // Count adjacent bombs and rupoors
       forEachNeighbor(i, width, height, (neighborIdx) => {
@@ -97,15 +97,15 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
       
       // Only add constraint if there are unknown neighbors
       if (unknownNeighbors.length > 0) {
-        console.log(`  -> Constraint: ${unknownNeighbors.length} unknowns, expecting ${expectedBombs} bombs`)
+        // console.log(`  -> Constraint: ${unknownNeighbors.length} unknowns, expecting ${expectedBombs} bombs`)
         unknownNeighbors.push(expectedBombs)
         constraints.push(unknownNeighbors)
       } else {
-        console.log(`  -> No unknown neighbors, constraint skipped`)
+        // console.log(`  -> No unknown neighbors, constraint skipped`)
       }
     }
   }
-  console.log(`Total constraints: ${constraints.length}`)
+  // console.log(`Total constraints: ${constraints.length}`)
 
   // Convert Set to array and create index map for O(1) lookup
   const unknownIndices = Array.from(unknownSet)
@@ -186,18 +186,18 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   }
 
   // Validate board
-  console.log('=== Validation Results ===')
-  console.log('Constraints:', constraints.length, 'Unknown indices:', unknownIndices.length)
-  console.log('Valid solutions found:', validSolutions.length)
-  console.log('Total combinations tested:', totalCombinations)
-  console.log('remainingHazards:', remainingHazards, 'knownRupoorCount:', knownRupoorCount)
-  console.log('minBombsNeeded:', minBombsNeeded, 'maxBombsNeeded:', maxBombsNeeded)
+  // console.log('=== Validation Results ===')
+  // console.log('Constraints:', constraints.length, 'Unknown indices:', unknownIndices.length)
+  // console.log('Valid solutions found:', validSolutions.length)
+  // console.log('Total combinations tested:', totalCombinations)
+  // console.log('remainingHazards:', remainingHazards, 'knownRupoorCount:', knownRupoorCount)
+  // console.log('minBombsNeeded:', minBombsNeeded, 'maxBombsNeeded:', maxBombsNeeded)
   
   if (constraints.length > 0 && validSolutions.length === 0) {
-    console.log('❌ BOARD INVALID: No valid solutions found for constraints')
-    console.log('Constraints were:', constraints)
-    console.log('Board state:', solvedBoard)
-    console.log('unknownIndices:', unknownIndices)
+    // console.log('❌ BOARD INVALID: No valid solutions found for constraints')
+    // console.log('Constraints were:', constraints)
+    // console.log('Board state:', solvedBoard)
+    // console.log('unknownIndices:', unknownIndices)
     return null
   }
 
@@ -221,7 +221,7 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   }
 
   if (Math.round(remainingExpected * 100) < 0) {
-   console.log('❌ BOARD INVALID: Remaining expected bombs is negative:', remainingExpected)
+   // console.log('❌ BOARD INVALID: Remaining expected bombs is negative:', remainingExpected)
    return null
   }
 
