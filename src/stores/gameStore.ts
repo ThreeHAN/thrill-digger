@@ -53,6 +53,7 @@ export interface GameState {
   requiresConfirmation: boolean
   closeRupeeModals: number
   showProbabilitiesInPlayMode: boolean
+  invalidSourceIndex?: number
 }
 
 interface GameActions {
@@ -67,6 +68,7 @@ interface GameActions {
   setGameConfig: (config: GameConfig) => void
   resetGame: (difficulty: Difficulty, mode: GameMode) => void
   setShowInvalidBoardError: (show: boolean) => void
+  // Clears invalid source highlight when needed
   solveBoardInternal: () => void
   digCell: (row: number, col: number) => void
   confirmComputation: () => void
@@ -113,6 +115,7 @@ const initialGameState = (difficulty: Difficulty): GameState => {
     requiresConfirmation: false,
     closeRupeeModals: 0,
     showProbabilitiesInPlayMode: false,
+    invalidSourceIndex: undefined,
   }
 }
 
@@ -146,6 +149,7 @@ export const useGameStore = create<GameStore>()(
       boardTotal: totalRupees,
       showInvalidBoardError: false,
       showProbabilitiesInPlayMode: false,
+      invalidSourceIndex: undefined,
     })
 
     // Trigger solver if in solve mode
@@ -276,6 +280,7 @@ export const useGameStore = create<GameStore>()(
             solvedBoard: result,
             showComputationWarning: false,
             showInvalidBoardError: result === null,
+            invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
           })
         }, 100)
       }
@@ -291,6 +296,7 @@ export const useGameStore = create<GameStore>()(
       set({
         solvedBoard: result,
         showInvalidBoardError: result === null,
+        invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
       })
     }
   },
@@ -312,6 +318,7 @@ export const useGameStore = create<GameStore>()(
         solvedBoard: result,
         showComputationWarning: false,
         showInvalidBoardError: result === null,
+        invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
       })
     }, 100)
   },
@@ -382,13 +389,15 @@ export const useGameStore = create<GameStore>()(
       
       set({ 
         showProbabilitiesInPlayMode: true,
-        solvedBoard: result 
+        solvedBoard: result,
+        invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
       })
     } else {
       // Hide probabilities
       set({ 
         showProbabilitiesInPlayMode: false,
-        solvedBoard: null 
+        solvedBoard: null,
+        invalidSourceIndex: undefined,
       })
     }
   },

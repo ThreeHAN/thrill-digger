@@ -30,6 +30,8 @@ export default React.memo(function Hole({
   const isAutoRevealed = useGameStore(state => state.autoRevealed[row][col])
   const mode = useGameStore(state => state.mode)
   const showProbabilitiesInPlayMode = useGameStore(state => state.showProbabilitiesInPlayMode)
+  const gridWidth = useGameStore(state => state.config.width)
+  const invalidSourceIndex = useGameStore(state => state.invalidSourceIndex)
   const solverProbability = useGameStore(state => {
     // Show probabilities in Solve Mode OR in Play Mode when enabled
     if (state.mode === GameMode.Solve && state.solvedBoard) {
@@ -46,6 +48,7 @@ export default React.memo(function Hole({
   const difficulty = useGameStore(state => state.difficulty)
   const digCell = useGameStore(state => state.digCell)
   const closeRupeeModals = useGameStore(state => state.closeRupeeModals)
+  const lastChangedIndex = useGameStore(state => state.lastChangedIndex)
   
   const [showModal, setShowModal] = useState(false)
   const [isExploding, setIsExploding] = useState(false)
@@ -69,6 +72,8 @@ export default React.memo(function Hole({
   }, [closeRupeeModals])
   
   const holeId = formatHoleId(row, col)
+    const holeIndex = row * gridWidth + col
+    const showInvalidOverlay = invalidSourceIndex === holeIndex
   
   const itemName = useMemo(() => getItemName(cellValue), [cellValue])
   
@@ -110,7 +115,8 @@ export default React.memo(function Hole({
   // Determine tile styling based on game mode and cell state
   const tileClass = useMemo(() => (
     computeTileClass(mode as GameMode, cellValue, isRevealed, solverProbability, isLowestProbability, isAutoRevealed)
-  ), [mode, cellValue, isRevealed, solverProbability, isLowestProbability, isAutoRevealed])
+      + (showInvalidOverlay ? ' tile-invalid-source' : '')
+  ), [mode, cellValue, isRevealed, solverProbability, isLowestProbability, isAutoRevealed, showInvalidOverlay])
 
   return (
     <button 
@@ -157,6 +163,7 @@ export default React.memo(function Hole({
           />
         </>
       )}
+      {showInvalidOverlay && <span className="invalid-mark" aria-hidden="true" />}
     </button>
   )
 })
