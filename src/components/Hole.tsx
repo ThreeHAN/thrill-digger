@@ -149,7 +149,7 @@ export default React.memo(function Hole({
             <img 
               className="solverimg" 
               alt={itemName} 
-              src={getImageForItem(getBombCountDisplayName(cellValue))} 
+              src={getImageForItem(cellValue === -3 || cellValue === -10 ? itemName : getBombCountDisplayName(cellValue))} 
             />
           )}
           <MemoizedRupeeModal 
