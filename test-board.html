@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Board Solver</title>
+</head>
+<body>
+  <h1>Testing Board Solver</h1>
+  <div id="output"></div>
+  <script type="module">
+    import { solveBoardProbabilities } from './src/utils/solver.ts';
+    
+    const board = [
+      [5, -1, 5, 1, 1],
+      [-1, 5, 5, 5, 5],
+      [5, 5, 5, -1, 5],
+      [1, 5, -1, 5, 5]
+    ];
+    
+    console.log('Testing board:', board);
+    const result = solveBoardProbabilities(board, 5, 4, 4, 0);
+    console.log('Result:', result);
+    
+    document.getElementById('output').innerHTML = result === null ? 
+      '<p style="color: red;">INVALID BOARD</p>' : 
+      '<p style="color: green;">VALID BOARD</p><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+  </script>
+</body>
+</html>

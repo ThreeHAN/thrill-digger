@@ -6,7 +6,7 @@ import { GameMode } from '../stores/gameStore'
  * Returns a percentage to display for a probability cell.
  * - Only for empty cells (`cellVal === 0`) in Solve mode or unrevealed cells in Play mode
  * - Hides when probability is undefined or sentinel (-2)
- * - Rounds up non-zero probabilities so 0.5% shows as 1%
+ * - Returns whole number percentage, rounded down
  */
 export function getDisplayProbability(
   cellVal: BoardCell,
@@ -22,7 +22,8 @@ export function getDisplayProbability(
     return undefined
   }
   const percent = prob * 100
-  return percent === 0 ? 0 : Math.ceil(percent)
+  // Round down to whole number
+  return Math.floor(percent)
 }
 
 /**

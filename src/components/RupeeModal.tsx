@@ -8,6 +8,7 @@ type RupeeOption = {
   label: string
 }
 
+// Show rupee values in UI like vanilla - they get converted to bomb counts on storage
 const rupeeOptions: RupeeOption[] = [
   { value: 0, label: 'Undug' },
   { value: 1, label: 'Green rupee' },

@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState, useEffect } from 'react'
-import { getItemName } from '../utils/gameLogic'
+import { getItemName, getBombCountDisplayName } from '../utils/gameLogic'
 import { getImageForItem } from '../utils/imageMap'
 import { useGameStore } from '../stores/gameStore'
 import RupeeModal from './RupeeModal'
@@ -144,7 +144,7 @@ export default React.memo(function Hole({
             <img 
               className="solverimg" 
               alt={itemName} 
-              src={getImageForItem(itemName)} 
+              src={getImageForItem(getBombCountDisplayName(cellValue))} 
             />
           )}
           <MemoizedRupeeModal 

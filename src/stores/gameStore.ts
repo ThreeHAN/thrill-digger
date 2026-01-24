@@ -13,6 +13,25 @@ export const GameMode = {
 export type GameMode = typeof GameMode[keyof typeof GameMode]
 export type { Difficulty }
 
+/**
+ * Convert rupee value to bomb count for storage in Solve mode
+ * Matches vanilla version's mapping
+ */
+function convertRupeeValueToBombCount(value: number): number {
+  const converted = (() => {
+    switch (value) {
+      case 1: return 1      // Green rupee
+      case 5: return 2      // Blue rupee
+      case 20: return 4     // Red rupee
+      case 100: return 6    // Silver rupee
+      case 300: return 8    // Gold rupee
+      default: return value // Return unchanged for special values (-1, -2, -10, etc.)
+    }
+  })()
+  console.log(`Converting rupee value ${value} to bomb count ${converted}`)
+  return converted
+}
+
 export interface GameState {
   mode: GameMode
   difficulty: Difficulty
@@ -150,14 +169,26 @@ export const useGameStore = create<GameStore>()(
       return
     }
 
+    // Convert rupee values to bomb counts in Solve mode (matching vanilla)
+    let storedValue = value
+    if (state.mode === GameMode.Solve && value > 0) {
+      storedValue = convertRupeeValueToBombCount(value)
+    }
+
+    // If already converted (e.g., called internally with bomb counts), check if conversion matches
+    const prevDisplayValue = state.board[row][col]
+    if (prevDisplayValue === storedValue) {
+      return
+    }
+
     const newBoard = state.board.map(r => [...r])
-    newBoard[row][col] = value
+    newBoard[row][col] = storedValue
     const idx = row * state.config.width + col
     
     set({
       board: newBoard,
       lastChangedIndex: idx,
-      boardTotal: Math.max(0, state.boardTotal - prevValue + value),
+      boardTotal: Math.max(0, state.boardTotal - prevValue + storedValue),
     })
 
     // Trigger solver if in solve mode

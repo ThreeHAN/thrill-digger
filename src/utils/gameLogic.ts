@@ -136,3 +136,18 @@ export function getItemName(value: number): string {
 export function getImageNameForItem(itemName: string): string {
   return itemName.toLowerCase().replace(/\s+/g, '')
 }
+
+/**
+ * Convert bomb count value to display name for Solve mode
+ * In Solve mode we store bomb counts (1,2,4,6,8) but need rupee names for images
+ */
+export function getBombCountDisplayName(bombCount: number): string {
+  switch (bombCount) {
+    case 1: return 'Green rupee'
+    case 2: return 'Blue rupee'
+    case 4: return 'Red rupee'
+    case 6: return 'Silver rupee'
+    case 8: return 'Gold rupee'
+    default: return 'Error'
+  }
+}
