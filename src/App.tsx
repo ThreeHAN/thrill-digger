@@ -90,8 +90,8 @@ function App() {
       <main>
         <div className="board-area">
           <GameBoard />
+          <HazardStats boardTotal={gameMode === GameMode.Play ? currentRupees : boardTotal} />
         </div>
-        <HazardStats boardTotal={gameMode === GameMode.Play ? currentRupees : boardTotal} />
       </main>
 
       <footer className="app-footer">

@@ -48,11 +48,11 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
     }
   }
 
-  // Vanilla parity: if a revealed green (1) or rupoor (-2) is on the board, clear nearby unknowns
+  // Vanilla parity: if a revealed green (1) or rupoor (-10) is on the board, clear nearby unknowns
   // (vanilla marks adjacent -1 to 0 for green cells, effectively removing those
   // neighbors from constraint consideration).
   for (let i = 0; i < solvedBoard.length; i++) {
-    if (solvedBoard[i] === 1 || solvedBoard[i] === -2) {
+    if (solvedBoard[i] === 1 || solvedBoard[i] === -10) {
       forEachNeighbor(i, width, height, (neighborIdx) => {
         if (solvedBoard[neighborIdx] === -1) {
           solvedBoard[neighborIdx] = 0

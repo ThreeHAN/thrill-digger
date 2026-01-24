@@ -10,7 +10,7 @@ export const Difficulty = {
 
 export type Difficulty = typeof Difficulty[keyof typeof Difficulty]
 
-export type BoardCell = number // -3=bomb, -2=rupoor, -1=undug, 0+=rupee value or probability
+export type BoardCell = number // -3=bomb, -10=rupoor, -1=undug, 0+=rupee value or probability
 
 export interface GameConfig {
   difficulty: Difficulty
