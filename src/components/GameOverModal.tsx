@@ -42,13 +42,13 @@ export default function GameOverModal({ isOpen, totalRupees, onPlayAgain, onReve
         </div>
         <div className="game-over-actions">
           <button 
-            className="wood-btn game-over-button"
+            className="probability-pill game-over-button reveal-pill"
             onClick={handleRevealBoard}
           >
             Reveal Board
           </button>
           <button 
-            className="wood-btn game-over-button"
+            className="probability-pill game-over-button play-again-pill"
             onClick={handlePlayAgain}
           >
             Play Again

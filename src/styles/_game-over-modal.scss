@@ -46,6 +46,27 @@
   font-size: clamp(0.9rem, 3.5vw, 1rem);
 }
 
+// Variants to match pill style while remaining distinctive
+.reveal-pill {
+  background: linear-gradient(135deg, rgba($color-gold, 0.35), rgba(93, 58, 26, 0.95));
+  border-color: rgba($color-gold, 0.55);
+
+  &:hover {
+    border-color: rgba($color-gold, 0.7);
+    box-shadow: 0 0 12px rgba($color-gold, 0.35), $shadow-small;
+  }
+}
+
+.play-again-pill {
+  background: linear-gradient(135deg, rgba($wood-medium, 0.85), rgba($wood-dark, 0.95));
+  border-color: rgba(243, 229, 171, 0.45);
+
+  &:hover {
+    border-color: rgba(243, 229, 171, 0.6);
+    box-shadow: 0 0 12px rgba(243, 229, 171, 0.25), $shadow-small;
+  }
+}
+
 // Mobile specific adjustments
 @media (max-width: 600px) {
   .game-over-header h2 {

@@ -6,6 +6,7 @@ import bombImg from '../assets/minigame/bomb.png'
 export default function HazardStats({ boardTotal }: { boardTotal: number }) {
   const board = useGameStore(state => state.board)
   const revealed = useGameStore(state => state.revealed)
+  const autoRevealed = useGameStore(state => state.autoRevealed)
   const solvedBoard = useGameStore(state => state.solvedBoard)
   const difficulty = useGameStore(state => state.difficulty)
   const config = useGameStore(state => state.config)
@@ -13,6 +14,7 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
   const isGameOver = useGameStore(state => state.isGameOver)
   const showProbabilitiesInPlayMode = useGameStore(state => state.showProbabilitiesInPlayMode)
   const toggleProbabilitiesInPlayMode = useGameStore(state => state.toggleProbabilitiesInPlayMode)
+  const resetGame = useGameStore(state => state.resetGame)
 
   const rupoorIcon = getImageForItem('rupoor')
   const greenIcon = getImageForItem('green rupee')
@@ -58,6 +60,16 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
 
   const showRupoors = difficulty !== 1
   const shouldShowProbabilityToggle = mode === 1 && !isGameOver
+  const shouldShowNewGameButton = useMemo(() => {
+    if (!(mode === 1 && isGameOver)) return false
+    // Show after board reveal from Game Over modal
+    for (let r = 0; r < autoRevealed.length; r++) {
+      for (let c = 0; c < autoRevealed[r].length; c++) {
+        if (autoRevealed[r][c]) return true
+      }
+    }
+    return false
+  }, [mode, isGameOver, autoRevealed])
 
   return (
     <div className="hazard-stats">
@@ -102,6 +114,17 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
             >
               <span className="pill-label">Probabilities</span>
               <span className="pill-state">{showProbabilitiesInPlayMode ? 'On' : 'Off'}</span>
+            </button>
+          </div>
+        )}
+        {shouldShowNewGameButton && (
+          <div className="probability-toggle-row">
+            <button
+              className="probability-pill new-game-pill"
+              onClick={() => resetGame(difficulty, mode)}
+              aria-label="Start a new game"
+            >
+              <span className="pill-label">New Game</span>
             </button>
           </div>
         )}

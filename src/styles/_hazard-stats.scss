@@ -70,6 +70,22 @@
   }
 }
 
+// Distinctive variant for New Game that matches pill style
+.new-game-pill {
+  background: linear-gradient(135deg, rgba($tile-safe, 0.9), rgba(#3d5a3d, 0.95));
+  border-color: rgba($color-light-green, 0.5);
+  text-shadow: $text-shadow-outline;
+
+  &:hover {
+    border-color: rgba($color-light-green, 0.7);
+    box-shadow: 0 0 12px rgba($color-light-green, 0.3), $shadow-small;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
 .pill-label {
   white-space: nowrap;
 }
