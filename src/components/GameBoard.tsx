@@ -44,8 +44,6 @@ export default function GameBoard() {
       const vw = window.innerWidth
       const vv = window.visualViewport
       const vh = vv?.height ?? window.innerHeight
-      const topInset = vv?.offsetTop ?? 0
-      const bottomInset = vv ? Math.max(0, window.innerHeight - vh - topInset) : 0
       const isPortrait = vh > vw
 
       // Query elements on first run or cache miss
@@ -80,8 +78,8 @@ export default function GameBoard() {
                         (gridStyles ? parseFloat(gridStyles.paddingBottom || '0') : 0)
 
       const availW = vw - hazardW - (!isPortrait ? flexGap : 0) - CONTAINER_PADDING * 2 - boardPadX - gridGap * (config.width - 1)
-      const viewportCap = vh - reservedH - bottomInset - extra
-      const effectiveMainHeight = mainClientHeight > 0 ? Math.min(mainClientHeight, viewportCap) : viewportCap
+      // Base tile height strictly on the visible main area; fallback to viewport height.
+      const effectiveMainHeight = mainClientHeight > 0 ? (mainClientHeight - extra) : (vh - extra)
       const availH = effectiveMainHeight - boardPadY - gridGap * (config.height - 1)
 
       const sizeW = Math.floor(availW / config.width)
