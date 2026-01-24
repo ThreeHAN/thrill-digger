@@ -48,7 +48,6 @@ export default React.memo(function Hole({
   const difficulty = useGameStore(state => state.difficulty)
   const digCell = useGameStore(state => state.digCell)
   const closeRupeeModals = useGameStore(state => state.closeRupeeModals)
-  const lastChangedIndex = useGameStore(state => state.lastChangedIndex)
   
   const [showModal, setShowModal] = useState(false)
   const [isExploding, setIsExploding] = useState(false)
