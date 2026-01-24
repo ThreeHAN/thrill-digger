@@ -1,0 +1,36 @@
+{
+  "name": "Thrill Digger",
+  "short_name": "Thrill Digger",
+  "description": "A solver and simulator for the Thrill Digger minigame from Zelda: Skyward Sword",
+  "start_url": "/thrill-digger/",
+  "scope": "/thrill-digger/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8B6F47",
+  "icons": [
+    {
+      "src": "/thrill-digger/silverrupee-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/thrill-digger/silverrupee-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/thrill-digger/silverrupee-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/thrill-digger/silverrupee-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
