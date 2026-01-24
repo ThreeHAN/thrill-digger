@@ -34,28 +34,28 @@
     flex-direction: column;
     margin: 0;
     margin-top: 40px;
-    gap: 6px;
+    gap: 12px;
     padding-right: 0;
     align-items: stretch;
   }
 
   .hazard-card {
-    padding: clamp(3px, 1vw, 6px) clamp(5px, 1.2vw, 8px);
+    padding: clamp(6px, 1.5vw, 12px) clamp(10px, 2vw, 16px);
     width: auto;
   }
 
   .hazard-row {
-    gap: clamp(2px, 0.8vw, 3px);
-    font-size: clamp(0.6rem, 1.2vw, 0.85rem);
+    gap: clamp(4px, 1.2vw, 6px);
+    font-size: clamp(1rem, 1.8vw, 1.3rem);
 
     img {
-      width: clamp(12px, 1.8vw, 18px);
-      height: clamp(12px, 1.8vw, 18px);
+      width: clamp(24px, 3.5vw, 36px);
+      height: clamp(24px, 3.5vw, 36px);
     }
   }
 
   .hazard-value {
-    font-size: clamp(0.75rem, 1.5vw, 1rem);
+    font-size: clamp(1.2rem, 2.2vw, 1.5rem);
   }
 
   .grid-board {
@@ -89,6 +89,28 @@
 
 // Mobile portrait adjustments
 @media (max-width: 600px) and (orientation: portrait) {
+  .hazard-stats {
+    gap: 16px;
+  }
+
+  .hazard-card {
+    padding: 16px 20px;
+  }
+
+  .hazard-row {
+    gap: 10px;
+    font-size: 1.8rem;
+
+    img {
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  .hazard-value {
+    font-size: 2rem;
+  }
+
   .grid-board {
     max-width: calc(100vw - 16px);
     gap: 6px;
