@@ -6,7 +6,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  /* Progressive viewport height units for mobile */
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   height: 100%;
   width: 100%;
   padding: 8px;
@@ -48,6 +51,8 @@ main {
   width: 100%;
   margin-top: 0px;
   flex: 1;
+  /* allow flex child to shrink instead of forcing overflow */
+  min-height: 0;
   overflow: visible;
 }
 
@@ -87,7 +92,6 @@ main {
   width: 100%;
   text-align: center;
   padding: 6px 8px;
-  padding-bottom: calc(6px + var(--vv-bottom-inset, 0px) + env(safe-area-inset-bottom));
   font-size: 0.85rem;
   color: rgba(243, 229, 171, 0.7);
   border-top: 1px solid $border-lighter;

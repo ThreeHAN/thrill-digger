@@ -44,6 +44,8 @@ export default function GameBoard() {
       const vw = window.innerWidth
       const vv = window.visualViewport
       const vh = vv?.height ?? window.innerHeight
+      const topInset = vv?.offsetTop ?? 0
+      const bottomInset = vv ? Math.max(0, window.innerHeight - vh - topInset) : 0
       const isPortrait = vh > vw
 
       // Query elements on first run or cache miss
@@ -53,13 +55,17 @@ export default function GameBoard() {
       cachedElements.hazardStats = cachedElements.hazardStats || document.querySelector('.hazard-stats') as HTMLElement | null
       cachedElements.grid = cachedElements.grid || document.querySelector('.grid-board') as HTMLElement | null
 
+      const headerH = cachedElements.header?.offsetHeight ?? 0
+      const footerH = cachedElements.footer?.offsetHeight ?? 0
 
       // Get main's styles once for both margin-top and flex gap
       const mainStyles = cachedElements.main ? window.getComputedStyle(cachedElements.main) : null
+      const mainMarginTop = mainStyles ? parseFloat(mainStyles.marginTop || '0') : 0
       const flexGap = mainStyles ? parseFloat(mainStyles.gap || '0') : 0
       const mainClientHeight = cachedElements.main?.clientHeight ?? 0
 
       const extra = isPortrait ? PORTRAIT_EXTRA_BUFFER : LANDSCAPE_EXTRA_BUFFER
+      const reservedH = headerH + footerH + mainMarginTop
 
       const hazardW = !isPortrait ? (cachedElements.hazardStats?.offsetWidth ?? 0) : 0
 
@@ -74,8 +80,8 @@ export default function GameBoard() {
                         (gridStyles ? parseFloat(gridStyles.paddingBottom || '0') : 0)
 
       const availW = vw - hazardW - (!isPortrait ? flexGap : 0) - CONTAINER_PADDING * 2 - boardPadX - gridGap * (config.width - 1)
-      // Base tile height strictly on the visible main area; fallback to viewport height.
-      const effectiveMainHeight = mainClientHeight > 0 ? (mainClientHeight - extra) : (vh - extra)
+      const viewportCap = vh - reservedH - bottomInset - extra
+      const effectiveMainHeight = mainClientHeight > 0 ? Math.min(mainClientHeight, viewportCap) : viewportCap
       const availH = effectiveMainHeight - boardPadY - gridGap * (config.height - 1)
 
       const sizeW = Math.floor(availW / config.width)
