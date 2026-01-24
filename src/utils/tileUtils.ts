@@ -23,7 +23,7 @@ export function getDisplayProbability(
   }
   const percent = prob * 100
   // Round down to 1 decimal places
-  return Math.floor(percent * 10) / 10
+  return Math.floor(percent)
 }
 
 /**
