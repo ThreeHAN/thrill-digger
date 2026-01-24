@@ -87,6 +87,20 @@
   }
 }
 
+// Keep the probability toggle visible on short landscape viewports
+@media (orientation: landscape) and (max-height: 700px) {
+  .probability-toggle-container {
+    position: sticky;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    padding: 0 12px 12px;
+    z-index: $z-header;
+  }
+
+  .probability-toggle-btn {
+    width: 100%;
+  }
+}
+
 // Mobile landscape mode (small screens in landscape) - AFTER general landscape for higher specificity
 @media (orientation: landscape) and (max-height: 600px) {
   .hazard-stats {
@@ -146,6 +160,14 @@
     max-width: calc(100vw - 16px);
     gap: 6px;
     padding: 8px;
+  }
+
+  .probability-toggle-container {
+    padding: 12px 14px 18px;
+  }
+
+  .probability-toggle-btn {
+    width: 100%;
   }
 
   :root {

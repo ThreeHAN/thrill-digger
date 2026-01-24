@@ -10,6 +10,9 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
   const difficulty = useGameStore(state => state.difficulty)
   const config = useGameStore(state => state.config)
   const mode = useGameStore(state => state.mode)
+  const isGameOver = useGameStore(state => state.isGameOver)
+  const showProbabilitiesInPlayMode = useGameStore(state => state.showProbabilitiesInPlayMode)
+  const toggleProbabilitiesInPlayMode = useGameStore(state => state.toggleProbabilitiesInPlayMode)
 
   const rupoorIcon = getImageForItem('rupoor')
   const greenIcon = getImageForItem('green rupee')
@@ -54,6 +57,7 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
   }, [board, revealed, solvedBoard, config.bombCount, config.rupoorCount, config.width, mode])
 
   const showRupoors = difficulty !== 1
+  const shouldShowProbabilityToggle = mode === 1 && !isGameOver
 
   return (
     <div className="hazard-stats">
@@ -88,6 +92,14 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
           )}
         </span>
       </div>
+      {shouldShowProbabilityToggle && (
+          <button
+            className="btn probability-toggle-btn"
+            onClick={toggleProbabilitiesInPlayMode}
+          >
+            {showProbabilitiesInPlayMode ? 'Hide Probabilities' : 'Show Probabilities'}
+          </button>
+      )}
     </div>
   )
 }
