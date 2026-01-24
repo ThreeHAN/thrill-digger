@@ -1,36 +1,5 @@
 @use './variables' as *;
 
-// Mobile landscape mode (small screens in landscape)
-@media (orientation: landscape) and (max-height: 600px) {
-  .hazard-stats {
-    flex-direction: column;
-    margin: 0;
-    margin-top: 20px;
-    gap: 24px;
-    padding-right: 0;
-    align-items: stretch;
-  }
-
-  .hazard-card {
-    padding: 24px 32px;
-    width: auto;
-  }
-
-  .hazard-row {
-    gap: 16px;
-    font-size: 2.8rem;
-
-    img {
-      width: 72px;
-      height: 72px;
-    }
-  }
-
-  .hazard-value {
-    font-size: 3.2rem;
-  }
-}
-
 // Landscape Mode Optimizations
 @media (orientation: landscape) {
   .game-container {
@@ -115,6 +84,37 @@
     width: clamp(50px, 15%, 70px);
     height: clamp(50px, 15%, 70px);
     font-size: clamp(0.65rem, 2.5vw, 0.85rem);
+  }
+}
+
+// Mobile landscape mode (small screens in landscape) - AFTER general landscape for higher specificity
+@media (orientation: landscape) and (max-height: 600px) {
+  .hazard-stats {
+    flex-direction: column;
+    margin: 0;
+    margin-top: 20px;
+    gap: 24px;
+    padding-right: 0;
+    align-items: stretch;
+  }
+
+  .hazard-card {
+    padding: 24px 32px;
+    width: auto;
+  }
+
+  .hazard-row {
+    gap: 16px;
+    font-size: 2.8rem;
+
+    img {
+      width: 72px;
+      height: 72px;
+    }
+  }
+
+  .hazard-value {
+    font-size: 3.2rem;
   }
 }
 
