@@ -20,11 +20,11 @@ export default function GameBoard() {
 
   useEffect(() => {
     const CONTAINER_PADDING = 0
-    const MAX_TILE = 120
-    const LANDSCAPE_SAFETY_FACTOR = 0.985
-    const PORTRAIT_SHRINK_FACTOR = 0.92
-    const PORTRAIT_EXTRA_BUFFER = 18
-    const LANDSCAPE_EXTRA_BUFFER = 12
+    const MAX_TILE = 100
+    const LANDSCAPE_SAFETY_FACTOR = 0.97
+    const PORTRAIT_SHRINK_FACTOR = 0.9
+    const PORTRAIT_EXTRA_BUFFER = 6
+    const LANDSCAPE_EXTRA_BUFFER = 0
     const MIN_TILE_SIZE = 20
     const SMALL_PORTRAIT_WIDTH = 600
     const DEBOUNCE_MS = 150
@@ -59,9 +59,10 @@ export default function GameBoard() {
       const mainStyles = cachedElements.main ? window.getComputedStyle(cachedElements.main) : null
       const mainMarginTop = mainStyles ? parseFloat(mainStyles.marginTop || '0') : 0
       const flexGap = mainStyles ? parseFloat(mainStyles.gap || '0') : 0
+      const mainClientHeight = cachedElements.main?.clientHeight ?? 0
 
       const extra = isPortrait ? PORTRAIT_EXTRA_BUFFER : LANDSCAPE_EXTRA_BUFFER
-      const reservedH = headerH + footerH + mainMarginTop + extra
+      const reservedH = headerH + footerH + mainMarginTop
 
       const hazardW = !isPortrait ? (cachedElements.hazardStats?.offsetWidth ?? 0) : 0
 
@@ -76,7 +77,9 @@ export default function GameBoard() {
                         (gridStyles ? parseFloat(gridStyles.paddingBottom || '0') : 0)
 
       const availW = vw - hazardW - (!isPortrait ? flexGap : 0) - CONTAINER_PADDING * 2 - boardPadX - gridGap * (config.width - 1)
-      const availH = vh - reservedH - boardPadY - gridGap * (config.height - 1)
+      const baseViewportHeight = vh - reservedH - extra
+      const effectiveMainHeight = mainClientHeight > 0 ? (mainClientHeight - extra) : baseViewportHeight
+      const availH = effectiveMainHeight - boardPadY - gridGap * (config.height - 1)
 
       const sizeW = Math.floor(availW / config.width)
       const sizeH = Math.floor(availH / config.height)

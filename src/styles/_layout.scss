@@ -6,10 +6,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  min-height: 100vh;
   height: 100%;
   width: 100%;
   padding: 8px;
-  padding-bottom: calc(40px + 16px);
   box-sizing: border-box;
 }
 
@@ -48,7 +48,7 @@ main {
   width: 100%;
   margin-top: 0px;
   flex: 1;
-  overflow-y: auto;
+  overflow: visible;
 }
 
 .board-area {
@@ -84,10 +84,6 @@ main {
 
 // Footer
 .app-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   width: 100%;
   text-align: center;
   padding: 6px 8px;
@@ -95,7 +91,7 @@ main {
   color: rgba(243, 229, 171, 0.7);
   border-top: 1px solid $border-lighter;
   background-color: $page-bg;
-  z-index: 100;
+  margin-top: auto;
 
   p {
     margin: 0;
