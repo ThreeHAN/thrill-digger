@@ -42,7 +42,10 @@ export default function GameBoard() {
 
     const computeSize = () => {
       const vw = window.innerWidth
-      const vh = window.visualViewport?.height ?? window.innerHeight
+      const vv = window.visualViewport
+      const vh = vv?.height ?? window.innerHeight
+      const topInset = vv?.offsetTop ?? 0
+      const bottomInset = vv ? Math.max(0, window.innerHeight - vh - topInset) : 0
       const isPortrait = vh > vw
 
       // Query elements on first run or cache miss
@@ -77,8 +80,8 @@ export default function GameBoard() {
                         (gridStyles ? parseFloat(gridStyles.paddingBottom || '0') : 0)
 
       const availW = vw - hazardW - (!isPortrait ? flexGap : 0) - CONTAINER_PADDING * 2 - boardPadX - gridGap * (config.width - 1)
-      const baseViewportHeight = vh - reservedH - extra
-      const effectiveMainHeight = mainClientHeight > 0 ? (mainClientHeight - extra) : baseViewportHeight
+      const viewportCap = vh - reservedH - bottomInset - extra
+      const effectiveMainHeight = mainClientHeight > 0 ? Math.min(mainClientHeight, viewportCap) : viewportCap
       const availH = effectiveMainHeight - boardPadY - gridGap * (config.height - 1)
 
       const sizeW = Math.floor(availW / config.width)
@@ -107,8 +110,16 @@ export default function GameBoard() {
 
     computeSize()
     window.addEventListener('resize', handleResize)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize)
+      window.visualViewport.addEventListener('scroll', handleResize)
+    }
     return () => {
       window.removeEventListener('resize', handleResize)
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize)
+        window.visualViewport.removeEventListener('scroll', handleResize)
+      }
       if (debounceTimer) clearTimeout(debounceTimer)
     }
   }, [config.width, config.height])
