@@ -39,6 +39,35 @@ function App() {
     newGame(difficulty, gameMode)
   }, [newGame, difficulty, gameMode])
 
+  // Update CSS var with dynamic VisualViewport bottom inset (URL bar / browser chrome)
+  useEffect(() => {
+    const updateViewportInset = () => {
+      const vv = window.visualViewport
+      if (!vv) {
+        document.documentElement.style.setProperty('--vv-bottom-inset', '0px')
+        return
+      }
+      const topInset = vv.offsetTop || 0
+      const bottomInset = Math.max(0, window.innerHeight - vv.height - topInset)
+      document.documentElement.style.setProperty('--vv-bottom-inset', `${bottomInset}px`)
+    }
+
+    updateViewportInset()
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateViewportInset)
+      window.visualViewport.addEventListener('scroll', updateViewportInset)
+    }
+    window.addEventListener('resize', updateViewportInset)
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateViewportInset)
+        window.visualViewport.removeEventListener('scroll', updateViewportInset)
+      }
+      window.removeEventListener('resize', updateViewportInset)
+    }
+  }, [])
+
   // Show game over modal with 1 second delay
   useEffect(() => {
     if (isGameOver && mode === GameMode.Play) {
