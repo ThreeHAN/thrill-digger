@@ -37,6 +37,7 @@ Credit: Josh Scotland's original constraint satisfaction solver.
 - Exhaustively generates all valid bomb placements given revealed rupee constraints
 - Rupee values map to expected adjacent bombs: Green (1) = 0, Blue (5) = 2, Red (20) = 4, etc.
 - Computes probability for each unrevealed cell by counting valid configurations
+- Rupoors (-2 or -10) are treated as non-constraints (do not affect adjacent bomb counts)
 - **Performance**: Automatically warns/confirms if `unknownIndicesCount >= 22` (exponential complexity)
 
 #### Play Board Generation ([utils/gameLogic.ts](src/utils/gameLogic.ts))
@@ -106,6 +107,33 @@ Images imported via [assets/images.ts](src/assets/images.ts) barrel file, then m
 - Performance gate in `gameStore.solveBoardInternal()` checks `unknownIndicesCount`
 - Warning thresholds: 22 unknown cells (show warning), 30+ seconds (require confirmation)
 
+#### Graduated Solver Process & User Interactions
+For heavy computations (≥22 unknown cells), the solver uses a phased loading UI in [gameStore.ts](src/stores/gameStore.ts#L150-L268) to gradually escalate user feedback:
+
+**Phase 1 (0-200ms)**: Silent initialization
+- Solver begins immediately with no UI changes
+- User continues interacting with the board normally
+- No visual indication yet
+
+**Phase 2 (200ms-2s)**: Loading spinner appears
+- If solver is still computing after 200ms, a loading spinner displays
+- Provides visual feedback that computation is in progress
+- User understands the app is working
+- State: `showLoadingSpinner = true`
+
+**Phase 3 (2s+)**: Computation warning modal
+- If solver exceeds 2 seconds, the warning modal replaces the spinner
+- Displays estimated completion time (ETA), total combinations to evaluate, and progress count
+- Offers two actions: **Continue** (proceed with computation) or **Cancel** (revert last change and discard solver)
+- State: `showComputationWarning = true`, `computationWarning = { time: etaSeconds, combinations, processed }`
+
+**User Actions**:
+- **Continue**: Calls `confirmComputation()` → solver continues in Web Worker with progress updates
+- **Cancel**: Calls `cancelComputation()` → terminates worker, reverts last board edit (Solve Mode only), clears computation state
+- **Close/Timeout**: No automatic close—user must explicitly choose
+
+The graduated approach avoids showing warnings for fast computations while preventing user uncertainty during long operations. The Web Worker ([workers/solver.worker.ts](src/workers/solver.worker.ts)) runs on a background thread and sends periodic progress messages to update the ETA and processed count in real-time.
+
 #### Solver Performance Gotchas
 Performance doesn't scale linearly with unknown cell count - constraint overlap matters significantly. Example: an 8×5 board with sparse high-value constraints (300 rupees at opposite corners, 5 rupees in middle) can trigger warnings even with only 3-4 visible constraints, because the solver exhaustively searches all valid bomb placements across the entire board. Boards with tightly clustered constraints or large empty zones are slower than evenly distributed ones.
 
@@ -126,7 +154,7 @@ The constraint satisfaction solver uses exhaustive search, which can be computat
 
 The additional constraint creates exponentially more valid bomb placement configurations that the solver must evaluate, even though only one rupee was added.
 
-**When implementing solver optimizations or board validation**: Test with sparse, high-value constraint layouts (see `Solve Mode` example above) as they represent worst-case performance scenarios.
+**When implementing solver optimizations or board validation**: Test with sparse, high-value constraint layouts (see `Solve Mode` example above) as they represent worst-case performance scenarios. Utilize the existing fixture set in [test-data/solverFixtures.ts](src/test-data/solverFixtures.ts) and consider adding more edge cases. After optimizations run the test suite to compare performance metrics and ensure correctness. Only change the existing solutions in the fixture after warning the user, as they represent baseline probabilities.
 
 ### UI Theming
 All colors centralized in [_variables.scss](src/styles/_variables.scss). The wood/earth tone palette is consistent across buttons ([_buttons.scss](src/styles/_buttons.scss)) and backgrounds.
