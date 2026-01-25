@@ -10,6 +10,7 @@ import type { SolverWorkerInput, SolverWorkerOutput } from '../workers/solver.wo
 let solverWorker: Worker | null = null
 const getSolverWorker = (): Worker => {
   if (!solverWorker) {
+    console.log('🚀 Creating solver Web Worker for heavy computations...')
     solverWorker = new Worker(new URL('../workers/solver.worker.ts', import.meta.url), {
       type: 'module'
     })
@@ -295,10 +296,14 @@ export const useGameStore = create<GameStore>()(
             rupoorCount: state.rupoorCount
           }
           
+          console.log(`⏳ Offloading solver to worker (${state.config.width}×${state.config.height} board)...`)
+          
           worker.onmessage = (e: MessageEvent<SolverWorkerOutput>) => {
             const { result, error } = e.data
             if (error) {
-              console.error('Worker error:', error)
+              console.error('❌ Worker error:', error)
+            } else {
+              console.log('✅ Worker computation complete, updating probabilities...')
             }
             set({
               solvedBoard: result,
@@ -390,10 +395,14 @@ export const useGameStore = create<GameStore>()(
         rupoorCount: state.rupoorCount
       }
       
+      console.log(`⏳ Offloading solver to worker (${state.config.width}×${state.config.height} board)...`)
+      
       worker.onmessage = (e: MessageEvent<SolverWorkerOutput>) => {
         const { result, error } = e.data
         if (error) {
-          console.error('Worker error:', error)
+          console.error('❌ Worker error:', error)
+        } else {
+          console.log('✅ Worker computation complete, updating probabilities...')
         }
         set({
           solvedBoard: result,

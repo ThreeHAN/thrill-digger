@@ -23,8 +23,14 @@ export interface SolverWorkerOutput {
 self.onmessage = (e: MessageEvent<SolverWorkerInput>) => {
   const { board, width, height, bombCount, rupoorCount } = e.data
   
+  console.log(`🧵 [Worker] Starting computation: ${width}×${height} board, ${bombCount} bombs`)
+  const startTime = performance.now()
+  
   try {
     const result = solveBoardProbabilities(board, width, height, bombCount, rupoorCount)
+    const endTime = performance.now()
+    
+    console.log(`🧵 [Worker] Computation complete in ${(endTime - startTime).toFixed(2)}ms`)
     
     const response: SolverWorkerOutput = { result }
     self.postMessage(response)
