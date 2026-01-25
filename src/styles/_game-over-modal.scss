@@ -1,69 +1,101 @@
 @use './variables' as *;
 
-.game-over-header {
-  display: block;
+// Game Over Modal
+.game-over-modal {
+  max-width: 560px;
   text-align: center;
-
-  h2 {
-    font-size: clamp(2rem, 8vw, 4rem);
-    margin: 0;
-    color: $primary-text;
-  }
-}
-
-.game-over-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(12px, 4vw, 20px);
-  padding: clamp(12px, 4vw, 20px) 0;
-}
-
-.game-over-rupees {
-  display: flex;
-  align-items: center;
-  gap: clamp(8px, 3vw, 12px);
-  font-size: clamp(1.5rem, 6vw, 2.5rem);
-  font-weight: bold;
+  padding: 0;
+  background: linear-gradient(180deg, #4f4338 0%, #3f362e 100%);
+  border: 4px solid #d9c28a;
+  border-radius: $border-radius-lg;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45), inset 0 0 0 2px #745d38;
   color: $primary-text;
 }
 
-.game-over-rupee-image {
-  width: clamp(40px, 12vw, 60px);
-  height: clamp(40px, 12vw, 60px);
+.game-over-frame {
+  background: linear-gradient(180deg, #4c4035 0%, #40352c 100%);
+  border: 2px solid #a27c48;
+  border-radius: calc($border-radius-lg - 4px);
+  padding: 32px 26px 28px 26px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.game-over-title {
+  text-transform: uppercase;
+  font-size: 1.6rem;
+  letter-spacing: 1px;
+  color: #f7e6b4;
+  text-shadow: $text-shadow-outline;
+  margin-bottom: 24px;
+}
+
+.game-over-stats {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 26px;
+}
+
+.game-over-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.game-over-label {
+  font-size: 0.95rem;
+  color: $tertiary-text;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.game-over-value {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.8rem;
+  color: #f8ecd0;
+  font-weight: bold;
+}
+
+.game-over-rupee-icon {
+  width: 50px;
+  height: 50px;
   object-fit: contain;
 }
 
 .game-over-actions {
   display: flex;
-  gap: 12px;
+  flex-direction: row;
+  gap: 10px;
   justify-content: center;
-  padding-top: clamp(12px, 4vw, 20px);
 }
 
-.game-over-button {
-  padding: clamp(8px, 2vw, 10px) clamp(16px, 4vw, 20px);
-  font-size: clamp(0.9rem, 3.5vw, 1rem);
+.reveal-btn,
+.play-again-btn {
+  padding: 12px 18px;
+  font-size: 0.95rem;
+  border-radius: 999px;
+  width: auto;
 }
 
-// Variants to match pill style while remaining distinctive
-.reveal-pill {
-  background: linear-gradient(135deg, rgba($color-gold, 0.35), rgba(93, 58, 26, 0.95));
-  border-color: rgba($color-gold, 0.55);
+.reveal-btn {
+  background: linear-gradient(135deg, rgba(211, 180, 79, 0.9), rgba(93, 58, 26, 0.95));
+  border-color: rgba(211, 180, 79, 0.6);
 
   &:hover {
-    border-color: rgba($color-gold, 0.7);
-    box-shadow: 0 0 12px rgba($color-gold, 0.35), $shadow-small;
+    border-color: rgba(211, 180, 79, 0.8);
+    box-shadow: 0 0 12px rgba(211, 180, 79, 0.4), $shadow-small;
   }
 }
 
-.play-again-pill {
-  background: linear-gradient(135deg, rgba($wood-medium, 0.85), rgba($wood-dark, 0.95));
-  border-color: rgba(243, 229, 171, 0.45);
+.play-again-btn {
+  background: linear-gradient(135deg, rgba($tile-safe, 0.9), rgba(#3d5a3d, 0.95));
+  border-color: rgba($color-light-green, 0.5);
 
   &:hover {
-    border-color: rgba(243, 229, 171, 0.6);
-    box-shadow: 0 0 12px rgba(243, 229, 171, 0.25), $shadow-small;
+    border-color: rgba($color-light-green, 0.7);
+    box-shadow: 0 0 12px rgba($color-light-green, 0.3), $shadow-small;
   }
 }
 
