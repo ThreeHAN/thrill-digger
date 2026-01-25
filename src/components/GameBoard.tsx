@@ -30,7 +30,7 @@ export default function GameBoard() {
     const DEBOUNCE_MS = 150
 
     // Cache element references to avoid repeated DOM queries
-    let cachedElements = {
+    const cachedElements = {
       header: null as HTMLElement | null,
       footer: null as HTMLElement | null,
       main: null as HTMLElement | null,

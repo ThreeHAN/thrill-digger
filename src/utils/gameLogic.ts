@@ -47,7 +47,7 @@ export function getRandomInt(min: number, max: number): number {
 export function generatePlayBoard(width: number, height: number, bombCount: number, rupoorCount: number): BoardCell[][] {
   const board = createEmptyBoard(width, height)
   const totalCells = width * height
-  let placed = { bombs: 0, rupoors: 0 }
+  const placed = { bombs: 0, rupoors: 0 }
 
   // Place bombs randomly
   while (placed.bombs < bombCount) {
@@ -184,6 +184,13 @@ export function convertRupeeValueToBombCount(value: number): number {
   })()
   console.log(`Converting rupee value ${value} to bomb count ${converted}`)
   return converted
+}
+
+/**
+ * Deep clone a 2D board array
+ */
+export function cloneBoard(board: BoardCell[][]): BoardCell[][] {
+  return board.map(row => [...row])
 }
 
 /**

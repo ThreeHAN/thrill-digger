@@ -296,7 +296,7 @@ export function getProbabilityColor(probability: number): string {
  */
 export function calculateUnknownIndicesCount(board: BoardCell[][], width: number, height: number): number {
   const flat1D = board.flat()
-  let solvedBoard = flat1D.slice(0)
+  const solvedBoard = flat1D.slice(0)
 
   // Convert empty cells (0) to unknown (-1) for solving
   for (let i = 0; i < solvedBoard.length; i++) {
