@@ -78,8 +78,6 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
     if (cell > 1) {
       const unknownNeighbors: number[] = []
       let expectedBombs = cell  // Value is already the bomb count
-      const colIndex = i % width
-      const rowIndex = Math.floor(i / width)
       // console.log(`Cell at [${rowIndex},${colIndex}] value=${cell} expects ${expectedBombs} bombs`)
       
       // Count adjacent bombs and rupoors

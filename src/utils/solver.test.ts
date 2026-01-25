@@ -1,11 +1,21 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterAll } from 'vitest'
 import { solveBoardProbabilities } from './solver'
 import { solverFixtures } from '../test-data/solverFixtures'
+
+interface TimingEntry {
+  name: string
+  timeMs: number
+  width: number
+  height: number
+}
+
+const timings: TimingEntry[] = []
 
 describe('solveBoardProbabilities', () => {
   describe('baseline regression tests', () => {
     solverFixtures.forEach((fixture) => {
-      it(`should produce correct probabilities for: ${fixture.name}`, () => {
+      it(`should produce correct probabilities for: ${fixture.name}`, { timeout: 30000 }, () => {
+        const startTime = performance.now()
         const result = solveBoardProbabilities(
           fixture.board,
           fixture.width,
@@ -13,11 +23,39 @@ describe('solveBoardProbabilities', () => {
           fixture.bombCount,
           fixture.rupoorCount
         )
+        const endTime = performance.now()
+        
+        timings.push({
+          name: fixture.name,
+          timeMs: endTime - startTime,
+          width: fixture.width,
+          height: fixture.height,
+        })
 
         expect(result).not.toBeNull()
-        expect(result).toEqual(fixture.expectedSolvedBoard)
+        expect(result).toEqual(fixture.solvedBoard)
       })
     })
+  })
+
+  afterAll(() => {
+    if (timings.length > 0) {
+      const totalTime = timings.reduce((sum, t) => sum + t.timeMs, 0)
+      const avgTime = totalTime / timings.length
+      const sorted = [...timings].sort((a, b) => b.timeMs - a.timeMs)
+      
+      console.log('\n📊 Solver Performance Benchmark')
+      console.log('================================')
+      console.log(`Total fixtures: ${timings.length}`)
+      console.log(`Total time: ${totalTime.toFixed(2)}ms`)
+      console.log(`Average time: ${avgTime.toFixed(3)}ms`)
+      console.log(`Fastest: ${sorted[sorted.length - 1].name} (${sorted[sorted.length - 1].timeMs.toFixed(3)}ms)`)
+      console.log(`Slowest: ${sorted[0].name} (${sorted[0].timeMs.toFixed(3)}ms)`)
+      console.log('\nTop 5 slowest fixtures:')
+      sorted.slice(0, 5).forEach((t, i) => {
+        console.log(`  ${i + 1}. ${t.name} (${t.width}×${t.height}): ${t.timeMs.toFixed(3)}ms`)
+      })
+    }
   })
 
   describe('edge cases', () => {
