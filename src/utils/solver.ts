@@ -5,6 +5,13 @@
 
 import type { BoardCell } from './gameLogic'
 
+// Progress reporting for long-running computations
+export type SolverProgressHandler = (processed: number, total: number, elapsedMs: number) => void
+let progressHandler: SolverProgressHandler | null = null
+export function setSolverProgressHandler(handler: SolverProgressHandler | null) {
+  progressHandler = handler
+}
+
 export type SolvedBoard = number[] // Probabilities or special values like -2 (unknown)
 
 /**
@@ -157,6 +164,8 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   const minBombsNeeded = Math.max(0, remainingHazards - safeCount)
 
   // Test all possible bomb placements with early pruning
+  const reportIntervalMs = 100
+  let lastReportTime = performance.now()
   for (let combo = 0; combo < totalCombinations; ++combo) {
     if (combo > 4e8) {
       computationLimitReached = true;
@@ -201,6 +210,15 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
       validSolutionsCount++;
       for (let unknownPos = 0; unknownPos < unknownCount; unknownPos++) {
         bombCounts[unknownPos] += placement[unknownPos];
+      }
+    }
+
+    // Progress reporting based on time to avoid overhead
+    if (progressHandler) {
+      const now = performance.now()
+      if (now - lastReportTime >= reportIntervalMs) {
+        lastReportTime = now
+        progressHandler(combo + 1, totalCombinations, now)
       }
     }
   }

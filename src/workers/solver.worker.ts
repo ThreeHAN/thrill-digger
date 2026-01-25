@@ -3,7 +3,7 @@
  * Keeps UI responsive during long-running constraint satisfaction solving
  */
 
-import { solveBoardProbabilities } from '../utils/solver'
+import { solveBoardProbabilities, setSolverProgressHandler } from '../utils/solver'
 import type { BoardCell } from '../utils/gameLogic'
 
 export interface SolverWorkerInput {
@@ -15,7 +15,11 @@ export interface SolverWorkerInput {
 }
 
 export interface SolverWorkerOutput {
-  result: number[] | null
+  type: 'done' | 'progress' | 'error'
+  result?: number[] | null
+  processed?: number
+  total?: number
+  elapsedMs?: number
   error?: string
 }
 
@@ -27,15 +31,31 @@ self.onmessage = (e: MessageEvent<SolverWorkerInput>) => {
   const startTime = performance.now()
   
   try {
+    // Attach progress handler to stream updates
+    setSolverProgressHandler((processed, total, now) => {
+      const response: SolverWorkerOutput = {
+        type: 'progress',
+        processed,
+        total,
+        elapsedMs: Math.round(now - startTime),
+      }
+      // Non-blocking post
+      self.postMessage(response)
+    })
+
     const result = solveBoardProbabilities(board, width, height, bombCount, rupoorCount)
     const endTime = performance.now()
     
     console.log(`🧵 [Worker] Computation complete in ${(endTime - startTime).toFixed(2)}ms`)
     
-    const response: SolverWorkerOutput = { result }
+    // Clear handler
+    setSolverProgressHandler(null)
+    const response: SolverWorkerOutput = { type: 'done', result }
     self.postMessage(response)
   } catch (error) {
+    setSolverProgressHandler(null)
     const response: SolverWorkerOutput = {
+      type: 'error',
       result: null,
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     }

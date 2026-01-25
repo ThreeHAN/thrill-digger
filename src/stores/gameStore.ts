@@ -256,6 +256,7 @@ export const useGameStore = create<GameStore>()(
     const state = get()
     if (state.mode !== GameMode.Solve) return
 
+    const startTime = performance.now()
     const unknownIndicesCount = calculateUnknownIndicesCount(
       state.board,
       state.config.width,
@@ -263,60 +264,88 @@ export const useGameStore = create<GameStore>()(
     )
     const totalCombinations = Math.round(Math.pow(2, unknownIndicesCount))
 
-    // Show warning if computation will be heavy
+    // For boards with many unknowns, use worker with time-based modal triggering
     if (unknownIndicesCount >= 22) {
-      const estimatedTime = Math.floor(totalCombinations / 1111111)
-      
-      // If time > 30 seconds, require confirmation
-      if (estimatedTime > 30) {
-        set({
-          showComputationWarning: true,
-          computationWarning: { time: estimatedTime, combinations: totalCombinations },
-          requiresConfirmation: true,
-        })
-      } else {
-        // Show warning but auto-proceed
-        set({
-          showComputationWarning: true,
-          computationWarning: { time: estimatedTime, combinations: totalCombinations },
-          requiresConfirmation: false,
-        })
+      let warningIntervalHandle: ReturnType<typeof setInterval> | null = null
+      let hasShownWarning = false
 
-        // Use worker for computation >= 22 unknowns to keep UI responsive
-        setTimeout(() => {
-          const state = get()
-          set({ isComputingInWorker: true })
-          
-          const worker = getSolverWorker()
-          const input: SolverWorkerInput = {
-            board: state.board,
-            width: state.config.width,
-            height: state.config.height,
-            bombCount: state.config.bombCount,
-            rupoorCount: state.rupoorCount
-          }
-          
-          console.log(`⏳ Offloading solver to worker (${state.config.width}×${state.config.height} board)...`)
-          
-          worker.onmessage = (e: MessageEvent<SolverWorkerOutput>) => {
-            const { result, error } = e.data
-            if (error) {
-              console.error('❌ Worker error:', error)
-            } else {
-              console.log('✅ Worker computation complete, updating probabilities...')
+      // Set interval to check if computation takes > 200ms
+      warningIntervalHandle = setInterval(() => {
+        const elapsed = Math.round(performance.now() - startTime)
+        if (elapsed > 200 && !hasShownWarning) {
+          hasShownWarning = true
+          set({
+            showComputationWarning: true,
+            computationWarning: { time: elapsed, combinations: totalCombinations },
+            requiresConfirmation: false,
+          })
+        }
+      }, 50) // Check every 50ms
+
+      // Use worker to keep UI responsive
+      setTimeout(() => {
+        const state = get()
+        set({ isComputingInWorker: true })
+        
+        const worker = getSolverWorker()
+        const input: SolverWorkerInput = {
+          board: state.board,
+          width: state.config.width,
+          height: state.config.height,
+          bombCount: state.config.bombCount,
+          rupoorCount: state.rupoorCount
+        }
+        
+        console.log(`⏳ Offloading solver to worker (${state.config.width}×${state.config.height} board)...`)
+        
+        worker.onmessage = (e: MessageEvent<SolverWorkerOutput>) => {
+          const msg = e.data
+          if (msg.type === 'progress') {
+            // Compute ETA based on throughput
+            const processed = msg.processed || 0
+            const total = msg.total || 0
+            const elapsedMs = msg.elapsedMs || 0
+            if (elapsedMs > 200) {
+              const rate = processed > 0 && elapsedMs > 0 ? processed / elapsedMs : 0 // combos per ms
+              const remaining = Math.max(0, total - processed)
+              const etaMs = rate > 0 ? Math.round(remaining / rate) : 0
+              set({
+                showComputationWarning: true,
+                computationWarning: { time: Math.round(etaMs / 1000), combinations: total },
+                requiresConfirmation: false,
+              })
             }
+            return
+          }
+
+          // Finalize
+          const elapsed = Math.round(performance.now() - startTime)
+          if (warningIntervalHandle) clearInterval(warningIntervalHandle)
+          
+          if (msg.type === 'error') {
+            console.error('❌ Worker error:', msg.error)
             set({
-              solvedBoard: result,
+              solvedBoard: null,
               showComputationWarning: false,
-              showInvalidBoardError: result === null,
-              invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
+              showInvalidBoardError: true,
+              invalidSourceIndex: state.lastChangedIndex,
               isComputingInWorker: false,
             })
+            return
           }
-          
-          worker.postMessage(input)
-        }, 100)
-      }
+
+          console.log(`✅ Worker computation complete in ${elapsed}ms, updating probabilities...`)
+          set({
+            solvedBoard: msg.result ?? null,
+            showComputationWarning: false,
+            showInvalidBoardError: (msg.result ?? null) === null,
+            invalidSourceIndex: (msg.result ?? null) === null ? state.lastChangedIndex : undefined,
+            isComputingInWorker: false,
+          })
+        }
+        
+        worker.postMessage(input)
+      }, 100)
     } else {
       // Compute immediately for small boards (< 22 unknowns)
       const result = solveBoardProbabilities(
@@ -326,6 +355,9 @@ export const useGameStore = create<GameStore>()(
         state.config.bombCount,
         state.rupoorCount
       )
+      const elapsed = Math.round(performance.now() - startTime)
+      console.log(`Solver completed synchronously in ${elapsed}ms`)
+      
       set({
         solvedBoard: result,
         showInvalidBoardError: result === null,
@@ -398,17 +430,40 @@ export const useGameStore = create<GameStore>()(
       console.log(`⏳ Offloading solver to worker (${state.config.width}×${state.config.height} board)...`)
       
       worker.onmessage = (e: MessageEvent<SolverWorkerOutput>) => {
-        const { result, error } = e.data
-        if (error) {
-          console.error('❌ Worker error:', error)
-        } else {
-          console.log('✅ Worker computation complete, updating probabilities...')
+        const msg = e.data
+        if (msg.type === 'progress') {
+          const processed = msg.processed || 0
+          const total = msg.total || 0
+          const elapsedMs = msg.elapsedMs || 0
+          if (elapsedMs > 200) {
+            const rate = processed > 0 && elapsedMs > 0 ? processed / elapsedMs : 0
+            const remaining = Math.max(0, total - processed)
+            const etaMs = rate > 0 ? Math.round(remaining / rate) : 0
+            set({
+              showComputationWarning: true,
+              computationWarning: { time: Math.round(etaMs / 1000), combinations: total },
+              requiresConfirmation: false,
+            })
+          }
+          return
         }
+        if (msg.type === 'error') {
+          console.error('❌ Worker error:', msg.error)
+          set({
+            solvedBoard: null,
+            showComputationWarning: false,
+            showInvalidBoardError: true,
+            invalidSourceIndex: state.lastChangedIndex,
+            isComputingInWorker: false,
+          })
+          return
+        }
+        console.log('✅ Worker computation complete, updating probabilities...')
         set({
-          solvedBoard: result,
+          solvedBoard: msg.result ?? null,
           showComputationWarning: false,
-          showInvalidBoardError: result === null,
-          invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
+          showInvalidBoardError: (msg.result ?? null) === null,
+          invalidSourceIndex: (msg.result ?? null) === null ? state.lastChangedIndex : undefined,
           isComputingInWorker: false,
           showProbabilitiesInPlayMode: state.mode === GameMode.Play ? true : state.showProbabilitiesInPlayMode,
         })

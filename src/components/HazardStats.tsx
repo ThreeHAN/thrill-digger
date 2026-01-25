@@ -59,7 +59,7 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
   }, [board, revealed, solvedBoard, config.bombCount, config.rupoorCount, config.width, mode])
 
   const showRupoors = difficulty !== 1
-  const shouldShowProbabilityToggle = mode === 1 && !isGameOver
+  const shouldShowProbabilityToggle = mode === 1
   const shouldShowNewGameButton = useMemo(() => {
     if (!(mode === 1 && isGameOver)) return false
     // Show after board reveal from Game Over modal
