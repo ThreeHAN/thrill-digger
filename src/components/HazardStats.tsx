@@ -1,133 +1,154 @@
-import { useMemo } from 'react'
-import { useGameStore } from '../stores/gameStore'
+import { useMemo, type ReactNode } from 'react'
+import { useShallow } from 'zustand/react/shallow'
+import { Difficulty } from '../utils/gameLogic'
+import { GameMode, useGameStore } from '../stores/gameStore'
 import { getImageForItem } from '../utils/imageMap'
 import bombImg from '../assets/minigame/bomb.png'
 
 export default function HazardStats({ boardTotal }: { boardTotal: number }) {
-  const board = useGameStore(state => state.board)
-  const revealed = useGameStore(state => state.revealed)
-  const autoRevealed = useGameStore(state => state.autoRevealed)
-  const solvedBoard = useGameStore(state => state.solvedBoard)
-  const difficulty = useGameStore(state => state.difficulty)
-  const config = useGameStore(state => state.config)
-  const mode = useGameStore(state => state.mode)
-  const isGameOver = useGameStore(state => state.isGameOver)
-  const showProbabilitiesInPlayMode = useGameStore(state => state.showProbabilitiesInPlayMode)
-  const toggleProbabilitiesInPlayMode = useGameStore(state => state.toggleProbabilitiesInPlayMode)
-  const resetGame = useGameStore(state => state.resetGame)
+  const {
+    board,
+    revealed,
+    autoRevealed,
+    solvedBoard,
+    difficulty,
+    config,
+    mode,
+    isGameOver,
+    showProbabilitiesInPlayMode,
+    toggleProbabilitiesInPlayMode,
+    resetGame,
+  } = useGameStore(useShallow(state => ({
+    board: state.board,
+    revealed: state.revealed,
+    autoRevealed: state.autoRevealed,
+    solvedBoard: state.solvedBoard,
+    difficulty: state.difficulty,
+    config: state.config,
+    mode: state.mode,
+    isGameOver: state.isGameOver,
+    showProbabilitiesInPlayMode: state.showProbabilitiesInPlayMode,
+    toggleProbabilitiesInPlayMode: state.toggleProbabilitiesInPlayMode,
+    resetGame: state.resetGame,
+  })))
 
   const rupoorIcon = getImageForItem('rupoor')
   const greenIcon = getImageForItem('green rupee')
 
+  const isPlayMode = mode === GameMode.Play
+  const showRupoors = difficulty !== Difficulty.Beginner
+  const { bombCount, rupoorCount, width } = config
+
   const { remainingRupoors, remainingHazards } = useMemo(() => {
-    const flat = board.flat()
-    
+    const flatBoard = board.flat()
+    const isRupoor = (value: number) => value === -10 || value === -2
+
     let rupoorsFound = 0
     let guaranteedHazardsFound = 0
-    
-    if (mode === 1) {
-      // Play mode: count revealed rupoors
-      for (let i = 0; i < flat.length; i++) {
-        const row = Math.floor(i / config.width)
-        const col = i % config.width
-        if ((flat[i] === -10 || flat[i] === -2) && revealed[row][col]) {
+
+    if (isPlayMode) {
+      for (let i = 0; i < flatBoard.length; i++) {
+        const row = Math.floor(i / width)
+        const col = i % width
+        if (isRupoor(flatBoard[i]) && revealed[row][col]) {
           rupoorsFound++
         }
       }
     } else {
-      // Solve mode: count placed rupoors
-      rupoorsFound = flat.reduce((acc, cell) => (
-        cell === -10 || cell === -2 ? acc + 1 : acc
-      ), 0)
-      
-      // Count guaranteed hazards (100% probability squares)
-      if (solvedBoard && solvedBoard.length === flat.length) {
+      rupoorsFound = flatBoard.reduce<number>((count, cell) => count + (isRupoor(cell) ? 1 : 0), 0)
+
+      if (solvedBoard && solvedBoard.length === flatBoard.length) {
         for (let i = 0; i < solvedBoard.length; i++) {
-          if (flat[i] === 0 && solvedBoard[i] === 1) {
+          if (flatBoard[i] === 0 && solvedBoard[i] === 1) {
             guaranteedHazardsFound++
           }
         }
       }
     }
 
-    // Remaining hazards = (total bombs + total rupoors) - rupoors found - 100% probability squares
-    const totalPossibleHazards = config.bombCount + config.rupoorCount
+    const totalPossibleHazards = bombCount + rupoorCount
     const remainingHazards = Math.max(0, totalPossibleHazards - rupoorsFound - guaranteedHazardsFound)
-    const remainingRupoors = Math.max(0, config.rupoorCount - rupoorsFound)
+    const remainingRupoors = Math.max(0, rupoorCount - rupoorsFound)
 
     return { remainingRupoors, remainingHazards }
-  }, [board, revealed, solvedBoard, config.bombCount, config.rupoorCount, config.width, mode])
+  }, [board, revealed, solvedBoard, bombCount, rupoorCount, width, isPlayMode])
 
-  const showRupoors = difficulty !== 1
-  const shouldShowProbabilityToggle = mode === 1
+  const shouldShowProbabilityToggle = isPlayMode
   const shouldShowNewGameButton = useMemo(() => {
-    if (!(mode === 1 && isGameOver)) return false
-    // Show after board reveal from Game Over modal
-    for (let r = 0; r < autoRevealed.length; r++) {
-      for (let c = 0; c < autoRevealed[r].length; c++) {
-        if (autoRevealed[r][c]) return true
-      }
-    }
-    return false
-  }, [mode, isGameOver, autoRevealed])
+    if (!(isPlayMode && isGameOver)) return false
+    return autoRevealed.some((row: boolean[]) => row.some(Boolean))
+  }, [isPlayMode, isGameOver, autoRevealed])
 
   return (
     <div className="hazard-stats">
-      <div className="hazard-card" title="Total rupees available on the board (bombs and rupoors don't count)">
-        <span className="hazard-row" aria-label="Total rupees">
-          <img src={greenIcon} alt="Rupees" />
-          <span className="hazard-value">{boardTotal}</span>
-        </span>
-      </div>
+      <HazardCard title="Total rupees available on the board (bombs and rupoors don't count)" ariaLabel="Total rupees">
+        <img src={greenIcon} alt="Rupees" />
+        <span className="hazard-value">{boardTotal}</span>
+      </HazardCard>
+
       {showRupoors && (
-        <div className="hazard-card" title="Remaining rupoors to find (total - found)">
-          <span className="hazard-row" aria-label="Known rupoors">
-            <img src={rupoorIcon} alt="Rupoor" />
-            <span className="hazard-value">{remainingRupoors}</span>
-          </span>
-        </div>
+        <HazardCard title="Remaining rupoors to find (total - found)" ariaLabel="Known rupoors">
+          <img src={rupoorIcon} alt="Rupoor" />
+          <span className="hazard-value">{remainingRupoors}</span>
+        </HazardCard>
       )}
-      <div className="hazard-card" title="Remaining hazards: bombs + rupoors - found - confirmed 100% squares">
-        <span className="hazard-row" aria-label="Remaining hazards">
-          {!showRupoors && (
-            <>
-              <img src={bombImg} alt="Bomb" />
-              <span className="hazard-value">{remainingHazards}</span>
-            </>
-          )}
-          {showRupoors && (
-            <>
-              <img src={rupoorIcon} alt="Rupoor" />
-              <img src={bombImg} alt="Bomb" />
-              <span className="hazard-value">{remainingHazards}</span>
-            </>
-          )}
-        </span>
-      </div>
-        {shouldShowProbabilityToggle && !shouldShowNewGameButton && (
-          <div className="probability-toggle-row">
-            <button
-              className={`probability-pill ${showProbabilitiesInPlayMode ? 'is-active' : ''}`}
-              onClick={toggleProbabilitiesInPlayMode}
-              aria-pressed={showProbabilitiesInPlayMode}
-              aria-label={`Probabilities ${showProbabilitiesInPlayMode ? 'on' : 'off'}`}
-            >
-              <span className="pill-label">Probabilities</span>
-              <span className="pill-state">{showProbabilitiesInPlayMode ? 'On' : 'Off'}</span>
-            </button>
-          </div>
-        )}
-        {shouldShowNewGameButton && (
-          <div className="probability-toggle-row">
-            <button
-              className="probability-pill new-game-pill"
-              onClick={() => resetGame(difficulty, mode)}
-              aria-label="Start a new game"
-            >
-              <span className="pill-label">New Game</span>
-            </button>
-          </div>
-        )}
+
+      <HazardCard title="Remaining hazards: bombs + rupoors - found - confirmed 100% squares" ariaLabel="Remaining hazards">
+        {showRupoors && <img src={rupoorIcon} alt="Rupoor" />}
+        <img src={bombImg} alt="Bomb" />
+        <span className="hazard-value">{remainingHazards}</span>
+      </HazardCard>
+
+      {shouldShowProbabilityToggle && !shouldShowNewGameButton && (
+        <ProbabilityToggle
+          active={showProbabilitiesInPlayMode}
+          onToggle={toggleProbabilitiesInPlayMode}
+        />
+      )}
+
+      {shouldShowNewGameButton && (
+        <NewGameButton onReset={() => resetGame(difficulty, mode)} />
+      )}
+    </div>
+  )
+}
+
+function HazardCard({ title, ariaLabel, children }: { title: string; ariaLabel: string; children: ReactNode }) {
+  return (
+    <div className="hazard-card" title={title}>
+      <span className="hazard-row" aria-label={ariaLabel}>
+        {children}
+      </span>
+    </div>
+  )
+}
+
+function ProbabilityToggle({ active, onToggle }: { active: boolean; onToggle: () => void }) {
+  return (
+    <div className="probability-toggle-row">
+      <button
+        className={`probability-pill ${active ? 'is-active' : ''}`}
+        onClick={onToggle}
+        aria-pressed={active}
+        aria-label={`Probabilities ${active ? 'on' : 'off'}`}
+      >
+        <span className="pill-label">Probabilities</span>
+        <span className="pill-state">{active ? 'On' : 'Off'}</span>
+      </button>
+    </div>
+  )
+}
+
+function NewGameButton({ onReset }: { onReset: () => void }) {
+  return (
+    <div className="probability-toggle-row">
+      <button
+        className="probability-pill new-game-pill"
+        onClick={onReset}
+        aria-label="Start a new game"
+      >
+        <span className="pill-label">New Game</span>
+      </button>
     </div>
   )
 }
