@@ -104,7 +104,7 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
           )}
         </span>
       </div>
-        {shouldShowProbabilityToggle && (
+        {shouldShowProbabilityToggle && !shouldShowNewGameButton && (
           <div className="probability-toggle-row">
             <button
               className={`probability-pill ${showProbabilitiesInPlayMode ? 'is-active' : ''}`}

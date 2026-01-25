@@ -32,8 +32,6 @@ function App() {
   const showComputationWarning = useGameStore(state => state.showComputationWarning)
   const showLoadingSpinner = useGameStore(state => state.showLoadingSpinner)
   const computationWarning = useGameStore(state => state.computationWarning)
-  const requiresConfirmation = useGameStore(state => state.requiresConfirmation)
-  const confirmComputation = useGameStore(state => state.confirmComputation)
   const cancelComputation = useGameStore(state => state.cancelComputation)
   const revealAllCells = useGameStore(state => state.revealAllCells)
 
@@ -114,8 +112,6 @@ function App() {
         estimatedTime={computationWarning.time}
         combinations={computationWarning.combinations}
         combinationsRemaining={computationWarning.combinations - (computationWarning.processed || 0)}
-        requiresConfirmation={requiresConfirmation}
-        onConfirm={confirmComputation}
         onCancel={cancelComputation}
       />
 

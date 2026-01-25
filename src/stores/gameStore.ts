@@ -55,7 +55,6 @@ export interface GameState {
   computationWarning: { time: number; combinations: number; processed?: number }
   boardTotal: number
   showInvalidBoardError: boolean
-  requiresConfirmation: boolean
   closeRupeeModals: number
   showProbabilitiesInPlayMode: boolean
   invalidSourceIndex?: number
@@ -111,7 +110,6 @@ const initialGameState = (difficulty: Difficulty): GameState => {
     computationWarning: { time: 0, combinations: 0 },
     boardTotal: 0,
     showInvalidBoardError: false,
-    requiresConfirmation: false,
     closeRupeeModals: 0,
     showProbabilitiesInPlayMode,
     invalidSourceIndex: undefined,
@@ -147,7 +145,7 @@ export const useGameStore = create<GameStore>()(
         const totalCombinations = Math.round(Math.pow(2, unknownIndicesCount))
 
         // Clear any lingering warnings/confirmation before recompute
-        set({ showComputationWarning: false, requiresConfirmation: false })
+        set({ showComputationWarning: false })
 
         if (unknownIndicesCount >= 22) {
           // Use setTimeout to offload to worker with phased loading UI
@@ -174,7 +172,6 @@ export const useGameStore = create<GameStore>()(
                   time: -1, // Will be updated when worker sends first progress
                   combinations: totalCombinations,
                 },
-                requiresConfirmation: false,
               })
             }, 2000)
           )
@@ -211,7 +208,6 @@ export const useGameStore = create<GameStore>()(
                         combinations: total,
                         processed,
                       },
-                      requiresConfirmation: false,
                     })
                   }
                 },
@@ -411,8 +407,6 @@ export const useGameStore = create<GameStore>()(
   },
 
   confirmComputation: () => {
-    set({ requiresConfirmation: false })
-
     const state = get()
 
     let solverBoard = state.board
@@ -452,8 +446,20 @@ export const useGameStore = create<GameStore>()(
     setTimeout(() => {
       isWorkerTerminating = false
     }, 200)
+
+    if (state.mode === GameMode.Play) {
+      set({
+        solvedBoard: null,
+        invalidSourceIndex: undefined,
+        lastChangedIndex: undefined,
+        showComputationWarning: false,
+        showLoadingSpinner: false,
+        isComputingInWorker: false,
+      })
+      return
+    }
     
-    // Revert the last changed cell if it exists
+    // Revert the last changed cell if it exists (Solve Mode)
     if (state.lastChangedIndex !== undefined) {
       const row = Math.floor(state.lastChangedIndex / state.config.width)
       const col = state.lastChangedIndex % state.config.width
@@ -469,14 +475,12 @@ export const useGameStore = create<GameStore>()(
         lastChangedIndex: undefined,
         showComputationWarning: false,
         showLoadingSpinner: false,
-        requiresConfirmation: false,
         isComputingInWorker: false,
       })
     } else {
       set({
         showComputationWarning: false,
         showLoadingSpinner: false,
-        requiresConfirmation: false,
         isComputingInWorker: false,
       })
     }
@@ -535,7 +539,6 @@ export const useGameStore = create<GameStore>()(
         solvedBoard: null,
         invalidSourceIndex: undefined,
         showComputationWarning: false,
-        requiresConfirmation: false,
       })
     }
   },
