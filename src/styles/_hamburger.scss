@@ -16,11 +16,6 @@
   transition: transform $transition-slow;
   width: 40px;
   height: 40px;
-  outline: none;
-
-  &:focus {
-    outline: none;
-  }
 
   &.active {
     transform: rotate(180deg);
@@ -53,7 +48,7 @@
   flex-direction: column;
   max-height: 80vh;
   width: 90%;
-  max-width: 400px;
+  max-width: 430px;
   pointer-events: auto;
   z-index: calc($z-modal + 1);
 
@@ -122,15 +117,28 @@
 
 .hamburger-menu-action-btn {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border-radius: $border-radius-md;
   border: 2px solid;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
   cursor: pointer;
-  text-align: center;
-  letter-spacing: 0.5px;
-  transition: all $transition-normal;
+  transition: background-color $transition-normal, border-color $transition-normal, transform $transition-fast;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  outline: none;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(243, 229, 171, 0.35);
+  }
 
   &.new-game {
     background: linear-gradient(135deg, rgba(168, 68, 50, 0.3), rgba(142, 52, 40, 0.4));
@@ -145,14 +153,12 @@
   }
 
   &.info {
-    background: none;
-    border-color: rgba(211, 180, 79, 0.4);
-    color: $tertiary-text;
+    background: $bg-overlay-dark;
+    border-color: $border-card;
+    color: $primary-text;
 
     &:hover {
-      background: rgba(211, 180, 79, 0.1);
-      border-color: rgba(211, 180, 79, 0.6);
-      color: $primary-text;
+      border-color: rgba(243, 229, 171, 0.5);
     }
   }
 }
@@ -161,38 +167,52 @@
   border-bottom: 1px solid rgba(211, 180, 79, 0.3);
   padding: 8px 0;
   display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .hamburger-menu-label {
   color: $primary-text;
   padding: 6px 16px;
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 600;
-  opacity: 0.7;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   text-align: center;
+  flex-shrink: 0;
   text-shadow: $text-shadow-outline;
 }
 
 .hamburger-menu-subitem {
-  background: none;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: $border-radius-md;
+  border: 2px solid $border-card;
+  background: $bg-overlay-dark;
   color: $primary-text;
-  padding: 8px 16px;
-  font-size: 0.9rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
   cursor: pointer;
-  text-align: center;
-  transition: all $transition-normal;
-  position: relative;
+  transition: background-color $transition-normal, border-color $transition-normal, transform $transition-fast;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: none;
+  outline: none;
+  margin: 4px 0;
 
   &:hover {
-    background-color: rgba(243, 229, 171, 0.1);
+    transform: translateY(-1px);
+    border-color: rgba(243, 229, 171, 0.5);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(243, 229, 171, 0.35);
   }
 
   &.active {
-    background-color: rgba(243, 229, 171, 0.15);
-    font-weight: 500;
+    background: linear-gradient(135deg, rgba(139, 90, 43, 0.9), rgba(93, 58, 26, 0.95));
+    border-color: rgba(243, 229, 171, 0.5);
   }
 }
