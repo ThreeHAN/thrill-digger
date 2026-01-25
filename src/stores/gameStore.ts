@@ -4,6 +4,18 @@ import type { BoardCell, GameConfig } from '../utils/gameLogic'
 import { getGameConfig, createEmptyBoard, generatePlayBoard, Difficulty } from '../utils/gameLogic'
 import { solveBoardProbabilities, calculateUnknownIndicesCount } from '../utils/solver'
 import type { SolvedBoard } from '../utils/solver'
+import type { SolverWorkerInput, SolverWorkerOutput } from '../workers/solver.worker'
+
+// Initialize worker lazily
+let solverWorker: Worker | null = null
+const getSolverWorker = (): Worker => {
+  if (!solverWorker) {
+    solverWorker = new Worker(new URL('../workers/solver.worker.ts', import.meta.url), {
+      type: 'module'
+    })
+  }
+  return solverWorker
+}
 
 export const GameMode = {
   Play: 1,
@@ -54,6 +66,7 @@ export interface GameState {
   closeRupeeModals: number
   showProbabilitiesInPlayMode: boolean
   invalidSourceIndex?: number
+  isComputingInWorker: boolean
 }
 
 interface GameActions {
@@ -116,6 +129,7 @@ const initialGameState = (difficulty: Difficulty): GameState => {
     closeRupeeModals: 0,
     showProbabilitiesInPlayMode: false,
     invalidSourceIndex: undefined,
+    isComputingInWorker: false,
   }
 }
 
@@ -150,6 +164,7 @@ export const useGameStore = create<GameStore>()(
       showInvalidBoardError: false,
       showProbabilitiesInPlayMode: false,
       invalidSourceIndex: undefined,
+      isComputingInWorker: false,
     })
 
     // Trigger solver if in solve mode
@@ -266,26 +281,39 @@ export const useGameStore = create<GameStore>()(
           requiresConfirmation: false,
         })
 
-        // Defer computation to allow UI to update
+        // Use worker for computation >= 22 unknowns to keep UI responsive
         setTimeout(() => {
           const state = get()
-          const result = solveBoardProbabilities(
-            state.board,
-            state.config.width,
-            state.config.height,
-            state.config.bombCount,
-            state.rupoorCount
-          )
-          set({
-            solvedBoard: result,
-            showComputationWarning: false,
-            showInvalidBoardError: result === null,
-            invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
-          })
+          set({ isComputingInWorker: true })
+          
+          const worker = getSolverWorker()
+          const input: SolverWorkerInput = {
+            board: state.board,
+            width: state.config.width,
+            height: state.config.height,
+            bombCount: state.config.bombCount,
+            rupoorCount: state.rupoorCount
+          }
+          
+          worker.onmessage = (e: MessageEvent<SolverWorkerOutput>) => {
+            const { result, error } = e.data
+            if (error) {
+              console.error('Worker error:', error)
+            }
+            set({
+              solvedBoard: result,
+              showComputationWarning: false,
+              showInvalidBoardError: result === null,
+              invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
+              isComputingInWorker: false,
+            })
+          }
+          
+          worker.postMessage(input)
         }, 100)
       }
     } else {
-      // Compute immediately
+      // Compute immediately for small boards (< 22 unknowns)
       const result = solveBoardProbabilities(
         state.board,
         state.config.width,
@@ -350,20 +378,34 @@ export const useGameStore = create<GameStore>()(
         )
       }
       
-      const result = solveBoardProbabilities(
-        solverBoard,
-        state.config.width,
-        state.config.height,
-        state.config.bombCount,
-        state.rupoorCount
-      )
-      set({
-        solvedBoard: result,
-        showComputationWarning: false,
-        showProbabilitiesInPlayMode: state.mode === GameMode.Play ? true : state.showProbabilitiesInPlayMode,
-        showInvalidBoardError: result === null,
-        invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
-      })
+      // Use worker for heavy computation
+      set({ isComputingInWorker: true })
+      
+      const worker = getSolverWorker()
+      const input: SolverWorkerInput = {
+        board: solverBoard,
+        width: state.config.width,
+        height: state.config.height,
+        bombCount: state.config.bombCount,
+        rupoorCount: state.rupoorCount
+      }
+      
+      worker.onmessage = (e: MessageEvent<SolverWorkerOutput>) => {
+        const { result, error } = e.data
+        if (error) {
+          console.error('Worker error:', error)
+        }
+        set({
+          solvedBoard: result,
+          showComputationWarning: false,
+          showInvalidBoardError: result === null,
+          invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
+          isComputingInWorker: false,
+          showProbabilitiesInPlayMode: state.mode === GameMode.Play ? true : state.showProbabilitiesInPlayMode,
+        })
+      }
+      
+      worker.postMessage(input)
     }, 100)
   },
 
