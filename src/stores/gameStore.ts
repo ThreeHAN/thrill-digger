@@ -302,6 +302,8 @@ export const useGameStore = create<GameStore>()(
         
         console.log(`⏳ Offloading solver to worker (${state.config.width}×${state.config.height} board)...`)
         
+        // Remove any previous handler to avoid race conditions
+        worker.onmessage = null
         worker.onmessage = (e: MessageEvent<SolverWorkerOutput>) => {
           const msg = e.data
           if (msg.type === 'progress') {
@@ -435,6 +437,8 @@ export const useGameStore = create<GameStore>()(
       
       console.log(`⏳ Offloading solver to worker (${state.config.width}×${state.config.height} board)...`)
       
+      // Remove any previous handler to avoid race conditions
+      worker.onmessage = null
       worker.onmessage = (e: MessageEvent<SolverWorkerOutput>) => {
         const msg = e.data
         if (msg.type === 'progress') {
@@ -595,6 +599,8 @@ export const useGameStore = create<GameStore>()(
             rupoorCount: state.rupoorCount
           }
 
+          // Remove any previous handler to avoid race conditions
+          worker.onmessage = null
           worker.onmessage = (e: MessageEvent<SolverWorkerOutput>) => {
             const msg = e.data
             if (msg.type === 'progress') {

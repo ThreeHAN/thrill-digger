@@ -168,7 +168,7 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   const reportStep = Math.max(1, Math.floor(totalCombinations / 20)) // ~20 updates max
   let nextReport = reportStep
   for (let combo = 0; combo < totalCombinations; ++combo) {
-    if (combo > 4e8) {
+    if (combo > 10e8) {
       computationLimitReached = true;
       break;
     }
