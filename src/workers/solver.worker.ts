@@ -31,15 +31,14 @@ self.onmessage = (e: MessageEvent<SolverWorkerInput>) => {
   const startTime = performance.now()
   
   try {
-    // Attach progress handler to stream updates
-    setSolverProgressHandler((processed, total, now) => {
+    // Attach progress handler to post updates directly (no timer needed)
+    setSolverProgressHandler((processed, total) => {
       const response: SolverWorkerOutput = {
         type: 'progress',
         processed,
         total,
-        elapsedMs: Math.round(now - startTime),
+        elapsedMs: Math.round(performance.now() - startTime),
       }
-      // Non-blocking post
       self.postMessage(response)
     })
 

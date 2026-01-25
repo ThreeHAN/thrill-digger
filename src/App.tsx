@@ -107,6 +107,7 @@ function App() {
         isOpen={showComputationWarning}
         estimatedTime={computationWarning.time}
         combinations={computationWarning.combinations}
+        combinationsRemaining={computationWarning.combinations - (computationWarning.processed || 0)}
         requiresConfirmation={requiresConfirmation}
         onConfirm={confirmComputation}
         onCancel={cancelComputation}

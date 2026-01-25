@@ -60,7 +60,7 @@ export interface GameState {
   solvedBoard: SolvedBoard | null
   lastChangedIndex?: number
   showComputationWarning: boolean
-  computationWarning: { time: number; combinations: number }
+  computationWarning: { time: number; combinations: number; processed?: number }
   boardTotal: number
   showInvalidBoardError: boolean
   requiresConfirmation: boolean
@@ -271,16 +271,20 @@ export const useGameStore = create<GameStore>()(
 
       // Set interval to check if computation takes > 200ms
       warningIntervalHandle = setInterval(() => {
-        const elapsed = Math.round(performance.now() - startTime)
-        if (elapsed > 200 && !hasShownWarning) {
+        const elapsedMs = Math.round(performance.now() - startTime)
+        if (elapsedMs > 200 && !hasShownWarning) {
           hasShownWarning = true
+          // Estimate: if it's taken 200ms for ~0 progress, assume slow computation
+          const estimatedTotalMs = Math.max(2000, elapsedMs * 10) // Assume 10x more time needed
+          const estimatedRemaining = Math.ceil((estimatedTotalMs - elapsedMs) / 1000)
+          console.log(`⏱️ Initial warning: elapsed ${elapsedMs}ms, estimated remaining ${estimatedRemaining}s`)
           set({
             showComputationWarning: true,
-            computationWarning: { time: elapsed, combinations: totalCombinations },
+            computationWarning: { time: estimatedRemaining, combinations: totalCombinations },
             requiresConfirmation: false,
           })
         }
-      }, 50) // Check every 50ms
+      }, 500) // Check every 500ms
 
       // Use worker to keep UI responsive
       setTimeout(() => {
@@ -309,9 +313,11 @@ export const useGameStore = create<GameStore>()(
               const rate = processed > 0 && elapsedMs > 0 ? processed / elapsedMs : 0 // combos per ms
               const remaining = Math.max(0, total - processed)
               const etaMs = rate > 0 ? Math.round(remaining / rate) : 0
+              const etaSeconds = Math.max(1, Math.ceil(etaMs / 1000))
+              console.log(`📊 Progress: ${processed}/${total} combos, elapsed ${elapsedMs}ms, ETA ${etaSeconds}s`)
               set({
                 showComputationWarning: true,
-                computationWarning: { time: Math.round(etaMs / 1000), combinations: total },
+                computationWarning: { time: etaSeconds, combinations: total, processed },
                 requiresConfirmation: false,
               })
             }
@@ -571,30 +577,63 @@ export const useGameStore = create<GameStore>()(
             requiresConfirmation: true,
           })
         } else {
-          // Show warning but auto-proceed
+          // Show warning and offload to worker with progress-based ETA
           set({
             showComputationWarning: true,
-            computationWarning: { time: estimatedTime, combinations: totalCombinations },
+            computationWarning: { time: 0, combinations: totalCombinations },
             requiresConfirmation: false,
+            showProbabilitiesInPlayMode: true,
           })
 
-          // Defer computation to allow UI to update
-          setTimeout(() => {
-            const state = get()
-            const result = solveBoardProbabilities(
-              solverBoard,
-              state.config.width,
-              state.config.height,
-              state.config.bombCount,
-              state.rupoorCount
-            )
+          const startTime = performance.now()
+          const worker = getSolverWorker()
+          const input: SolverWorkerInput = {
+            board: solverBoard,
+            width: state.config.width,
+            height: state.config.height,
+            bombCount: state.config.bombCount,
+            rupoorCount: state.rupoorCount
+          }
+
+          worker.onmessage = (e: MessageEvent<SolverWorkerOutput>) => {
+            const msg = e.data
+            if (msg.type === 'progress') {
+              const processed = msg.processed || 0
+              const total = msg.total || 0
+              const elapsedMs = msg.elapsedMs || Math.round(performance.now() - startTime)
+              if (elapsedMs > 200) {
+                const rate = processed > 0 && elapsedMs > 0 ? processed / elapsedMs : 0
+                const remaining = Math.max(0, total - processed)
+                const etaMs = rate > 0 ? Math.round(remaining / rate) : 0
+                set({
+                  showComputationWarning: true,
+                  computationWarning: { time: Math.round(etaMs / 1000), combinations: total },
+                  requiresConfirmation: false,
+                })
+              }
+              return
+            }
+            if (msg.type === 'error') {
+              console.error('❌ Worker error:', msg.error)
+              set({
+                solvedBoard: null,
+                showComputationWarning: false,
+                showInvalidBoardError: true,
+                invalidSourceIndex: state.lastChangedIndex,
+              })
+              return
+            }
+            const elapsed = Math.round(performance.now() - startTime)
+            console.log(`✅ Worker computation complete in ${elapsed}ms, updating probabilities...`)
             set({
-              showProbabilitiesInPlayMode: true,
-              solvedBoard: result,
+              solvedBoard: msg.result ?? null,
               showComputationWarning: false,
-              invalidSourceIndex: result === null ? state.lastChangedIndex : undefined,
+              showInvalidBoardError: (msg.result ?? null) === null,
+              invalidSourceIndex: (msg.result ?? null) === null ? state.lastChangedIndex : undefined,
             })
-          }, 100)
+          }
+
+          worker.postMessage(input)
         }
       } else {
         // Compute immediately

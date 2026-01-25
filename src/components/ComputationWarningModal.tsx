@@ -4,6 +4,7 @@ type ComputationWarningModalProps = {
   isOpen: boolean
   estimatedTime?: number
   combinations?: number
+  combinationsRemaining?: number
   requiresConfirmation?: boolean
   onConfirm?: () => void
   onCancel?: () => void
@@ -13,6 +14,7 @@ export default function ComputationWarningModal({
   isOpen,
   estimatedTime,
   combinations,
+  combinationsRemaining,
   requiresConfirmation = false,
   onConfirm,
   onCancel
@@ -30,10 +32,10 @@ export default function ComputationWarningModal({
         }</p>
         {estimatedTime !== undefined && combinations !== undefined && (
           <div className="computation-details">
-            <p className="small-text">Estimated time: {estimatedTime} seconds</p>
+            <p className="small-text">ESTIMATED TIME: <span className="monospace">{estimatedTime} seconds</span></p>
             <p className="small-text">{requiresConfirmation 
-              ? `${combinations.toLocaleString()} combinations to analyze`
-              : `Analyzing ${combinations.toLocaleString()} combinations...`
+              ? <>COMBINATIONS TO ANALYZE: <span className="monospace">{combinations.toLocaleString()}</span></>
+              : <>COMBINATIONS REMAINING: <span className="monospace">{(combinationsRemaining ?? combinations).toLocaleString()}</span></>
             }</p>
             {requiresConfirmation && (
               <p className="warning-text">This will take a while. Continue?</p>

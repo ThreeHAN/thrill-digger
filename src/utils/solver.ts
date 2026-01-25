@@ -6,7 +6,7 @@
 import type { BoardCell } from './gameLogic'
 
 // Progress reporting for long-running computations
-export type SolverProgressHandler = (processed: number, total: number, elapsedMs: number) => void
+export type SolverProgressHandler = (processed: number, total: number) => void
 let progressHandler: SolverProgressHandler | null = null
 export function setSolverProgressHandler(handler: SolverProgressHandler | null) {
   progressHandler = handler
@@ -164,8 +164,9 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   const minBombsNeeded = Math.max(0, remainingHazards - safeCount)
 
   // Test all possible bomb placements with early pruning
-  const reportIntervalMs = 100
-  let lastReportTime = performance.now()
+  // Report progress at coarse steps to minimize overhead
+  const reportStep = Math.max(1, Math.floor(totalCombinations / 20)) // ~20 updates max
+  let nextReport = reportStep
   for (let combo = 0; combo < totalCombinations; ++combo) {
     if (combo > 4e8) {
       computationLimitReached = true;
@@ -213,13 +214,10 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
       }
     }
 
-    // Progress reporting based on time to avoid overhead
-    if (progressHandler) {
-      const now = performance.now()
-      if (now - lastReportTime >= reportIntervalMs) {
-        lastReportTime = now
-        progressHandler(combo + 1, totalCombinations, now)
-      }
+    // Progress reporting using coarse stepping
+    if (progressHandler && combo + 1 >= nextReport) {
+      progressHandler(combo + 1, totalCombinations)
+      nextReport += reportStep
     }
   }
 
