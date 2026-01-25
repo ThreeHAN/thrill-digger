@@ -166,7 +166,7 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
 
   // Test all possible bomb placements with early pruning
   // Report progress at coarse steps to minimize overhead
-  const reportStep = Math.max(1, Math.floor(totalCombinations / 100)) // ~20 updates max
+  const reportStep = Math.max(1, Math.floor(totalCombinations / 200))
   let nextReport = reportStep
   for (let combo = 0; combo < totalCombinations; ++combo) {
     if (combo > 10e8) {

@@ -51,6 +51,7 @@
   max-width: 430px;
   pointer-events: auto;
   z-index: calc($z-modal + 1);
+  padding: 16px 18px 20px 18px;
 
   .modal-close {
     position: absolute;
