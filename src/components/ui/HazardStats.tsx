@@ -1,9 +1,9 @@
 import { useMemo, type ReactNode } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-import { Difficulty } from '../utils/gameLogic'
-import { GameMode, useGameStore } from '../stores/gameStore'
-import { getImageForItem } from '../utils/imageMap'
-import bombImg from '../assets/minigame/bomb.png'
+import { Difficulty } from '../../utils/gameLogic'
+import { GameMode, useGameStore } from '../../stores/gameStore'
+import { getImageForItem } from '../../utils/imageMap'
+import bombImg from '../../assets/minigame/bomb.png'
 
 export default function HazardStats({ boardTotal }: { boardTotal: number }) {
   const {

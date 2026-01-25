@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom'
-import { greenrupee } from '../assets/images'
-import '../styles/_game-over-modal.scss'
+import { greenrupee } from '../../assets/images'
+import '../../styles/_game-over-modal.scss'
 
 type GameOverModalProps = {
   isOpen: boolean

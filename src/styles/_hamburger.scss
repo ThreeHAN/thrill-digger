@@ -1,4 +1,5 @@
 @use './variables' as *;
+@use './modals' as modals;
 
 // Hamburger Menu Button
 .hamburger-btn {
@@ -71,8 +72,8 @@
   right: 0;
   bottom: 0;
   width: 320px;
-  background-color: $wood-dark;
-  border-left: 3px solid $wood-medium;
+  @include modals.modal-bg;
+  border-left: 3px solid;
   display: flex;
   flex-direction: column;
   padding-events: auto;
@@ -123,6 +124,49 @@
 
   &:hover {
     background-color: rgba(243, 229, 171, 0.1);
+  }
+}
+
+.hamburger-menu-primary-action {
+  background: linear-gradient(135deg, rgba(211, 180, 79, 0.25), rgba(93, 58, 26, 0.3));
+  border: 2px solid rgba(211, 180, 79, 0.5);
+  border-radius: 8px;
+  color: #f8ecd0;
+  padding: 14px 20px;
+  margin: 16px 12px 20px 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 0.5px;
+  transition: all $transition-normal;
+
+  &:hover {
+    background: linear-gradient(135deg, rgba(211, 180, 79, 0.35), rgba(93, 58, 26, 0.4));
+    border-color: rgba(211, 180, 79, 0.7);
+    box-shadow: 0 0 12px rgba(211, 180, 79, 0.3);
+  }
+}
+
+.hamburger-menu-footer-action {
+  background: none;
+  border: none;
+  color: $tertiary-text;
+  padding: 14px 20px;
+  margin-top: auto;
+  margin-left: 12px;
+  margin-right: 12px;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 0.5px;
+  transition: all $transition-normal;
+  border-top: 1px solid $border-lightest;
+  padding-top: 16px;
+
+  &:hover {
+    color: $primary-text;
   }
 }
 

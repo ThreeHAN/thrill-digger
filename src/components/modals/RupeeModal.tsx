@@ -1,7 +1,7 @@
 import React from 'react'
 import { createPortal } from 'react-dom'
-import { getImageForItem } from '../utils/imageMap'
-import { getItemName, Difficulty } from '../utils/gameLogic'
+import { getImageForItem } from '../../utils/imageMap'
+import { getItemName, Difficulty } from '../../utils/gameLogic'
 
 type RupeeOption = {
   value: number

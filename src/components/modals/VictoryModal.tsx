@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom'
-import { greenrupee } from '../assets/images'
+import { greenrupee } from '../../assets/images'
 
 type VictoryModalProps = {
   isOpen: boolean

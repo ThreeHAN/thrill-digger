@@ -1,19 +1,66 @@
 @use './variables' as *;
 
-// Info Modal Styles
-.info-modal-content {
-  max-height: 70vh;
-  overflow-y: auto;
-  padding: 0 8px;
+.difficulty-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.difficulty-card {
+  background-color: rgba(76, 64, 53, 0.5);
+  padding: 14px;
+  border-radius: $border-radius-sm;
+  border: 1px solid rgba(162, 124, 72, 0.3);
+}
+
+.difficulty-title {
+  color: #f7e6b4;
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  font-weight: 600;
   font-family: $font-system;
 }
 
+.difficulty-info {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  font-family: $font-system;
+}
+
+.difficulty-label {
+  color: $tertiary-text;
+}
+
+.difficulty-value {
+  color: #f8ecd0;
+  font-weight: 500;
+}
+
+.difficulty-hazards {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #f8ecd0;
+  font-weight: 500;
+}
+
+.difficulty-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
 .info-section-title {
-  color: $color-gold;
+  color: #f7e6b4;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
   margin-bottom: 16px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 600;
   font-family: $font-system;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .info-section {
@@ -23,17 +70,47 @@
 .info-cards-grid {
   display: grid;
   gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  max-width: 300px;
+  margin: 0 auto;
 }
 
 .info-card {
-  background-color: rgba(139, 90, 43, 0.3);
+  background-color: rgba(76, 64, 53, 0.5);
   padding: 12px;
   border-radius: $border-radius-sm;
+  border: 1px solid rgba(162, 124, 72, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.info-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.info-card-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.info-card-content {
+  flex: 1;
+}
+
+.info-card-rupoor {
+  background-color: rgba(139, 51, 51, 0.4);
+  border-color: rgba(220, 20, 60, 0.4);
 }
 
 .info-card-title {
   color: $primary-text;
-  margin: 0 0 4px 0;
+  margin: 0;
   font-weight: 600;
   font-family: $font-system;
 }
@@ -48,7 +125,7 @@
 .info-card-detail-secondary {
   color: $tertiary-text;
   margin: 4px 0 0 0;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-family: $font-system;
 }
 

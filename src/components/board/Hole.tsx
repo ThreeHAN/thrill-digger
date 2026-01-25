@@ -1,14 +1,14 @@
 import { useMemo, useCallback, useState, useEffect } from 'react'
-import { getItemName, getBombCountDisplayName } from '../utils/gameLogic'
-import { getImageForItem } from '../utils/imageMap'
-import { useGameStore } from '../stores/gameStore'
-import RupeeModal from './RupeeModal'
-import Starburst from './Starburst'
+import { getItemName, getBombCountDisplayName } from '../../utils/gameLogic'
+import { getImageForItem } from '../../utils/imageMap'
+import { useGameStore } from '../../stores/gameStore'
+import RupeeModal from '../modals/RupeeModal'
+import Starburst from '../shared/Starburst'
 import React from 'react'
-import { GameMode } from '../stores/gameStore'
-import { computeTileClass, getDisplayProbability, formatHoleId } from '../utils/tileUtils'
+import { GameMode } from '../../stores/gameStore'
+import { computeTileClass, getDisplayProbability, formatHoleId } from '../../utils/tileUtils'
 
-const DEBUG_MODE = false;
+const DEBUG_MODE = true;
 
 const MemoizedRupeeModal = React.memo(RupeeModal)
 

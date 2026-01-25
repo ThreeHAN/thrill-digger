@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import type { Level } from '../constants/levels'
-import { LEVELS } from '../constants/levels'
-import type { GameMode } from '../stores/gameStore'
-import { useGameStore } from '../stores/gameStore'
+import type { Level } from '../../constants/levels'
+import { LEVELS } from '../../constants/levels'
+import type { GameMode } from '../../stores/gameStore'
+import { useGameStore } from '../../stores/gameStore'
 
 type HamburgerMenuProps = {
   onNewGame: () => void
@@ -42,7 +42,7 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
       {isOpen && (
         <div className="hamburger-backdrop" onClick={() => setIsOpen(false)}>
           <div className="hamburger-menu-content" onClick={(e) => e.stopPropagation()}>
-            <button className="hamburger-menu-item" onClick={() => handleMenuClick(onNewGame)}>
+            <button className="hamburger-menu-primary-action" onClick={() => handleMenuClick(onNewGame)}>
               New Game
             </button>
         
@@ -84,7 +84,7 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
               ))}
             </div>
 
-            <button className="hamburger-menu-item" onClick={() => handleMenuClick(onInfo)}>
+            <button className="hamburger-menu-footer-action" onClick={() => handleMenuClick(onInfo)}>
               Info
             </button>
           </div>

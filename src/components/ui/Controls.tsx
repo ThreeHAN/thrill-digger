@@ -1,7 +1,7 @@
 import React from 'react'
-import type { Level } from '../constants/levels'
-import { LEVELS } from '../constants/levels'
-import type { GameMode } from '../stores/gameStore'
+import type { Level } from '../../constants/levels'
+import { LEVELS } from '../../constants/levels'
+import type { GameMode } from '../../stores/gameStore'
 
 type ControlsProps = {
   level: Level

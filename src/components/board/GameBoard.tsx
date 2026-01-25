@@ -1,8 +1,8 @@
 import Hole from './Hole'
-import ErrorModal from './ErrorModal'
-import VictoryModal from './VictoryModal'
-import { useGameStore } from '../stores/gameStore'
-import { useLowestProbabilityIndex } from '../hooks/useLowestProbabilityIndex'
+import ErrorModal from '../modals/ErrorModal'
+import VictoryModal from '../modals/VictoryModal'
+import { useGameStore } from '../../stores/gameStore'
+import { useLowestProbabilityIndex } from '../../hooks/useLowestProbabilityIndex'
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 
 export default function GameBoard() {
