@@ -39,78 +39,77 @@ function forEachNeighbor(cellIdx: number, width: number, height: number, callbac
 export function solveBoardProbabilities(board: BoardCell[][], width: number, height: number, bombCount: number, rupoorCount: number): SolvedBoard | null {
   
   
-  const flat1D = board.flat()
-  const boardLength = flat1D.length
-  let solvedBoard = flat1D.slice(0)
-  
-  // Combined first pass: convert empty cells to unknown and process greens/rupoors
+  const flat1D = board.flat();
+  const boardLength = flat1D.length;
+  const solvedBoard = flat1D.slice(0);
+
+  // First pass: convert empty cells to unknown (-1)
   for (let i = 0; i < boardLength; i++) {
-    if (solvedBoard[i] === 0) {
-      solvedBoard[i] = -1
-    }
+    if (solvedBoard[i] === 0) solvedBoard[i] = -1;
   }
 
-  // Second pass: clear neighbors of greens/rupoors
-  // (Must be separate pass to avoid processing cells we just modified)
+  // Second pass: clear neighbors of greens/rupoors in a single scan
   for (let i = 0; i < boardLength; i++) {
-    if (solvedBoard[i] === 1 || solvedBoard[i] === -10) {
-      forEachNeighbor(i, width, height, (neighborIdx) => {
-        if (solvedBoard[neighborIdx] === -1) {
-          solvedBoard[neighborIdx] = 0
+    const v = solvedBoard[i];
+    if (v === 1 || v === -10) {
+      const colIndex = i % width;
+      const rowIndex = (i / width) | 0;
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          if (dx === 0 && dy === 0) continue;
+          const ncol = colIndex + dx;
+          const nrow = rowIndex + dy;
+          if (ncol >= 0 && ncol < width && nrow >= 0 && nrow < height) {
+            const nidx = ncol + nrow * width;
+            if (solvedBoard[nidx] === -1) solvedBoard[nidx] = 0;
+          }
         }
-      })
-    }
-  }
-
-  // Track already-known hazards so remaining counts reflect placed rupoors
-  let knownRupoorCount = 0
-  let safeCount = 0
-  for (let i = 0; i < boardLength; i++) {
-    const cell = solvedBoard[i]
-    if (cell === -10 || cell === -2) {
-      knownRupoorCount++
-    }
-    if (cell === -1) {
-      safeCount++
-    }
-  }
-  const constraints: number[][] = []
-  const unknownSet = new Set<number>() // Use Set for O(1) membership testing
-  
-  // Build constraints from numbered cells (bomb count values)
-  // console.log('Building constraints from board...')
-  for (let i = 0; i < solvedBoard.length; i++) {
-    const cell = solvedBoard[i]
-    // Vanilla parity: only treat values > 1 as constraint sources (greens are skipped)
-    if (cell > 1) {
-      const unknownNeighbors: number[] = []
-      let expectedBombs = cell  // Value is already the bomb count
-      // console.log(`Cell at [${rowIndex},${colIndex}] value=${cell} expects ${expectedBombs} bombs`)
-      
-      // Count adjacent bombs and rupoors
-      forEachNeighbor(i, width, height, (neighborIdx) => {
-        const neighborCell = solvedBoard[neighborIdx]
-        
-        if (neighborCell === -1) {
-          unknownNeighbors.push(neighborIdx)
-          unknownSet.add(neighborIdx)
-        } else if (neighborCell === -10 || neighborCell === -2) {
-          // Rupoors decrement expected bombs (vanilla uses -2 as rupoor marker)
-          expectedBombs--
-        }
-      })
-      
-      // Only add constraint if there are unknown neighbors
-      if (unknownNeighbors.length > 0) {
-        // console.log(`  -> Constraint: ${unknownNeighbors.length} unknowns, expecting ${expectedBombs} bombs`)
-        unknownNeighbors.push(expectedBombs)
-        constraints.push(unknownNeighbors)
-      } else {
-        // console.log(`  -> No unknown neighbors, constraint skipped`)
       }
     }
   }
-  // console.log(`Total constraints: ${constraints.length}`)
+
+  // Track already-known hazards and safe unknowns
+  let knownRupoorCount = 0;
+  let safeCount = 0;
+  for (let i = 0; i < boardLength; i++) {
+    const cell = solvedBoard[i];
+    if (cell === -10 || cell === -2) knownRupoorCount++;
+    if (cell === -1) safeCount++;
+  }
+
+  // Build constraints and unknown set in a single pass
+  const constraints: number[][] = [];
+  const unknownSet = new Set<number>();
+  for (let i = 0; i < boardLength; i++) {
+    const cell = solvedBoard[i];
+    if (cell > 1) {
+      let expectedBombs = cell;
+      const unknownNeighbors: number[] = [];
+      const colIndex = i % width;
+      const rowIndex = (i / width) | 0;
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          if (dx === 0 && dy === 0) continue;
+          const ncol = colIndex + dx;
+          const nrow = rowIndex + dy;
+          if (ncol >= 0 && ncol < width && nrow >= 0 && nrow < height) {
+            const nidx = ncol + nrow * width;
+            const neighborCell = solvedBoard[nidx];
+            if (neighborCell === -1) {
+              unknownNeighbors.push(nidx);
+              unknownSet.add(nidx);
+            } else if (neighborCell === -10 || neighborCell === -2) {
+              expectedBombs--;
+            }
+          }
+        }
+      }
+      if (unknownNeighbors.length > 0) {
+        unknownNeighbors.push(expectedBombs);
+        constraints.push(unknownNeighbors);
+      }
+    }
+  }
 
   // Convert Set to array and create index map for O(1) lookup
   const unknownIndices = Array.from(unknownSet)
@@ -144,7 +143,6 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   // Adjust safeCount: subtract unknown cells from total
 
   safeCount -= unknownIndices.length
-  const validSolutions: number[][] = []
   let computationLimitReached = false
   const unknownCount = unknownIndices.length
   const totalCombinations = Math.round(Math.pow(2, unknownCount))
@@ -152,57 +150,59 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
 
   // Reuse placement array to avoid allocations
   const placement: number[] = new Array(unknownCount)
+  // Accumulate bomb counts per unknown directly instead of storing valid solutions
+  const bombCounts = new Uint32Array(unknownCount)
+  let validSolutionsCount = 0
   // Vanilla parity: bombs placed must be in range [remainingHazards - safeCount, remainingHazards]
   const maxBombsNeeded = remainingHazards
   const minBombsNeeded = Math.max(0, remainingHazards - safeCount)
 
-  // Test all possible bomb placements
+  // Test all possible bomb placements (optimized loop)
   for (let combo = 0; combo < totalCombinations; ++combo) {
     if (combo > 4e8) {
-      computationLimitReached = true
-      break
+      computationLimitReached = true;
+      break;
     }
 
-    // Use bitwise operations for faster bit extraction
-    // First, count bits using Brian Kernighan's algorithm
-    let bombsPlaced = 0
-    let temp = combo
+    // Count set bits (bombs placed) using Kernighan's algorithm
+    let bombsPlaced = 0;
+    let temp = combo;
     while (temp) {
-      temp &= temp - 1
-      bombsPlaced++
+      temp &= temp - 1;
+      bombsPlaced++;
+      if (bombsPlaced > maxBombsNeeded) break; // Early exit if too many bombs
     }
+    if (bombsPlaced > maxBombsNeeded || bombsPlaced < minBombsNeeded) continue;
 
-    // Early termination: check bomb count bounds first before constraint checking
-    if (bombsPlaced > maxBombsNeeded || bombsPlaced < minBombsNeeded) {
-      continue
-    }
-
-    // Now extract the actual placement
+    // Extract placement bits only if bomb count is valid
     for (let bit = 0; bit < unknownCount; ++bit) {
-      placement[bit] = (combo >> bit) & 1
+      placement[bit] = (combo >> bit) & 1;
     }
 
-    let constraintsSatisfied = 0
-
+    // Check constraints with early exit
+    let valid = true;
     for (let c = 0; c < constraintsLength; c++) {
-      const processed = processedConstraints[c]
-      const positions = processed.positions
-      const expectedValue = processed.expectedValue
-      const positionsLength = positions.length
-      let bombsNearCell = 0
-
-      for (let pos = 0; pos < positionsLength; pos++) {
-        bombsNearCell += placement[positions[pos]]
+      const { positions, expectedValue } = processedConstraints[c];
+      let bombsNearCell = 0;
+      for (let pos = 0; pos < positions.length; pos++) {
+        bombsNearCell += placement[positions[pos]];
+        if (bombsNearCell > expectedValue) {
+          valid = false;
+          break;
+        }
       }
-
+      if (!valid) break;
       // Vanilla parity: allow exact value or one less
-      if (bombsNearCell === expectedValue || (bombsNearCell === expectedValue - 1 && expectedValue > 0)) {
-        constraintsSatisfied++
+      if (!(bombsNearCell === expectedValue || (bombsNearCell === expectedValue - 1 && expectedValue > 0))) {
+        valid = false;
+        break;
       }
     }
-
-    if (constraintsSatisfied === constraintsLength) {
-      validSolutions.push([...placement])
+    if (valid) {
+      validSolutionsCount++;
+      for (let unknownPos = 0; unknownPos < unknownCount; unknownPos++) {
+        bombCounts[unknownPos] += placement[unknownPos];
+      }
     }
   }
 
@@ -218,7 +218,7 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   // console.log('remainingHazards:', remainingHazards, 'knownRupoorCount:', knownRupoorCount)
   // console.log('minBombsNeeded:', minBombsNeeded, 'maxBombsNeeded:', maxBombsNeeded)
   
-  if (constraints.length > 0 && validSolutions.length === 0) {
+  if (constraints.length > 0 && validSolutionsCount === 0) {
     // console.log('❌ BOARD INVALID: No valid solutions found for constraints')
     // console.log('Constraints were:', constraints)
     // console.log('Board state:', solvedBoard)
@@ -226,41 +226,33 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
     return null
   }
 
-  let remainingExpected = remainingHazards
-  const validSolutionsCount = validSolutions.length
+  let remainingExpected = remainingHazards;
 
-  // Calculate probability for each unknown cell
   for (let unknownPos = 0; unknownPos < unknownIndices.length; unknownPos++) {
-    let bombOccurrences = 0
-
-    for (let solutionIdx = 0; solutionIdx < validSolutionsCount; solutionIdx++) {
-      bombOccurrences += validSolutions[solutionIdx][unknownPos]
-    }
-
+    const bombOccurrences = bombCounts[unknownPos];
     if (computationLimitReached && bombOccurrences === 0) {
-      solvedBoard[unknownIndices[unknownPos]] = -2 // Unknown
+      solvedBoard[unknownIndices[unknownPos]] = -2; // Unknown
     } else {
-      const probability = bombOccurrences / validSolutionsCount
-      remainingExpected -= probability
-      solvedBoard[unknownIndices[unknownPos]] = probability
+      const probability = bombOccurrences / validSolutionsCount;
+      remainingExpected -= probability;
+      solvedBoard[unknownIndices[unknownPos]] = probability;
     }
   }
 
   if (Math.round(remainingExpected * 100) < 0) {
-   // console.log('❌ BOARD INVALID: Remaining expected bombs is negative:', remainingExpected)
-   return null
+    return null;
   }
 
-  const defaultProbability = remainingExpected / safeCount
-
-  for (let cellIdx = 0; cellIdx < solvedBoard.length; cellIdx++) {
-    // Only set default probability for truly unknown cells
-    if (solvedBoard[cellIdx] === -1) {
-      solvedBoard[cellIdx] = defaultProbability
+  const defaultProbability = remainingExpected / safeCount;
+  if (safeCount > 0 && isFinite(defaultProbability)) {
+    for (let cellIdx = 0; cellIdx < solvedBoard.length; cellIdx++) {
+      if (solvedBoard[cellIdx] === -1) {
+        solvedBoard[cellIdx] = defaultProbability;
+      }
     }
   }
 
-  return solvedBoard
+  return solvedBoard;
 }
 
 /**
