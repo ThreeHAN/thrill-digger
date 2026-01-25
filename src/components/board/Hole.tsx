@@ -8,7 +8,7 @@ import React from 'react'
 import { GameMode } from '../../stores/gameStore'
 import { computeTileClass, getDisplayProbability, formatHoleId } from '../../utils/tileUtils'
 
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 
 const MemoizedRupeeModal = React.memo(RupeeModal)
 
