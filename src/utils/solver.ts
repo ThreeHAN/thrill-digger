@@ -13,25 +13,7 @@ export type SolvedBoard = number[] // Probabilities or special values like -2 (u
  * Green=1, Blue=2, Red=4, Silver=6, Gold=8
  */
 
-/**
- * Helper to iterate over 8 neighbors of a cell
- */
-function forEachNeighbor(cellIdx: number, width: number, height: number, callback: (neighborIdx: number) => void) {
-  const colIndex = cellIdx % width
-  const rowIndex = Math.floor(cellIdx / width)
-  
-  for (let colOffset = -1; colOffset <= 1; colOffset++) {
-    for (let rowOffset = -1; rowOffset <= 1; rowOffset++) {
-      if (colOffset !== 0 || rowOffset !== 0) {
-        const ncol = colIndex + colOffset
-        const nrow = rowIndex + rowOffset
-        if (ncol >= 0 && ncol < width && nrow >= 0 && nrow < height) {
-          callback(ncol + nrow * width)
-        }
-      }
-    }
-  }
-}
+// Note: previous neighbor helper removed; direct loops are used for performance.
 
 /**
  * Solve the board and return probabilities
