@@ -22,6 +22,11 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
     setIsOpen(false)
   }
 
+  const handleOptionClick = (callback: () => void) => {
+    callback()
+    setTimeout(() => setIsOpen(false), 500)
+  }
+
   return (
     <div className="hamburger-menu">
       <button
@@ -32,19 +37,21 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
           }
           setIsOpen(!isOpen)
         }}
-        aria-label="Menu"
+        aria-label="Settings"
       >
-        <span></span>
-        <span></span>
-        <span></span>
+        ⚙️
       </button>
 
       {isOpen && (
-        <div className="hamburger-backdrop" onClick={() => setIsOpen(false)}>
-          <div className="hamburger-menu-content" onClick={(e) => e.stopPropagation()}>
-            <button className="hamburger-menu-primary-action" onClick={() => handleMenuClick(onNewGame)}>
-              New Game
-            </button>
+        <div className="modal-backdrop" onClick={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          setIsOpen(false)
+        }}>
+          <div className="hamburger-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setIsOpen(false)} aria-label="Close menu">×</button>
+            
+            <h2 className="hamburger-modal-title">Settings</h2>
         
             <div className="hamburger-menu-section">
               <h3 className="hamburger-menu-label">Game Mode</h3>
@@ -52,7 +59,7 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
                 className={`hamburger-menu-subitem ${gameMode === 2 ? 'active' : ''}`}
                 onClick={() => {
                   setGameMode(2)
-                  setIsOpen(false)
+                  handleOptionClick(() => {})
                 }}
               >
                 Solve
@@ -61,7 +68,7 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
                 className={`hamburger-menu-subitem ${gameMode === 1 ? 'active' : ''}`}
                 onClick={() => {
                   setGameMode(1)
-                  setIsOpen(false)
+                  handleOptionClick(() => {})
                 }}
               >
                 Play
@@ -76,7 +83,7 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
                   className={`hamburger-menu-subitem ${level === l ? 'active' : ''}`}
                   onClick={() => {
                     setLevel(l)
-                    setIsOpen(false)
+                    handleOptionClick(() => {})
                   }}
                 >
                   {l[0].toUpperCase() + l.slice(1)}
@@ -84,9 +91,14 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
               ))}
             </div>
 
-            <button className="hamburger-menu-footer-action" onClick={() => handleMenuClick(onInfo)}>
-              Info
-            </button>
+            <div className="hamburger-menu-actions">
+              <button className="hamburger-menu-action-btn new-game" onClick={() => handleMenuClick(onNewGame)}>
+                Restart
+              </button>
+              <button className="hamburger-menu-action-btn info" onClick={() => handleMenuClick(onInfo)}>
+                How to Play
+              </button>
+            </div>
           </div>
         </div>
       )}
