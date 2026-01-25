@@ -38,7 +38,6 @@ export default function RupeeModal({ isOpen, onClose, onSelect, currentValue, co
 
   const handleSelect = (value: number, e: React.MouseEvent) => {
     e.stopPropagation()
-    console.log(`Selected value: ${value} (${getItemName(value)})`)
     onSelect(value)
     onClose()
   }

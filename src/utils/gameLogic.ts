@@ -182,7 +182,7 @@ export function convertRupeeValueToBombCount(value: number): number {
       default: return value // Return unchanged for special values (-1, -2, -10, etc.)
     }
   })()
-  console.log(`Converting rupee value ${value} to bomb count ${converted}`)
+
   return converted
 }
 

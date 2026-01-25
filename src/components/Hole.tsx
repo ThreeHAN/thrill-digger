@@ -105,8 +105,6 @@ export default React.memo(function Hole({
   const handleModalSelect = useCallback((value: number) => {
     if (mode !== 2) return
     
-    console.log('Solve mode: placing', value, 'at', row, col)
-
     updateCell(row, col, value)
     setShowModal(false)
   }, [mode, row, col, updateCell])

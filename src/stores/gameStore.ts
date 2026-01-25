@@ -134,7 +134,6 @@ export const useGameStore = create<GameStore>()(
         const {
           solverBoard,
           rupoorCount,
-          requireConfirmationCheck = false,
           enablePlayModeShowProbabilities = false,
         } = options
         const state = get()
@@ -151,18 +150,6 @@ export const useGameStore = create<GameStore>()(
         set({ showComputationWarning: false, requiresConfirmation: false })
 
         if (unknownIndicesCount >= 22) {
-          const estimatedTime = Math.floor(totalCombinations / 1111111)
-
-          // If time > 30 seconds and confirmation check is enabled, require confirmation (blocking modal)
-          if (requireConfirmationCheck && estimatedTime > 30) {
-            set({
-              showComputationWarning: true,
-              computationWarning: { time: estimatedTime, combinations: totalCombinations },
-              requiresConfirmation: true,
-            })
-            return
-          }
-
           // Use setTimeout to offload to worker with phased loading UI
           let phaseTransitionHandles: ReturnType<typeof setTimeout>[] = []
           const startTime = performance.now()
