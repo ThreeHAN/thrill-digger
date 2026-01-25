@@ -37,10 +37,11 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
     if (solvedBoard[i] === 0) solvedBoard[i] = -1;
   }
 
-  // Second pass: clear neighbors of greens/rupoors in a single scan
+  // Second pass: clear neighbors of greens (0 bombs nearby) in a single scan
+  // Note: rupoors (value -10) are NOT constraints and should not clear neighbors
   for (let i = 0; i < boardLength; i++) {
     const v = solvedBoard[i];
-    if (v === 1 || v === -10) {
+    if (v === 1) {
       const colIndex = i % width;
       const rowIndex = (i / width) | 0;
       for (let dx = -1; dx <= 1; dx++) {
