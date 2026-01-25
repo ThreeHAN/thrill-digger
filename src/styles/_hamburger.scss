@@ -91,6 +91,22 @@
   }
 }
 
+@media (max-width: 480px) {
+  .hamburger-menu-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hamburger-menu-label {
+    width: 100%;
+    padding: 6px 16px;
+  }
+
+  .hamburger-menu-subitem {
+    width:50%;
+  }
+}
+
 .hamburger-menu-item {
   background: none;
   border: none;
