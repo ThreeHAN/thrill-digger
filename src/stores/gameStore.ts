@@ -889,65 +889,6 @@ export const useGameStore = create<GameStore>()(
           }
           worker.postMessage(input)
         }, 100)
-        return
-
-        // Show warning and offload to worker with progress-based ETA
-        set({
-          showComputationWarning: true,
-          computationWarning: { time: 0, combinations: totalCombinations },
-          requiresConfirmation: false,
-        })
-
-        const startTime = performance.now()
-        const worker = getSolverWorker()
-        const input: SolverWorkerInput = {
-          board: solverBoard,
-          width: checkState.config.width,
-          height: checkState.config.height,
-          bombCount: checkState.config.bombCount,
-          rupoorCount: updatedRupoorCount
-        }
-
-        worker.onmessage = null
-        worker.onmessage = (e: MessageEvent<SolverWorkerOutput>) => {
-          const msg = e.data
-          if (msg.type === 'progress') {
-            const processed = msg.processed || 0
-            const total = msg.total || 0
-            const elapsedMs = msg.elapsedMs || Math.round(performance.now() - startTime)
-            if (elapsedMs > 200) {
-              const rate = processed > 0 && elapsedMs > 0 ? processed / elapsedMs : 0
-              const remaining = Math.max(0, total - processed)
-              const etaMs = rate > 0 ? Math.round(remaining / rate) : 0
-              set({
-                showComputationWarning: true,
-                computationWarning: { time: Math.round(etaMs / 1000), combinations: total, processed },
-                requiresConfirmation: false,
-              })
-            }
-            return
-          }
-          if (msg.type === 'error') {
-            console.error('❌ Worker error:', msg.error)
-            set({
-              solvedBoard: null,
-              showComputationWarning: false,
-              showInvalidBoardError: true,
-              invalidSourceIndex: checkState.lastChangedIndex,
-            })
-            return
-          }
-          const elapsed = Math.round(performance.now() - startTime)
-          console.log(`✅ Worker computation complete in ${elapsed}ms, updating probabilities...`)
-          set({
-            solvedBoard: msg.result ?? null,
-            showComputationWarning: false,
-            showInvalidBoardError: (msg.result ?? null) === null,
-            invalidSourceIndex: (msg.result ?? null) === null ? checkState.lastChangedIndex : undefined,
-          })
-        }
-
-        worker.postMessage(input)
       } else {
         // Compute immediately for lighter boards
         const result = solveBoardProbabilities(
