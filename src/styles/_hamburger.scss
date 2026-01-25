@@ -130,6 +130,7 @@
   padding: 12px;
   margin-top: auto;
   border-top: 1px solid rgba(211, 180, 79, 0.3);
+  flex-wrap: wrap;
 }
 
 .hamburger-menu-action-btn {
@@ -148,6 +149,7 @@
   text-transform: none;
   letter-spacing: 0.01em;
   outline: none;
+  min-width: 0;
 
   &:hover {
     transform: translateY(-1px);

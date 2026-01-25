@@ -16,6 +16,7 @@ type HamburgerMenuProps = {
 export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, gameMode, setGameMode }: HamburgerMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const triggerCloseRupeeModals = useGameStore(state => state.triggerCloseRupeeModals)
+  const exportDebugState = useGameStore(state => state.exportDebugState)
 
   const handleMenuClick = (callback: () => void) => {
     callback()
@@ -97,6 +98,16 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
               </button>
               <button className="hamburger-menu-action-btn info" onClick={() => handleMenuClick(onInfo)}>
                 How to Play
+              </button>
+              <button 
+                className="hamburger-menu-action-btn info" 
+                onClick={() => {
+                  exportDebugState()
+                  setIsOpen(false)
+                }}
+                title="Copy game state to clipboard"
+              >
+                Debug
               </button>
             </div>
           </div>

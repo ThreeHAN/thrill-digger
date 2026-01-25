@@ -14,6 +14,8 @@ import { solveBoardProbabilities, calculateUnknownIndicesCount } from '../utils/
 import type { SolvedBoard } from '../utils/solver'
 import type { SolverWorkerInput } from '../workers/solver.worker'
 import { createWorkerMessageHandler, calculateSolverETA } from '../utils/workerHelpers'
+import { copyStateToClipboard } from '../utils/debugUtils'
+import type { SerializedGameState } from '../utils/debugUtils'
 
 // Initialize worker lazily
 let solverWorker: Worker | null = null
@@ -81,6 +83,8 @@ interface GameActions {
   triggerCloseRupeeModals: () => void
   revealAllCells: () => void
   toggleProbabilitiesInPlayMode: () => void
+  exportDebugState: () => Promise<void>
+  loadDebugState: (serialized: SerializedGameState) => void
 }
 
 type GameStore = GameState & GameActions
@@ -613,6 +617,57 @@ export const useGameStore = create<GameStore>()(
       // Use helper (no confirmation check needed during gameplay)
       computeSolver(solverBoard, updatedRupoorCount, false)
     }
+  },
+
+  exportDebugState: async () => {
+    const state = get()
+    const serialized: SerializedGameState = {
+      mode: state.mode,
+      difficulty: state.difficulty,
+      board: state.board,
+      revealed: state.revealed,
+      currentRupees: state.currentRupees,
+      rupoorCount: state.rupoorCount,
+      isGameOver: state.isGameOver,
+      isWon: state.isWon,
+      solvedBoard: state.solvedBoard,
+    }
+    
+    try {
+      await copyStateToClipboard(serialized)
+      console.log('🐛 Debug state exported to clipboard')
+    } catch (error) {
+      console.error('Failed to export debug state:', error)
+      alert('Failed to copy state to clipboard')
+    }
+  },
+
+  loadDebugState: (serialized: SerializedGameState) => {
+    const config = getGameConfig(serialized.difficulty)
+    
+    // Create autoRevealed array matching the loaded board dimensions
+    const autoRevealed = createEmptyRevealedBoard(config.width, config.height)
+    
+    set({
+      mode: serialized.mode,
+      difficulty: serialized.difficulty,
+      config,
+      board: serialized.board,
+      revealed: serialized.revealed,
+      autoRevealed,
+      currentRupees: serialized.currentRupees,
+      rupoorCount: serialized.rupoorCount,
+      isGameOver: serialized.isGameOver,
+      isWon: serialized.isWon,
+      solvedBoard: serialized.solvedBoard,
+      boardTotal: serialized.board.flat().reduce((sum, cell) => sum + (cell > 0 ? cell : 0), 0),
+      showInvalidBoardError: false,
+      invalidSourceIndex: undefined,
+      lastChangedIndex: undefined,
+      isComputingInWorker: false,
+    })
+    
+    console.log('🐛 Debug state loaded:', serialized)
   },
       }
     },

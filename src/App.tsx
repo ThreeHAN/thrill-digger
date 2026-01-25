@@ -9,6 +9,7 @@ import HazardStats from './components/ui/HazardStats'
 import type { Level } from './constants/levels'
 import { Difficulty } from './utils/gameLogic'
 import { GameMode, useGameStore } from './stores/gameStore'
+import { loadStateFromUrl } from './utils/debugUtils'
 
 const levelToDifficulty: Record<Level, Difficulty> = {
   beginner: Difficulty.Beginner,
@@ -16,14 +17,23 @@ const levelToDifficulty: Record<Level, Difficulty> = {
   expert: Difficulty.Expert,
 }
 
+const difficultyToLevel: Record<Difficulty, Level> = {
+  [Difficulty.Beginner]: 'beginner',
+  [Difficulty.Intermediate]: 'intermediate',
+  [Difficulty.Expert]: 'expert',
+}
+
 function App() {
   const [level, setLevel] = useState<Level>('beginner')
   const [gameMode, setGameMode] = useState<GameMode>(GameMode.Solve)
   const [showInfo, setShowInfo] = useState(false)
   const [showGameOverModal, setShowGameOverModal] = useState(false)
+  const [stateLoaded, setStateLoaded] = useState(false)
+  const [hasDebugState, setHasDebugState] = useState(false)
   
   const difficulty = levelToDifficulty[level]
   const newGame = useGameStore(state => state.newGame)
+  const loadDebugState = useGameStore(state => state.loadDebugState)
   const resetGame = useGameStore(state => state.resetGame)
   const isGameOver = useGameStore(state => state.isGameOver)
   const mode = useGameStore(state => state.mode)
@@ -35,9 +45,24 @@ function App() {
   const cancelComputation = useGameStore(state => state.cancelComputation)
   const revealAllCells = useGameStore(state => state.revealAllCells)
 
+  // Check for debug state in URL on initial mount
   useEffect(() => {
+    const debugState = loadStateFromUrl()
+    if (debugState) {
+      loadDebugState(debugState)
+      setLevel(difficultyToLevel[debugState.difficulty])
+      setGameMode(debugState.mode)
+      setHasDebugState(true)
+      setStateLoaded(true)
+    } else {
+      setStateLoaded(true)
+    }
+  }, [loadDebugState])
+
+  useEffect(() => {
+    if (!stateLoaded || hasDebugState) return
     newGame(difficulty, gameMode)
-  }, [newGame, difficulty, gameMode])
+  }, [newGame, difficulty, gameMode, stateLoaded, hasDebugState])
 
   // Show game over modal with 1 second delay
   useEffect(() => {
