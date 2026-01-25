@@ -1,6 +1,12 @@
 import { useState, useCallback, useEffect } from 'react'
 import type { BoardCell, GameConfig } from '../utils/gameLogic'
-import { getGameConfig, createEmptyBoard, generatePlayBoard, Difficulty } from '../utils/gameLogic'
+import { 
+  getGameConfig, 
+  createEmptyBoard, 
+  generatePlayBoard, 
+  Difficulty,
+  createEmptyRevealedBoard
+} from '../utils/gameLogic'
 import { solveBoardProbabilities, calculateUnknownIndicesCount } from '../utils/solver'
 import type { SolvedBoard } from '../utils/solver'
 import type { GameMode } from '../stores/gameStore'
@@ -29,18 +35,6 @@ export interface GameState {
   rupoorCount: number
   solvedBoard: SolvedBoard | null // Probabilities for solve mode
   lastChangedIndex?: number
-}
-
-const createEmptyRevealedBoard = (width: number, height: number): boolean[][] => {
-  const board: boolean[][] = []
-  for (let i = 0; i < height; i++) {
-    const row: boolean[] = []
-    for (let j = 0; j < width; j++) {
-      row.push(false)
-    }
-    board.push(row)
-  }
-  return board
 }
 
 const initialGameState = (difficulty: Difficulty): GameState => {

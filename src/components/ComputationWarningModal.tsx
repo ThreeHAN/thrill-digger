@@ -31,7 +31,7 @@ export default function ComputationWarningModal({
         }</p>
         {estimatedTime !== undefined && combinations !== undefined && (
           <div className="computation-details">
-            <p className="small-text">ESTIMATED TIME: <span className="monospace">{estimatedTime} seconds</span></p>
+            <p className="small-text">ESTIMATED TIME: <span className="monospace">{estimatedTime >= 0 ? estimatedTime : '......'} {estimatedTime >= 0 ? 'seconds' : ''}</span></p>
             <p className="small-text">{requiresConfirmation 
               ? <>COMBINATIONS TO ANALYZE: <span className="monospace">{combinations.toLocaleString()}</span></>
               : <>COMBINATIONS REMAINING: <span className="monospace">{(combinationsRemaining ?? combinations).toLocaleString()}</span></>

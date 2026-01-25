@@ -151,3 +151,87 @@ export function getBombCountDisplayName(bombCount: number): string {
     default: return 'Error'
   }
 }
+
+/**
+ * Create an empty boolean board for tracking revealed state
+ */
+export function createEmptyRevealedBoard(width: number, height: number): boolean[][] {
+  const board: boolean[][] = []
+  for (let i = 0; i < height; i++) {
+    const row: boolean[] = []
+    for (let j = 0; j < width; j++) {
+      row.push(false)
+    }
+    board.push(row)
+  }
+  return board
+}
+
+/**
+ * Convert rupee value to bomb count for storage in Solve mode
+ * Matches vanilla version's mapping
+ */
+export function convertRupeeValueToBombCount(value: number): number {
+  const converted = (() => {
+    switch (value) {
+      case 1: return 1      // Green rupee
+      case 5: return 2      // Blue rupee
+      case 20: return 4     // Red rupee
+      case 100: return 6    // Silver rupee
+      case 300: return 8    // Gold rupee
+      default: return value // Return unchanged for special values (-1, -2, -10, etc.)
+    }
+  })()
+  console.log(`Converting rupee value ${value} to bomb count ${converted}`)
+  return converted
+}
+
+/**
+ * Convert a Play Mode board to Solve Mode format for the solver
+ * - Unrevealed cells become 0 (unknown)
+ * - Revealed bombs/rupoors become -2 (hazard markers)
+ * - Revealed rupees become bomb counts (1/2/4/6/8) based on adjacent hazards
+ */
+export function convertPlayBoardToSolveBoard(
+  board: BoardCell[][],
+  revealed: boolean[][],
+  width: number,
+  height: number
+): BoardCell[][] {
+  return board.map((row, rowIdx) => 
+    row.map((cell, colIdx) => {
+      if (!revealed[rowIdx][colIdx]) {
+        return 0 // Unrevealed -> unknown
+      }
+      // Convert revealed Play Mode values to Solve Mode format
+      if (cell === -1) {
+        return -2 // Bomb -> hazard marker
+      }
+      if (cell === -10) {
+        return -2 // Rupoor -> hazard marker (marks adjacent cells as safe)
+      }
+      // In Play Mode, rupee values are rewards, not bomb counts
+      // We need to count actual adjacent hazards for the solver
+      let adjacentHazards = 0
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue
+          const nr = rowIdx + dr
+          const nc = colIdx + dc
+          if (nr >= 0 && nr < height && nc >= 0 && nc < width) {
+            const neighborCell = board[nr][nc]
+            if (neighborCell === -1 || neighborCell === -10) {
+              adjacentHazards++
+            }
+          }
+        }
+      }
+      // Map to Solve mode values: Green=1 (0 bombs), Blue=2 (1-2), Red=4 (3-4), Silver=6 (5-6), Gold=8 (7-8)
+      if (adjacentHazards <= 0) return 1
+      if (adjacentHazards <= 2) return 2
+      if (adjacentHazards <= 4) return 4
+      if (adjacentHazards <= 6) return 6
+      return 8
+    })
+  )
+}

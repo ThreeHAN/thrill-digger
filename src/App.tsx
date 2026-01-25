@@ -3,6 +3,7 @@ import GameBoard from './components/GameBoard'
 import InfoModal from './components/InfoModal'
 import HamburgerMenu from './components/HamburgerMenu'
 import ComputationWarningModal from './components/ComputationWarningModal'
+import LoadingSpinner from './components/LoadingSpinner'
 import GameOverModal from './components/GameOverModal'
 import HazardStats from './components/HazardStats'
 import type { Level } from './constants/levels'
@@ -29,6 +30,7 @@ function App() {
   const currentRupees = useGameStore(state => state.currentRupees)
   const boardTotal = useGameStore(state => state.boardTotal)
   const showComputationWarning = useGameStore(state => state.showComputationWarning)
+  const showLoadingSpinner = useGameStore(state => state.showLoadingSpinner)
   const computationWarning = useGameStore(state => state.computationWarning)
   const requiresConfirmation = useGameStore(state => state.requiresConfirmation)
   const confirmComputation = useGameStore(state => state.confirmComputation)
@@ -101,6 +103,10 @@ function App() {
       <InfoModal
         isOpen={showInfo}
         onClose={handleInfoClose}
+      />
+
+      <LoadingSpinner
+        isOpen={showLoadingSpinner}
       />
 
       <ComputationWarningModal
