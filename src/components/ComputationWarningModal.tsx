@@ -41,13 +41,19 @@ export default function ComputationWarningModal({
             )}
           </div>
         )}
-        {requiresConfirmation && (
+        {requiresConfirmation ? (
           <div className="computation-actions">
             <button className="wood-btn" onClick={onCancel}>
               Cancel
             </button>
             <button className="wood-btn" onClick={onConfirm}>
               Continue
+            </button>
+          </div>
+        ) : (
+          <div className="computation-actions">
+            <button className="wood-btn" onClick={onCancel}>
+              Cancel
             </button>
           </div>
         )}

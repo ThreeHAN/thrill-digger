@@ -484,10 +484,40 @@ export const useGameStore = create<GameStore>()(
   },
 
   cancelComputation: () => {
-    set({
-      showComputationWarning: false,
-      requiresConfirmation: false,
-    })
+    const state = get()
+    
+    // Terminate the worker to stop computation
+    if (state.isComputingInWorker && solverWorker) {
+      console.log('🛑 Cancelling worker computation...')
+      solverWorker.terminate()
+      solverWorker = null
+    }
+    
+    // Revert the last changed cell if it exists
+    if (state.lastChangedIndex !== undefined) {
+      const row = Math.floor(state.lastChangedIndex / state.config.width)
+      const col = state.lastChangedIndex % state.config.width
+      const newBoard = state.board.map(r => [...r])
+      const prevValue = newBoard[row][col]
+      newBoard[row][col] = 0 // Clear to empty tile
+      
+      console.log(`🔄 Reverting cell at (${row}, ${col}) from ${prevValue} to 0`)
+      
+      set({
+        board: newBoard,
+        boardTotal: Math.max(0, state.boardTotal - (prevValue > 0 ? prevValue : 0)),
+        lastChangedIndex: undefined,
+        showComputationWarning: false,
+        requiresConfirmation: false,
+        isComputingInWorker: false,
+      })
+    } else {
+      set({
+        showComputationWarning: false,
+        requiresConfirmation: false,
+        isComputingInWorker: false,
+      })
+    }
   },
 
   triggerCloseRupeeModals: () => {
