@@ -24,7 +24,6 @@ export default function ComputationWarningModal({
   return createPortal(
     <div className="modal-backdrop" onClick={requiresConfirmation ? onCancel : undefined}>
       <div className={`modal-content computation-modal ${requiresConfirmation ? 'warning-modal' : ''}`} onClick={(e) => e.stopPropagation()}>
-        {!requiresConfirmation && <div className="spinner"></div>}
         <h2>{requiresConfirmation ? '⚠️ Heavy Computation Warning' : '🎵 One moment, hero...'}</h2>
         <p>{requiresConfirmation 
           ? 'This computation will take a significant amount of time.' 
