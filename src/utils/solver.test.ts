@@ -33,7 +33,26 @@ describe('solveBoardProbabilities', () => {
         })
 
         expect(result).not.toBeNull()
-        expect(result).toEqual(fixture.solvedBoard)
+        
+        // Compare with floating-point tolerance for mathematically equivalent results
+        expect(result?.length).toBe(fixture.solvedBoard.length)
+        for (let i = 0; i < result!.length; i++) {
+          const actual = result![i]
+          const expected = fixture.solvedBoard[i]
+          
+          // For probability values (0-1), use relative tolerance
+          if (typeof actual === 'number' && typeof expected === 'number') {
+            if (actual < 0 || expected < 0) {
+              // Special values (like -1, -2, -3) must match exactly
+              expect(actual).toBe(expected)
+            } else {
+              // Probabilities: allow small floating-point differences
+              expect(Math.abs(actual - expected)).toBeLessThan(1e-10)
+            }
+          } else {
+            expect(actual).toBe(expected)
+          }
+        }
       })
     })
   })

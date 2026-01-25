@@ -93,8 +93,25 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
     }
   }
 
-  // Convert Set to array and create index map for O(1) lookup
+  // Convert Set to array with heuristic ordering: most constrained first
   const unknownIndices = Array.from(unknownSet)
+  
+  // Compute constraint degree for each unknown (how many constraints reference it)
+  const constraintDegree = new Map<number, number>()
+  for (const cellIdx of unknownIndices) {
+    constraintDegree.set(cellIdx, 0)
+  }
+  for (let c = 0; c < constraints.length; c++) {
+    const constraint = constraints[c]
+    for (let pos = 0; pos < constraint.length - 1; pos++) {
+      const cellIdx = constraint[pos]
+      constraintDegree.set(cellIdx, (constraintDegree.get(cellIdx) || 0) + 1)
+    }
+  }
+  
+  // Sort unknowns by degree (descending) for better pruning
+  unknownIndices.sort((a, b) => (constraintDegree.get(b) || 0) - (constraintDegree.get(a) || 0))
+  
   const unknownIndexMap = new Map<number, number>()
   for (let i = 0; i < unknownIndices.length; i++) {
     unknownIndexMap.set(unknownIndices[i], i)
@@ -139,7 +156,7 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   const maxBombsNeeded = remainingHazards
   const minBombsNeeded = Math.max(0, remainingHazards - safeCount)
 
-  // Test all possible bomb placements (optimized loop)
+  // Test all possible bomb placements with early pruning
   for (let combo = 0; combo < totalCombinations; ++combo) {
     if (combo > 4e8) {
       computationLimitReached = true;
