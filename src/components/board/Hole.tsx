@@ -112,8 +112,7 @@ export default React.memo(function Hole({
   // Determine tile styling based on game mode and cell state
   const tileClass = useMemo(() => (
     computeTileClass(mode as GameMode, cellValue, isRevealed, solverProbability, isLowestProbability, isAutoRevealed)
-      + (showInvalidOverlay ? ' tile-invalid-source' : '')
-  ), [mode, cellValue, isRevealed, solverProbability, isLowestProbability, isAutoRevealed, showInvalidOverlay])
+  ), [mode, cellValue, isRevealed, solverProbability, isLowestProbability, isAutoRevealed])
 
   return (
     <button 
@@ -161,9 +160,9 @@ export default React.memo(function Hole({
             container={modalContainer}
             difficulty={difficulty}
           />
+          {showInvalidOverlay && <span className="invalid-mark" aria-hidden="true" />}
         </>
       )}
-      {showInvalidOverlay && <span className="invalid-mark" aria-hidden="true" />}
     </button>
   )
 })

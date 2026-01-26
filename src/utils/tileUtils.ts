@@ -13,6 +13,11 @@ export function getDisplayProbability(
   prob: number | undefined,
   gameMode: GameMode
 ): number | undefined {
+
+    if (prob === 0.6) {
+    debugger;
+  }
+
   if (prob === undefined || prob === -2) {
     return undefined
   }
@@ -22,7 +27,19 @@ export function getDisplayProbability(
     return undefined
   }
   const percent = prob * 100
-  // Round down to 1 decimal places
+
+
+  // Handle floating point errors - treat extremely small values as 0
+  if (percent < 0.001) {
+    return 0
+  }
+  
+  // Round up small non-zero probabilities to 1%
+  if (percent > 0 && percent < 1) {
+    return 1
+  }
+
+  // Round down for all other values
   return Math.floor(percent)
 }
 
