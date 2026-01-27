@@ -68,7 +68,6 @@
 }
 
 .modal-header {
-  display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
@@ -148,6 +147,12 @@
 // Computation Modal
 .computation-modal {
   @include modal-container;
+}
+
+.computation-btn {
+    background: linear-gradient(135deg, rgb(229 49 7 / 90%), rgb(109 39 13 / 95%));
+    border-color: rgb(41 6 2 / 50%);
+    color: white;
 }
 
 // Info Modal

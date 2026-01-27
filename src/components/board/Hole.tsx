@@ -149,9 +149,6 @@ export default React.memo(function Hole({
               src={getImageForItem(cellValue === -3 || cellValue === -10 ? itemName : getBombCountDisplayName(cellValue))} 
             />
           )}
-          {DEBUG_MODE && (
-            <p style={{ fontSize: '1em', color: 'rgba(255,255,255,1)', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>{itemName} ({cellValue})</p>
-          )}
           <MemoizedRupeeModal 
             isOpen={showModal}
             onClose={() => setShowModal(false)}

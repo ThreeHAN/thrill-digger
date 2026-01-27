@@ -29,8 +29,8 @@ export default function VictoryModal({ isOpen, totalRupees, onPlayAgain }: Victo
         </div>
         <div className="victory-modal-body">
           <div className="victory-rupee-display">
-            <img 
-              src={greenrupee} 
+            <img
+              src={greenrupee}
               alt="Rupee"
               className="victory-rupee-icon"
             />
@@ -38,11 +38,11 @@ export default function VictoryModal({ isOpen, totalRupees, onPlayAgain }: Victo
           </div>
         </div>
         <div className="victory-modal-footer">
-          <button 
-            className="wood-btn victory-play-again-btn"
+          <button
+            className="probability-pill reveal-btn"
             onClick={handlePlayAgain}
           >
-            Play Again
+            <span className="pill-label">Play Again</span>
           </button>
         </div>
       </div>

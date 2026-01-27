@@ -8,7 +8,7 @@ type ComputationWarningModalProps = {
   onCancel?: () => void
 }
 
-export default function ComputationWarningModal({ 
+export default function ComputationWarningModal({
   isOpen,
   estimatedTime,
   combinations,
@@ -54,8 +54,11 @@ export default function ComputationWarningModal({
           </div>
 
           <div className="computation-actions">
-            <button className="wood-btn" onClick={onCancel}>
-              Cancel
+            <button
+              className="probability-pill computation-btn"
+              onClick={onCancel}
+            >
+              <span className="pill-label">Cancel</span>
             </button>
           </div>
         </div>
