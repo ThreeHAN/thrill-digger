@@ -95,6 +95,12 @@ export default React.memo(function Hole({
       if (cellValue === -1) {
         // Bomb - set game over IMMEDIATELY to prevent other clicks
         console.log('Hit bomb!')
+        
+        if ("vibrate" in navigator) {
+          navigator.vibrate(200);
+        } else {
+          console.log("Vibration API not supported on this device.");
+        }
         setIsExploding(true)
       }
       // Delegate the rest of the play logic to the store
