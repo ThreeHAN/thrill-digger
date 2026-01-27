@@ -4,7 +4,7 @@
 
 import type { BoardCell } from './gameLogic'
 import type { SolvedBoard } from './solver'
-import type { GameMode } from '../stores/gameStore'
+import type { GameMode, MoveHistoryEntry } from '../stores/gameStore'
 import type { Difficulty } from './gameLogic'
 
 export interface SerializedGameState {
@@ -17,6 +17,7 @@ export interface SerializedGameState {
   isGameOver: boolean
   isWon: boolean
   solvedBoard: SolvedBoard | null
+  moveHistory: MoveHistoryEntry[]
 }
 
 /**

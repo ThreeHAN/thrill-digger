@@ -748,6 +748,7 @@ export const useGameStore = create<GameStore>()(
       isGameOver: state.isGameOver,
       isWon: state.isWon,
       solvedBoard: state.solvedBoard,
+      moveHistory: state.moveHistory,
     }
     
     try {
@@ -777,6 +778,7 @@ export const useGameStore = create<GameStore>()(
       isGameOver: serialized.isGameOver,
       isWon: serialized.isWon,
       solvedBoard: serialized.solvedBoard,
+      moveHistory: serialized.moveHistory || [],
       boardTotal: serialized.board.flat().reduce((sum, cell) => sum + (cell > 0 ? cell : 0), 0),
       showInvalidBoardError: false,
       invalidSourceIndex: undefined,

@@ -26,7 +26,7 @@ export type SolvedBoard = number[] // Probabilities or special values like -2 (u
  * Solve the board and return probabilities
  */
 export function solveBoardProbabilities(board: BoardCell[][], width: number, height: number, bombCount: number, rupoorCount: number): SolvedBoard | null {
-    const flat1D = board.flat();
+  const flat1D = board.flat();
   const boardLength = flat1D.length;
   const solvedBoard = flat1D.slice(0);
 
