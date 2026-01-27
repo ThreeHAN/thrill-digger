@@ -95,7 +95,7 @@ export default React.memo(function Hole({
       if (cellValue === -1) {
         // Bomb - set game over IMMEDIATELY to prevent other clicks
 
-        window?.navigator?.vibrate(1000);
+        window?.navigator?.vibrate([200,200,200]);
         console.log('Hit bomb!')
         setIsExploding(true)
       }
