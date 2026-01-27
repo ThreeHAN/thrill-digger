@@ -38,6 +38,16 @@ export const GameMode = {
 export type GameMode = typeof GameMode[keyof typeof GameMode]
 export type { Difficulty }
 
+export interface MoveHistoryEntry {
+  row: number
+  col: number
+  cellValue: BoardCell
+  previousRevealed: boolean[][]
+  previousRupees: number
+  previousRupoorCount: number
+  previousTotalRupeesAllTime: number
+}
+
 export interface GameState {
   mode: GameMode
   difficulty: Difficulty
@@ -61,6 +71,7 @@ export interface GameState {
   showProbabilitiesInPlayMode: boolean
   invalidSourceIndex?: number
   isComputingInWorker: boolean
+  moveHistory: MoveHistoryEntry[]
 }
 
 interface GameActions {
@@ -78,6 +89,7 @@ interface GameActions {
   // Clears invalid source highlight when needed
   solveBoardInternal: () => void
   digCell: (row: number, col: number) => void
+  undo: () => void
   confirmComputation: () => void
   cancelComputation: () => void
   triggerCloseRupeeModals: () => void
@@ -118,6 +130,7 @@ const initialGameState = (difficulty: Difficulty): GameState => {
     showProbabilitiesInPlayMode,
     invalidSourceIndex: undefined,
     isComputingInWorker: false,
+    moveHistory: [],
   }
 }
 
@@ -274,12 +287,12 @@ export const useGameStore = create<GameStore>()(
       // Internal helper to compute solver for Play Mode
       const computeSolver = (
         solverBoard: BoardCell[][],
-        currentRupoorCount: number,
+        totalRupoorCount: number,
         requireConfirmationCheck = false
       ) => {
         executeWorkerSolver({
           solverBoard,
-          rupoorCount: currentRupoorCount,
+          rupoorCount: totalRupoorCount,
           requireConfirmationCheck,
           enablePlayModeShowProbabilities: false,
         })
@@ -314,6 +327,7 @@ export const useGameStore = create<GameStore>()(
       showInvalidBoardError: false,
       invalidSourceIndex: undefined,
       isComputingInWorker: false,
+      moveHistory: [],
     })
 
     // Trigger solver if in solve mode
@@ -428,7 +442,7 @@ export const useGameStore = create<GameStore>()(
     // Use unified solver with Play Mode flag
     executeWorkerSolver({
       solverBoard,
-      rupoorCount: state.rupoorCount,
+      rupoorCount: state.mode === GameMode.Play ? state.config.rupoorCount : state.rupoorCount,
       enablePlayModeShowProbabilities: state.mode === GameMode.Play,
     })
   },
@@ -535,7 +549,7 @@ export const useGameStore = create<GameStore>()(
       set({ showProbabilitiesInPlayMode: true })
       
       // Use helper with confirmation check enabled
-      computeSolver(solverBoard, state.rupoorCount, true)
+      computeSolver(solverBoard, state.config.rupoorCount, true)
     } else {
       // Hide probabilities
       set({ 
@@ -554,6 +568,11 @@ export const useGameStore = create<GameStore>()(
 
     const cellValue = state.board[row][col]
 
+    // Store previous state for undo history
+    const previousRevealed = state.revealed.map(r => [...r])
+    const previousRupees = state.currentRupees
+    const previousRupoorCount = state.rupoorCount
+
     // Reveal the cell
     const newRevealed = state.revealed.map(r => [...r])
     newRevealed[row][col] = true
@@ -563,7 +582,19 @@ export const useGameStore = create<GameStore>()(
     if (cellValue === -1) {
       // Bomb: game over and settle house fee
       const settleAmount = Math.max(0, state.currentRupees - state.config.houseFee)
-      set({ revealed: newRevealed, lastChangedIndex: idx, isGameOver: true })
+      
+      // Add move to history before game over
+      const moveHistory = [...state.moveHistory, {
+        row,
+        col,
+        cellValue,
+        previousRevealed,
+        previousRupees,
+        previousRupoorCount,
+        previousTotalRupeesAllTime: state.totalRupeesAllTime,
+      }]
+      
+      set({ revealed: newRevealed, lastChangedIndex: idx, isGameOver: true, moveHistory })
       // Update total after game ends
       const newTotal = state.totalRupeesAllTime + settleAmount
       set({ totalRupeesAllTime: newTotal })
@@ -571,20 +602,69 @@ export const useGameStore = create<GameStore>()(
     }
 
     let updatedRupoorCount = state.rupoorCount
+    let newCurrentRupees = state.currentRupees
 
     if (cellValue > 0) {
       // Rupee found
-      const newCurrent = state.currentRupees + cellValue
+      newCurrentRupees = state.currentRupees + cellValue
       const newTotal = state.totalRupeesAllTime + cellValue
-      set({ revealed: newRevealed, lastChangedIndex: idx, currentRupees: newCurrent, totalRupeesAllTime: newTotal })
+      
+      const moveHistory = [...state.moveHistory, {
+        row,
+        col,
+        cellValue,
+        previousRevealed,
+        previousRupees,
+        previousRupoorCount,
+        previousTotalRupeesAllTime: state.totalRupeesAllTime,
+      }]
+      
+      set({ 
+        revealed: newRevealed, 
+        lastChangedIndex: idx, 
+        currentRupees: newCurrentRupees, 
+        totalRupeesAllTime: newTotal,
+        moveHistory,
+      })
     } else if (cellValue === -10) {
       // Rupoor found - decrement remaining rupoor count
-      const newCurrent = Math.max(0, state.currentRupees - 10)
+      newCurrentRupees = Math.max(0, state.currentRupees - 10)
       updatedRupoorCount = Math.max(0, state.rupoorCount - 1)
-      set({ revealed: newRevealed, lastChangedIndex: idx, currentRupees: newCurrent, rupoorCount: updatedRupoorCount })
+      
+      const moveHistory = [...state.moveHistory, {
+        row,
+        col,
+        cellValue,
+        previousRevealed,
+        previousRupees,
+        previousRupoorCount,
+        previousTotalRupeesAllTime: state.totalRupeesAllTime,
+      }]
+      
+      set({ 
+        revealed: newRevealed, 
+        lastChangedIndex: idx, 
+        currentRupees: newCurrentRupees, 
+        rupoorCount: updatedRupoorCount,
+        moveHistory,
+      })
     } else {
       // Empty/other values just reveal
-      set({ revealed: newRevealed, lastChangedIndex: idx })
+      const moveHistory = [...state.moveHistory, {
+        row,
+        col,
+        cellValue,
+        previousRevealed,
+        previousRupees,
+        previousRupoorCount,
+        previousTotalRupeesAllTime: state.totalRupeesAllTime,
+      }]
+      
+      set({ 
+        revealed: newRevealed, 
+        lastChangedIndex: idx,
+        moveHistory,
+      })
     }
 
     // Check win: all non-hazard cells revealed
@@ -615,7 +695,44 @@ export const useGameStore = create<GameStore>()(
       )
       
       // Use helper (no confirmation check needed during gameplay)
-      computeSolver(solverBoard, updatedRupoorCount, false)
+      computeSolver(solverBoard, checkState.config.rupoorCount, false)
+    }
+  },
+
+  undo: () => {
+    const state = get()
+    
+    // Only allow undo in Play Mode and when there's history
+    if (state.mode !== GameMode.Play || state.moveHistory.length === 0) return
+    
+    // Get the last move
+    const lastMove = state.moveHistory[state.moveHistory.length - 1]
+    
+    // Restore the previous state
+    const newMoveHistory = state.moveHistory.slice(0, -1)
+    
+    set({
+      revealed: lastMove.previousRevealed,
+      currentRupees: lastMove.previousRupees,
+      rupoorCount: lastMove.previousRupoorCount,
+      totalRupeesAllTime: lastMove.previousTotalRupeesAllTime,
+      isGameOver: false,
+      isWon: false,
+      moveHistory: newMoveHistory,
+    })
+    
+    // Recalculate probabilities if they are being shown in Play Mode
+    const updatedState = get()
+    if (updatedState.showProbabilitiesInPlayMode) {
+      // Create solver board with restored revealed state
+      const solverBoard = convertPlayBoardToSolveBoard(
+        updatedState.board,
+        lastMove.previousRevealed,
+        updatedState.config.width,
+        updatedState.config.height
+      )
+      
+      computeSolver(solverBoard, updatedState.config.rupoorCount, false)
     }
   },
 

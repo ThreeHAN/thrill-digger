@@ -37,7 +37,7 @@ Credit: Josh Scotland's original constraint satisfaction solver.
 - Exhaustively generates all valid bomb placements given revealed rupee constraints
 - Rupee values map to expected adjacent bombs: Green (1) = 0, Blue (5) = 2, Red (20) = 4, etc.
 - Computes probability for each unrevealed cell by counting valid configurations
-- Rupoors (-2 or -10) are treated as non-constraints (do not affect adjacent bomb counts)
+- Rupoors (-2 or -10) are treated as hazards
 - **Performance**: Automatically warns/confirms if `unknownIndicesCount >= 22` (exponential complexity)
 
 #### Play Board Generation ([utils/gameLogic.ts](src/utils/gameLogic.ts))

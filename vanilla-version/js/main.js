@@ -58,8 +58,6 @@ class ThrillDiggerController {
     solveBoardProbabilities(gameState) {
         let boardCopy = gameState.gameBoard.slice(0);
 
-                debugger;
-
         // Clear constraints from revealed cells
         for (let i = 0; i < boardCopy.length; i++) {
             if (boardCopy[i] === 1 || boardCopy[i] === -2) {

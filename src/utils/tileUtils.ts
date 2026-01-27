@@ -14,10 +14,6 @@ export function getDisplayProbability(
   gameMode: GameMode
 ): number | undefined {
 
-    if (prob === 0.6) {
-    debugger;
-  }
-
   if (prob === undefined || prob === -2) {
     return undefined
   }

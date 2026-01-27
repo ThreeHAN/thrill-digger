@@ -1,5 +1,6 @@
 import { createPortal } from 'react-dom'
 import { greenrupee } from '../../assets/images'
+import UndoButton from '../shared/UndoButton'
 import '../../styles/_game-over-modal.scss'
 
 type GameOverModalProps = {
@@ -7,9 +8,11 @@ type GameOverModalProps = {
   totalRupees: number
   onPlayAgain: () => void
   onRevealBoard: () => void
+  onUndo?: () => void
+  canUndo?: boolean
 }
 
-export default function GameOverModal({ isOpen, totalRupees, onPlayAgain, onRevealBoard }: GameOverModalProps) {
+export default function GameOverModal({ isOpen, totalRupees, onPlayAgain, onRevealBoard, onUndo, canUndo }: GameOverModalProps) {
   if (!isOpen) return null
 
   const handlePlayAgain = () => {
@@ -18,6 +21,12 @@ export default function GameOverModal({ isOpen, totalRupees, onPlayAgain, onReve
 
   const handleRevealBoard = () => {
     onRevealBoard()
+  }
+
+  const handleUndo = () => {
+    if (onUndo) {
+      onUndo()
+    }
   }
 
   return createPortal(
@@ -45,6 +54,7 @@ export default function GameOverModal({ isOpen, totalRupees, onPlayAgain, onReve
           </div>
 
           <div className="game-over-actions">
+            <UndoButton canUndo={!!canUndo} onUndo={handleUndo} className="undo-btn" />
             <button 
               className="probability-pill reveal-btn"
               onClick={handleRevealBoard}

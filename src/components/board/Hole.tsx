@@ -134,7 +134,7 @@ export default React.memo(function Hole({
             <p className="probability-text">{displayProbability}%</p>
           )}
           {!isRevealed && DEBUG_MODE && (
-            <p style={{ fontSize: '0.7em', color: 'rgba(255,255,255,1)', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>{itemName}</p>
+            <p style={{ fontSize: '1em', color: 'rgba(255,255,255,1)', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>{itemName}</p>
           )}
         </>
       ) : (
@@ -150,7 +150,7 @@ export default React.memo(function Hole({
             />
           )}
           {DEBUG_MODE && (
-            <p style={{ fontSize: '0.6em', color: 'rgba(255,255,255,1)', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>{itemName} ({cellValue})</p>
+            <p style={{ fontSize: '1em', color: 'rgba(255,255,255,1)', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>{itemName} ({cellValue})</p>
           )}
           <MemoizedRupeeModal 
             isOpen={showModal}

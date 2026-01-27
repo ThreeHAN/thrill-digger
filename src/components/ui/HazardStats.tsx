@@ -3,6 +3,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { Difficulty } from '../../utils/gameLogic'
 import { GameMode, useGameStore } from '../../stores/gameStore'
 import { getImageForItem } from '../../utils/imageMap'
+import UndoButton from '../shared/UndoButton'
 import bombImg from '../../assets/minigame/bomb.png'
 
 export default function HazardStats({ boardTotal }: { boardTotal: number }) {
@@ -18,6 +19,8 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
     showProbabilitiesInPlayMode,
     toggleProbabilitiesInPlayMode,
     resetGame,
+    moveHistory,
+    undo,
   } = useGameStore(useShallow(state => ({
     board: state.board,
     revealed: state.revealed,
@@ -30,6 +33,8 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
     showProbabilitiesInPlayMode: state.showProbabilitiesInPlayMode,
     toggleProbabilitiesInPlayMode: state.toggleProbabilitiesInPlayMode,
     resetGame: state.resetGame,
+    moveHistory: state.moveHistory,
+    undo: state.undo,
   })))
 
   const rupoorIcon = getImageForItem('rupoor')
@@ -100,10 +105,16 @@ export default function HazardStats({ boardTotal }: { boardTotal: number }) {
       </HazardCard>
 
       {shouldShowProbabilityToggle && !shouldShowNewGameButton && (
-        <ProbabilityToggle
-          active={showProbabilitiesInPlayMode}
-          onToggle={toggleProbabilitiesInPlayMode}
-        />
+        <div className="probability-toggle-row">
+          <ProbabilityToggle
+            active={showProbabilitiesInPlayMode}
+            onToggle={toggleProbabilitiesInPlayMode}
+          />
+          <UndoButton
+            canUndo={moveHistory.length > 0}
+            onUndo={undo}
+          />
+        </div>
       )}
 
       {shouldShowNewGameButton && (
@@ -125,17 +136,15 @@ function HazardCard({ title, ariaLabel, children }: { title: string; ariaLabel: 
 
 function ProbabilityToggle({ active, onToggle }: { active: boolean; onToggle: () => void }) {
   return (
-    <div className="probability-toggle-row">
-      <button
-        className={`probability-pill ${active ? 'is-active' : ''}`}
-        onClick={onToggle}
-        aria-pressed={active}
-        aria-label={`Probabilities ${active ? 'on' : 'off'}`}
-      >
-        <span className="pill-label">Probabilities</span>
-        <span className="pill-state">{active ? 'On' : 'Off'}</span>
-      </button>
-    </div>
+    <button
+      className={`probability-pill ${active ? 'is-active' : ''}`}
+      onClick={onToggle}
+      aria-pressed={active}
+      aria-label={`Probabilities ${active ? 'on' : 'off'}`}
+    >
+      <span className="pill-label">Probabilities</span>
+      <span className="pill-state">{active ? 'On' : 'Off'}</span>
+    </button>
   )
 }
 

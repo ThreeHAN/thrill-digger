@@ -44,6 +44,8 @@ function App() {
   const computationWarning = useGameStore(state => state.computationWarning)
   const cancelComputation = useGameStore(state => state.cancelComputation)
   const revealAllCells = useGameStore(state => state.revealAllCells)
+  const moveHistory = useGameStore(state => state.moveHistory)
+  const undo = useGameStore(state => state.undo)
 
   // Check for debug state in URL on initial mount
   useEffect(() => {
@@ -145,6 +147,8 @@ function App() {
         totalRupees={currentRupees}
         onPlayAgain={handleReset}
         onRevealBoard={handleRevealBoard}
+        onUndo={undo}
+        canUndo={moveHistory.length > 0}
       />
     </div>
   )

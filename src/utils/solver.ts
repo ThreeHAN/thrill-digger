@@ -26,9 +26,7 @@ export type SolvedBoard = number[] // Probabilities or special values like -2 (u
  * Solve the board and return probabilities
  */
 export function solveBoardProbabilities(board: BoardCell[][], width: number, height: number, bombCount: number, rupoorCount: number): SolvedBoard | null {
-  
-  
-  const flat1D = board.flat();
+    const flat1D = board.flat();
   const boardLength = flat1D.length;
   const solvedBoard = flat1D.slice(0);
 
@@ -103,7 +101,7 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
 
   // Convert Set to array with heuristic ordering: most constrained first
   const unknownIndices = Array.from(unknownSet)
-  
+
   // Compute constraint degree for each unknown (how many constraints reference it)
   const constraintDegree = new Map<number, number>()
   for (const cellIdx of unknownIndices) {
@@ -223,22 +221,21 @@ export function solveBoardProbabilities(board: BoardCell[][], width: number, hei
   }
 
   if (computationLimitReached) {
-    // Computation limit reached at 100 million combinations
+    console.log('⚠️ [Solver] Computation limit reached (1 billion combinations). Results may be incomplete.');
   }
 
   // Validate board
-  // console.log('=== Validation Results ===')
-  // console.log('Constraints:', constraints.length, 'Unknown indices:', unknownIndices.length)
-  // console.log('Valid solutions found:', validSolutions.length)
-  // console.log('Total combinations tested:', totalCombinations)
-  // console.log('remainingHazards:', remainingHazards, 'knownRupoorCount:', knownRupoorCount)
-  // console.log('minBombsNeeded:', minBombsNeeded, 'maxBombsNeeded:', maxBombsNeeded)
+  console.log('=== Validation Results ===')
+  console.log('Constraints:', constraints.length, 'Unknown indices:', unknownIndices.length)
+  console.log('Total combinations tested:', totalCombinations)
+  console.log('remainingHazards:', remainingHazards, 'knownRupoorCount:', knownRupoorCount)
+  console.log('minBombsNeeded:', minBombsNeeded, 'maxBombsNeeded:', maxBombsNeeded)
   
   if (constraints.length > 0 && validSolutionsCount === 0) {
-    // console.log('❌ BOARD INVALID: No valid solutions found for constraints')
-    // console.log('Constraints were:', constraints)
-    // console.log('Board state:', solvedBoard)
-    // console.log('unknownIndices:', unknownIndices)
+    console.log('❌ BOARD INVALID: No valid solutions found for constraints')
+    console.log('Constraints were:', constraints)
+    console.log('Board state:', solvedBoard)
+    console.log('unknownIndices:', unknownIndices)
     return null
   }
 
