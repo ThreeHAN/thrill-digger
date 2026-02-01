@@ -3,6 +3,7 @@ import type { Level } from '../../constants/levels'
 import { LEVELS } from '../../constants/levels'
 import type { GameMode } from '../../stores/gameStore'
 import { useGameStore } from '../../stores/gameStore'
+import settingsGearIcon from '../../assets/minigame/gear.png'
 
 type HamburgerMenuProps = {
   onNewGame: () => void
@@ -40,7 +41,7 @@ export default function HamburgerMenu({ onNewGame, onInfo, level, setLevel, game
         }}
         aria-label="Settings"
       >
-        ⚙️
+        <img src={settingsGearIcon} alt="Settings" />
       </button>
 
       {isOpen && (
