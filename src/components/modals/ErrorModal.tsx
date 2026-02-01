@@ -17,23 +17,26 @@ export default function ErrorModal({ isOpen, onClose, message }: ErrorModalProps
     }
   }
 
-  const handleCloseClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onClose()
-  }
-
   return createPortal(
     <div className="modal-backdrop" onClick={handleBackdropClick}>
-      <div className="modal-content error-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Invalid Board</h2>
-          <button className="modal-close" onClick={handleCloseClick}>×</button>
-        </div>
-        <div className="error-message">
-          <p>{message}</p>
-        </div>
-        <div className="error-actions">
-          <button className="wood-btn" onClick={handleCloseClick}>OK</button>
+      <div className="info-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="info-modal-frame">
+          <div className="info-modal-header">
+            <h2>Invalid Board</h2>
+        
+          </div>
+          <div className="info-modal-content">
+            <div className="error-message">
+              <p>{message}</p>
+            </div>
+          </div>
+
+                      <button
+              className="probability-pill computation-btn"
+              onClick={onClose}
+            >
+              <span className="pill-label">OK</span>
+            </button>
         </div>
       </div>
     </div>,

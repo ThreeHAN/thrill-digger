@@ -274,6 +274,7 @@ export const useGameStore = create<GameStore>()(
 
           const updates: Partial<GameState> = {
             solvedBoard: result,
+            showInvalidBoardError: result === null,
             invalidSourceIndex:
               result === null ? state.lastChangedIndex : undefined,
           }

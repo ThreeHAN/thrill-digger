@@ -171,7 +171,7 @@ export default function GameBoard() {
       <ErrorModal
         isOpen={showInvalidBoardError}
         onClose={handleCloseError}
-        message="Not a valid board!"
+        message="Not a valid board, please undo your last move"
       />
       <VictoryModal
         isOpen={isWon}
