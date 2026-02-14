@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { getImageForItem } from '../../utils/imageMap'
 import { getItemName, Difficulty } from '../../utils/gameLogic'
@@ -59,12 +59,10 @@ export default function RupeeModal({ isOpen, onClose, onSelect, currentValue, co
   }
 
   const handleRupeeHover = (index: number) => {
-    setHoveredIndex(index)
     updateLine(index)
   }
 
   const handleRupeeLeave = () => {
-    setHoveredIndex(null)
     clearLine()
   }
 
